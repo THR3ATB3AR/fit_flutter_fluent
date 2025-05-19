@@ -1,4 +1,6 @@
+import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fit_flutter_fluent/screens/home.dart';
+import 'package:fit_flutter_fluent/screens/repack_details.dart';
 import 'package:fit_flutter_fluent/screens/settings.dart';
 import 'package:fit_flutter_fluent/services/repack_service.dart';
 import 'package:fluent_ui/fluent_ui.dart' hide Page;
@@ -264,16 +266,16 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
       appBar: NavigationAppBar(
         automaticallyImplyLeading: false,
         leading: () {
-          final enabled = widget.shellContext != null && router.canPop();
+          // final enabled = widget.shellContext != null && router.canPop();
+          final enabled = true;
 
-          final onPressed = enabled
-              ? () {
+          onPressed() {
                   if (router.canPop()) {
                     context.pop();
                     setState(() {});
                   }
                 }
-              : null;
+                
           return NavigationPaneTheme(
             data: NavigationPaneTheme.of(context).merge(NavigationPaneThemeData(
               unselectedIconColor: WidgetStateProperty.resolveWith((states) {
@@ -455,12 +457,15 @@ final router = GoRouter(navigatorKey: rootNavigatorKey, routes: [
     routes: <GoRoute>[
       /// Home
       GoRoute(path: '/', builder: (context, state) => const HomePage()),
-
-      /// Settings
       GoRoute(path: '/settings', builder: (context, state) => const Settings()),
+      GoRoute(path: '/repackdetails', builder: (context, state) {
+        final repack = state.extra as Repack;
+        
+        return RepackDetails(selectedRepack: repack);
+        
+      }),
 
-      /// /// Input
-      /// Buttons
+
       
     ],
   ),
