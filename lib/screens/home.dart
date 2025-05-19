@@ -20,33 +20,6 @@ class _HomePageState extends State<HomePage> with PageMixin {
   final ScraperService _scraperService = ScraperService.instance;
   final RepackService _repackService = RepackService.instance;
 
-  Future<void> _rescrapeAll() async {
-    if (_scraperService.isRescraping) return;
-
-    setState(() {
-      _scraperService.isRescraping = true;
-    });
-
-    try {
-      await Future.wait([
-        // _scraperService.rescrapeNewRepacks(),
-        _scraperService.rescrapePopularRepacks(),
-        // _scraperService.rescrapeAllRepacksNames(),
-        // _repackService.rescrapeUpdatedRepacks(),
-      ]);
-      // _repackService.saveAllRepackList();
-      // _repackService.saveNewRepackList();
-      _repackService.savePopularRepackList();
-    } catch (e) {
-      print("Błąd podczas rescrape'owania: $e");
-    } finally {
-      // _repackService.saveUpdatedRepackList;
-
-      setState(() {
-        _scraperService.isRescraping = false;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
