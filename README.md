@@ -37,8 +37,8 @@ This section outlines the tasks for the ongoing rewrite to implement Microsoft F
 * [ ] **Feature Parity with Fluent UI:**
   * [ ] Ensure all existing features from FitFlutter are functional within the new Fluent UI.
   * [ ] Port "Search Repacks" UI to Fluent.
-  * [ ] Port "Repack Details" view to Fluent.
-  * [ ] Port "Screenshots" viewer to Fluent.
+  * [X] Port "Repack Details" view to Fluent.
+  * [X] Port "Screenshots" viewer to Fluent.
   * [ ] Port "Download Manager" UI to Fluent.
 * [ ] **Visual Polish & UX:**
   * [X] Implement Fluent motion and animations for transitions and interactions.
@@ -107,7 +107,6 @@ To install and run the latest setup of FitFlutterFluent, follow these steps:
    ```bash
    tar -xzf fitflutterfluent.tar.gz -C /path/to/install/directory
    ```
-
 3. **Run the Application:**
 
    ```bash
@@ -129,13 +128,11 @@ To install and run the latest setup of FitFlutterFluent, follow these steps:
    git clone https://github.com/THR3ATB3AR/fit_flutter.git fit_flutter_fluent <!-- TODO: Update if repo name changes, or clone to a new directory name -->
    cd fit_flutter_fluent
    ```
-
 3. **Get Dependencies:**
 
    ```bash
    flutter pub get
    ```
-
 4. **Run the App:**
 
    ```bash
