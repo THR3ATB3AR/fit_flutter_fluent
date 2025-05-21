@@ -3,8 +3,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fit_flutter_fluent/theme.dart';
 import 'package:fit_flutter_fluent/widgets/fluent_chip.dart';
+import 'package:fit_flutter_fluent/widgets/repack_details/download_links_dialog.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
+
+import 'package:fit_flutter_fluent/services/host_service.dart'; 
 
 class RepackHeader extends StatefulWidget {
   final Repack repack;
@@ -17,6 +20,7 @@ class RepackHeader extends StatefulWidget {
 class _RepackHeaderState extends State<RepackHeader> {
   String? _selectedDownloadMethod;
   Map<String, String>? _selectedMirror;
+  final HostService _hostService = HostService(); // Instantiate HostService
 
   @override
   void initState() {
@@ -31,10 +35,19 @@ class _RepackHeaderState extends State<RepackHeader> {
     }
   }
 
-  String _overflowText(String text, int maxLength) {
-    return text.length > maxLength
-        ? '${text.substring(0, maxLength)}...'
-        : text;
+  void _showDownloadLinksProcessingDialog(String repackTitle, String mirrorUrlsString, String downloadPath) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // User cannot dismiss by tapping outside while loading
+      builder: (dialogContext) {
+        return DownloadLinksDialog(
+          repackTitle: repackTitle,
+          mirrorUrlsString: mirrorUrlsString,
+          downloadPath: downloadPath,
+          hostService: _hostService, // Pass the HostService instance
+        );
+      },
+    );
   }
 
   void showDownloadDialog() {
@@ -45,16 +58,21 @@ class _RepackHeaderState extends State<RepackHeader> {
     showDialog(
       context: context,
       builder: (dialogContext) {
-
+        // Use StatefulBuilder to manage the dialog's internal state for selections
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setStateDialog) {
-            List<Map<String, String>> currentMirrors = [];
-            if (_selectedDownloadMethod != null &&
+            // These local variables hold the state for THIS dialog instance
+            // Initialized from the main state, but changes are local until "Next"
+            String? currentDialogSelectedMethod = _selectedDownloadMethod;
+            Map<String, String>? currentDialogSelectedMirror = _selectedMirror;
+
+            List<Map<String, String>> currentMirrorsForDialog = [];
+            if (currentDialogSelectedMethod != null &&
                 widget.repack.downloadLinks.containsKey(
-                  _selectedDownloadMethod,
+                  currentDialogSelectedMethod,
                 )) {
-              currentMirrors =
-                  widget.repack.downloadLinks[_selectedDownloadMethod!]!;
+              currentMirrorsForDialog =
+                  widget.repack.downloadLinks[currentDialogSelectedMethod]!;
             }
 
             return ContentDialog(
@@ -66,64 +84,67 @@ class _RepackHeaderState extends State<RepackHeader> {
                 children: [
                   Row(
                     children: [
-                      InfoLabel(
-                        label: 'Select Download Method:',
-                        child: ComboBox<String>(
-                          value: _selectedDownloadMethod,
-                          items:
-                              widget.repack.downloadLinks.keys
-                                  .map(
-                                    (key) => ComboBoxItem<String>(
-                                      value: key,
-                                      child: Text(key),
-                                    ),
-                                  )
-                                  .toList(),
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() { 
-                                _selectedDownloadMethod = newValue;
-                                _selectedMirror = null;
-                                List<Map<String, String>>? mirrors = widget
-                                    .repack
-                                    .downloadLinks[_selectedDownloadMethod!];
-                                if (mirrors != null && mirrors.isNotEmpty) {
-                                  _selectedMirror = mirrors.first;
-                                }
-                              });
-                              setStateDialog((){}); 
-                            }
-                          },
-                          placeholder: const Text('Select method'),
+                      Expanded(
+                        child: InfoLabel(
+                          label: 'Select Download Method:',
+                          child: ComboBox<String>(
+                            value: currentDialogSelectedMethod,
+                            isExpanded: true,
+                            items:
+                                widget.repack.downloadLinks.keys
+                                    .map(
+                                      (key) => ComboBoxItem<String>(
+                                        value: key,
+                                        child: Text(key),
+                                      ),
+                                    )
+                                    .toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setStateDialog(() { 
+                                  currentDialogSelectedMethod = newValue;
+                                  currentDialogSelectedMirror = null; // Reset mirror
+                                  List<Map<String, String>>? mirrors = widget
+                                      .repack
+                                      .downloadLinks[currentDialogSelectedMethod!];
+                                  if (mirrors != null && mirrors.isNotEmpty) {
+                                    currentDialogSelectedMirror = mirrors.first;
+                                  }
+                                });
+                              }
+                            },
+                            placeholder: const Text('Select method'),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
-                      InfoLabel(
-                        label: 'Select Mirror:',
-                        child: ComboBox<Map<String, String>>(
-                          value: _selectedMirror,
-                          items:
-                              currentMirrors.map((mirrorMap) {
-                                final hostName = mirrorMap['hostName']!;
-                                return ComboBoxItem<Map<String, String>>(
-                                  value: mirrorMap,
-                                  child: Text(hostName),
-                                );
-                              }).toList(),
-                          onChanged: (Map<String, String>? newValue) {
-                            if (newValue != null) {
-                              setState(() { 
-                                _selectedMirror = newValue;
-                              });
-                              setStateDialog((){}); 
-                            }
-                          },
-                          placeholder: const Text('Select mirror'),
+                      Expanded(
+                        child: InfoLabel(
+                          label: 'Select Mirror:',
+                          child: ComboBox<Map<String, String>>(
+                            value: currentDialogSelectedMirror,
+                            isExpanded: true,
+                            items:
+                                currentMirrorsForDialog.map((mirrorMap) {
+                                  final hostName = mirrorMap['hostName']!;
+                                  return ComboBoxItem<Map<String, String>>(
+                                    value: mirrorMap,
+                                    child: Text(hostName),
+                                  );
+                                }).toList(),
+                            onChanged: (Map<String, String>? newValue) {
+                              if (newValue != null) {
+                                setStateDialog(() { 
+                                  currentDialogSelectedMirror = newValue;
+                                });
+                              }
+                            },
+                            placeholder: const Text('Select mirror'),
+                          ),
                         ),
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 16),
                   InfoLabel(
                     label: 'Override Download Location:',
@@ -136,9 +157,8 @@ class _RepackHeaderState extends State<RepackHeader> {
                           final path =
                               await FilePicker.platform.getDirectoryPath();
                           if (path != null) {
-                            setStateDialog(() {
-                              localDownloadPathController.text = path;
-                            });
+                            // Controller updates TextBox, no need for setStateDialog for this
+                            localDownloadPathController.text = path;
                           }
                         },
                       ),
@@ -150,22 +170,47 @@ class _RepackHeaderState extends State<RepackHeader> {
                 Button(
                   child: const Text('Close'),
                   onPressed: () {
-                    localDownloadPathController.dispose();
                     Navigator.pop(dialogContext);
                   }
                 ),
                 FilledButton(
                   onPressed: () {
-                    final String downloadPathForThisOperation = localDownloadPathController.text;
+                    // Persist dialog selections back to the main state
+                    _selectedDownloadMethod = currentDialogSelectedMethod;
+                    _selectedMirror = currentDialogSelectedMirror;
 
+                    final String downloadPathForThisOperation = localDownloadPathController.text;
+                    
                     if (_selectedDownloadMethod != null &&
-                        _selectedMirror != null) {
-                      print('Selected Method: $_selectedDownloadMethod');
-                      print('Selected Mirror Host: ${_selectedMirror!['hostName']}');
-                      print('Download Path for this operation: $downloadPathForThisOperation');
+                        _selectedMirror != null &&
+                        _selectedMirror!['url'] != null &&
+                        _selectedMirror!['url']!.isNotEmpty) {
+                      
+                      debugPrint('Selected Method: $_selectedDownloadMethod');
+                      debugPrint('Selected Mirror Host: ${_selectedMirror!['hostName']}');
+                      debugPrint('Selected Mirror URL(s): ${_selectedMirror!['url']}');
+                      debugPrint('Download Path for this operation: $downloadPathForThisOperation');
+                      
+                      Navigator.pop(dialogContext); // Close this first dialog
+
+                      // Show the second dialog for processing links
+                      _showDownloadLinksProcessingDialog(
+                        widget.repack.title,
+                        _selectedMirror!['url']!, 
+                        downloadPathForThisOperation,
+                      );
+
+                    } else {
+                      // Inform user to make selections
+                      showDialog(
+                        context: context, // Use main context for this simple info dialog
+                        builder: (ctx) => ContentDialog(
+                          title: Text("Selection Incomplete"),
+                          content: Text("Please select a download method, a mirror, and ensure the mirror has URLs."),
+                          actions: [Button(child: Text("OK"), onPressed: ()=>Navigator.pop(ctx))],
+                        )
+                      );
                     }
-                    localDownloadPathController.dispose(); 
-                    Navigator.pop(dialogContext);
                   },
                   child: const Text('Next'),
                 ),
@@ -175,11 +220,14 @@ class _RepackHeaderState extends State<RepackHeader> {
         );
       },
     ).then((_) {
+      // Dispose the controller when the dialog (and its StatefulBuilder) is gone.
+      localDownloadPathController.dispose(); 
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // ... (rest of your RepackHeader build method is unchanged)
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -192,25 +240,32 @@ class _RepackHeaderState extends State<RepackHeader> {
                 fit: BoxFit.cover,
                 width: 100,
                 height: 100,
+                errorWidget:(context, url, error) => Container(width:100, height:100, color: Colors.grey[40], child: Center(child: Icon(FluentIcons.error, size: 24))),
+                placeholder: (context, url) => Container(width:100, height:100, color: Colors.grey[40], child: Center(child: ProgressRing())),
+
               ),
             ),
             const SizedBox(width: 40),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _overflowText(widget.repack.title, 39),
-                  style: const TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w600,
+            Expanded( // Added Expanded to prevent overflow if title is very long
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.repack.title, // Use full title, let Text widget handle overflow with maxLines if needed
+                    style: const TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  widget.repack.company,
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ],
+                  const SizedBox(height: 15),
+                  Text(
+                    widget.repack.company,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -238,7 +293,7 @@ class _RepackHeaderState extends State<RepackHeader> {
               const EdgeInsets.only(right: 80, left: 15, top: 15, bottom: 15),
             ),
           ),
-          onPressed: showDownloadDialog,
+          onPressed: widget.repack.downloadLinks.isEmpty ? null : showDownloadDialog, // Disable if no download links
           child: Text(
             "Download",
             style: TextStyle(

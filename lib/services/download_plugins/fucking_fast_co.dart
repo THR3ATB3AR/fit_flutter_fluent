@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:html/dom.dart' as dom;
 
 class FuckingFastCo {
-  Future<DownloadInfo> getDownloadInfo(String url) async {
+  Future<DownloadInfo> getDownloadInfo(String gameName, String url) async {
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 404) {
       throw Exception('File not found');
@@ -18,6 +18,13 @@ class FuckingFastCo {
       fileName = fileName.trim();
     } else {
       fileName = 'unknown';
+    }
+
+    String downloadType = '';
+    if (fileName.contains('.')) {
+      downloadType = fileName.split('.').first;
+    } else {
+      downloadType = fileName;
     }
 
     final regex = RegExp(r'window\.open\("https?://[^\"]+');
@@ -40,6 +47,6 @@ class FuckingFastCo {
       // print('chuj');
     }
 
-    return DownloadInfo(downloadLink: dllink, fileName: fileName);
+    return DownloadInfo(repackTitle: gameName, downloadLink: dllink, fileName: fileName, downloadType: downloadType);
   }
 }
