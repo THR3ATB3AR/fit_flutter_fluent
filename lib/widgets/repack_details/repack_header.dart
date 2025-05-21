@@ -78,7 +78,14 @@ class _RepackHeaderState extends State<RepackHeader> {
               const EdgeInsets.only(right: 80, left: 15, top: 15, bottom: 15),
             ),
           ),
-          child: Text("Download", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14),),
+          child: Text(
+            "Download",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+          ),
           onPressed: () {},
         ),
       ],

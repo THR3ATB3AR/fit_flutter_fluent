@@ -60,16 +60,18 @@ class Repack {
       company: row['company'],
       originalSize: row['originalSize'],
       repackSize: row['repackSize'],
-      downloadLinks: (jsonDecode(row['downloadLinks']) as Map<String, dynamic>).map(
-        (key, value) => MapEntry(
-          key,
-          List<Map<String, String>>.from(
-            (value as List).map(
-              (item) => Map<String, String>.from(item as Map<String, dynamic>),
+      downloadLinks: (jsonDecode(row['downloadLinks']) as Map<String, dynamic>)
+          .map(
+            (key, value) => MapEntry(
+              key,
+              List<Map<String, String>>.from(
+                (value as List).map(
+                  (item) =>
+                      Map<String, String>.from(item as Map<String, dynamic>),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
       repackFeatures: row['repackFeatures'],
       description: row['description'],
       screenshots: List<String>.from(jsonDecode(row['screenshots'])),

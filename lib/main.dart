@@ -15,7 +15,6 @@ import 'theme.dart';
 
 const String appTitle = 'FitFlutter';
 
-/// Checks if the current environment is a desktop environment.
 bool get isDesktop {
   return [
     TargetPlatform.windows,
@@ -24,16 +23,18 @@ bool get isDesktop {
   ].contains(defaultTargetPlatform);
 }
 
+final _appTheme = AppTheme();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await _appTheme.loadInitialSettings();
   await RepackService.instance.init();
 
-  // if it's not on the web, windows or android, load the accent color
-  if (
-      [
-        TargetPlatform.windows,
-        TargetPlatform.android,
-      ].contains(defaultTargetPlatform)) {
+  if ([
+    TargetPlatform.windows,
+    TargetPlatform.android,
+  ].contains(defaultTargetPlatform)) {
     SystemTheme.accentColor.load();
   }
 
@@ -43,24 +44,25 @@ void main() async {
       await flutter_acrylic.Window.hideWindowControls();
     }
     await WindowManager.instance.ensureInitialized();
-    windowManager.waitUntilReadyToShow().then((_) async {
-      await windowManager.setTitleBarStyle(
-        TitleBarStyle.hidden,
-        windowButtonVisibility: false,
-      );
-      await windowManager.setMinimumSize(const Size(670, 690));
-      await windowManager.show();
-      await windowManager.setPreventClose(true);
-      await windowManager.setSkipTaskbar(false);
-    });
+
+    await windowManager.waitUntilReadyToShow();
+
+    await windowManager.setTitleBarStyle(
+      TitleBarStyle.hidden,
+      windowButtonVisibility: false,
+    );
+    await windowManager.setMinimumSize(const Size(670, 690));
+    await windowManager.setPreventClose(true);
+    await windowManager.setSkipTaskbar(false);
+
+    await windowManager.show();
+    await windowManager.focus();
+
+    runApp(const MyApp());
+  } else {
+    runApp(const MyApp());
   }
-
-  runApp(const MyApp());
-
-  
 }
-
-final _appTheme = AppTheme();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -71,6 +73,7 @@ class MyApp extends StatelessWidget {
       value: _appTheme,
       builder: (context, child) {
         final appTheme = context.watch<AppTheme>();
+
         return FluentApp.router(
           title: appTitle,
           themeMode: appTheme.mode,
@@ -93,14 +96,27 @@ class MyApp extends StatelessWidget {
           ),
           locale: appTheme.locale,
           builder: (context, child) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              appTheme.applyInitialWindowEffectIfNeeded(context);
+            });
+
             return Directionality(
               textDirection: appTheme.textDirection,
               child: NavigationPaneTheme(
                 data: NavigationPaneThemeData(
-                  backgroundColor: appTheme.windowEffect !=
-                          flutter_acrylic.WindowEffect.disabled
-                      ? Colors.transparent
-                      : null,
+                  backgroundColor:
+                      appTheme.windowEffect !=
+                                  flutter_acrylic.WindowEffect.disabled &&
+                              (appTheme.windowEffect ==
+                                      flutter_acrylic.WindowEffect.mica ||
+                                  appTheme.windowEffect ==
+                                      flutter_acrylic.WindowEffect.acrylic ||
+                                  appTheme.windowEffect ==
+                                      flutter_acrylic.WindowEffect.tabbed ||
+                                  appTheme.windowEffect ==
+                                      flutter_acrylic.WindowEffect.transparent)
+                          ? Colors.transparent
+                          : null,
                 ),
                 child: child!,
               ),
@@ -139,53 +155,54 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   final searchFocusNode = FocusNode();
   final searchController = TextEditingController();
 
-  late final List<NavigationPaneItem> originalItems = [
-    PaneItem(
-      key: const ValueKey('/'),
-      icon: const Icon(FluentIcons.home),
-      title: const Text('Home'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/repacklibrary'),
-      icon: const Icon(FluentIcons.library),
-      title: const Text('Repack Library'),
-      body: const SizedBox.shrink(),
-    ),
-    
-  ].map<NavigationPaneItem>((e) {
-    PaneItem buildPaneItem(PaneItem item) {
-      return PaneItem(
-        key: item.key,
-        icon: item.icon,
-        title: item.title,
-        body: item.body,
-        onTap: () {
-          final path = (item.key as ValueKey).value;
-          if (GoRouterState.of(context).uri.toString() != path) {
-            context.go(path);
-          }
-          item.onTap?.call();
-        },
-      );
-    }
+  late final List<NavigationPaneItem> originalItems =
+      [
+        PaneItem(
+          key: const ValueKey('/'),
+          icon: const Icon(FluentIcons.home),
+          title: const Text('Home'),
+          body: const SizedBox.shrink(),
+        ),
+        PaneItem(
+          key: const ValueKey('/repacklibrary'),
+          icon: const Icon(FluentIcons.library),
+          title: const Text('Repack Library'),
+          body: const SizedBox.shrink(),
+        ),
+      ].map<NavigationPaneItem>((e) {
+        PaneItem buildPaneItem(PaneItem item) {
+          return PaneItem(
+            key: item.key,
+            icon: item.icon,
+            title: item.title,
+            body: item.body,
+            onTap: () {
+              final path = (item.key as ValueKey).value;
+              if (GoRouterState.of(context).uri.toString() != path) {
+                context.go(path);
+              }
+              item.onTap?.call();
+            },
+          );
+        }
 
-    if (e is PaneItemExpander) {
-      return PaneItemExpander(
-        key: e.key,
-        icon: e.icon,
-        title: e.title,
-        body: e.body,
-        items: e.items.map((item) {
-          if (item is PaneItem) return buildPaneItem(item);
-          return item;
-        }).toList(),
-      );
-    }
-    // ignore: unnecessary_type_check
-    if (e is PaneItem) return buildPaneItem(e);
-    return e;
-  }).toList();
+        if (e is PaneItemExpander) {
+          return PaneItemExpander(
+            key: e.key,
+            icon: e.icon,
+            title: e.title,
+            body: e.body,
+            items:
+                e.items.map((item) {
+                  if (item is PaneItem) return buildPaneItem(item);
+                  return item;
+                }).toList(),
+          );
+        }
+        // ignore: unnecessary_type_check
+        if (e is PaneItem) return buildPaneItem(e);
+        return e;
+      }).toList();
   late final List<NavigationPaneItem> footerItems = [
     PaneItemSeparator(),
     PaneItem(
@@ -270,36 +287,41 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           final enabled = true;
 
           onPressed() {
-                  if (router.canPop()) {
-                    context.pop();
-                    setState(() {});
-                  }
-                }
-                
+            if (router.canPop()) {
+              context.pop();
+              setState(() {});
+            }
+          }
+
           return NavigationPaneTheme(
-            data: NavigationPaneTheme.of(context).merge(NavigationPaneThemeData(
-              unselectedIconColor: WidgetStateProperty.resolveWith((states) {
-                if (states.isDisabled) {
-                  return ButtonThemeData.buttonColor(context, states);
-                }
-                return ButtonThemeData.uncheckedInputColor(
-                  FluentTheme.of(context),
-                  states,
-                ).basedOnLuminance();
-              }),
-            )),
-            child: Builder(
-              builder: (context) => PaneItem(
-                icon: const Center(child: Icon(FluentIcons.back, size: 12.0)),
-                title: Text(localizations.backButtonTooltip),
-                body: const SizedBox.shrink(),
-                enabled: enabled,
-              ).build(
-                context,
-                false,
-                onPressed,
-                displayMode: PaneDisplayMode.compact,
+            data: NavigationPaneTheme.of(context).merge(
+              NavigationPaneThemeData(
+                unselectedIconColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.isDisabled) {
+                    return ButtonThemeData.buttonColor(context, states);
+                  }
+                  return ButtonThemeData.uncheckedInputColor(
+                    FluentTheme.of(context),
+                    states,
+                  ).basedOnLuminance();
+                }),
               ),
+            ),
+            child: Builder(
+              builder:
+                  (context) => PaneItem(
+                    icon: const Center(
+                      child: Icon(FluentIcons.back, size: 12.0),
+                    ),
+                    title: Text(localizations.backButtonTooltip),
+                    body: const SizedBox.shrink(),
+                    enabled: enabled,
+                  ).build(
+                    context,
+                    false,
+                    onPressed,
+                    displayMode: PaneDisplayMode.compact,
+                  ),
             ),
           );
         }(),
@@ -311,9 +333,10 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
             ),
           );
         }(),
-        actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          const WindowButtons(),
-        ]),
+        actions: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [const WindowButtons()],
+        ),
       ),
       paneBodyBuilder: (item, child) {
         final name =
@@ -325,7 +348,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
       },
       pane: NavigationPane(
         selected: _calculateSelectedIndex(context),
-        
+
         displayMode: appTheme.displayMode,
         indicator: () {
           switch (appTheme.indicator) {
@@ -336,55 +359,56 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           }
         }(),
         items: originalItems,
-        autoSuggestBox: Builder(builder: (context) {
-          return AutoSuggestBox(
-            key: searchKey,
-            focusNode: searchFocusNode,
-            controller: searchController,
-            unfocusedColor: Colors.transparent,
-            // also need to include sub items from [PaneItemExpander] items
-            items: <PaneItem>[
-              ...originalItems
-                  .whereType<PaneItemExpander>()
-                  .expand<PaneItem>((item) {
-                return [
-                  item,
-                  ...item.items.whereType<PaneItem>(),
-                ];
-              }),
-              ...originalItems
-                  .where(
-                    (item) => item is PaneItem && item is! PaneItemExpander,
-                  )
-                  .cast<PaneItem>(),
-            ].map((item) {
-              assert(item.title is Text);
-              final text = (item.title as Text).data!;
-              return AutoSuggestBoxItem(
-                label: text,
-                value: text,
-                onSelected: () {
-                  item.onTap?.call();
-                  searchController.clear();
-                  searchFocusNode.unfocus();
-                  final view = NavigationView.of(context);
-                  if (view.compactOverlayOpen) {
-                    view.compactOverlayOpen = false;
-                  } else if (view.minimalPaneOpen) {
-                    view.minimalPaneOpen = false;
-                  }
-                },
-              );
-            }).toList(),
-            trailingIcon: IgnorePointer(
-              child: IconButton(
-                onPressed: () {},
-                icon: const Icon(FluentIcons.search),
+        autoSuggestBox: Builder(
+          builder: (context) {
+            return AutoSuggestBox(
+              key: searchKey,
+              focusNode: searchFocusNode,
+              controller: searchController,
+              unfocusedColor: Colors.transparent,
+              // also need to include sub items from [PaneItemExpander] items
+              items:
+                  <PaneItem>[
+                    ...originalItems
+                        .whereType<PaneItemExpander>()
+                        .expand<PaneItem>((item) {
+                          return [item, ...item.items.whereType<PaneItem>()];
+                        }),
+                    ...originalItems
+                        .where(
+                          (item) =>
+                              item is PaneItem && item is! PaneItemExpander,
+                        )
+                        .cast<PaneItem>(),
+                  ].map((item) {
+                    assert(item.title is Text);
+                    final text = (item.title as Text).data!;
+                    return AutoSuggestBoxItem(
+                      label: text,
+                      value: text,
+                      onSelected: () {
+                        item.onTap?.call();
+                        searchController.clear();
+                        searchFocusNode.unfocus();
+                        final view = NavigationView.of(context);
+                        if (view.compactOverlayOpen) {
+                          view.compactOverlayOpen = false;
+                        } else if (view.minimalPaneOpen) {
+                          view.minimalPaneOpen = false;
+                        }
+                      },
+                    );
+                  }).toList(),
+              trailingIcon: IgnorePointer(
+                child: IconButton(
+                  onPressed: () {},
+                  icon: const Icon(FluentIcons.search),
+                ),
               ),
-            ),
-            placeholder: 'Search',
-          );
-        }),
+              placeholder: 'Search',
+            );
+          },
+        ),
         autoSuggestBoxReplacement: const Icon(FluentIcons.search),
         footerItems: footerItems,
       ),
@@ -442,31 +466,35 @@ class WindowButtons extends StatelessWidget {
   }
 }
 
-
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
-final router = GoRouter(navigatorKey: rootNavigatorKey, routes: [
-  ShellRoute(
-    navigatorKey: _shellNavigatorKey,
-    builder: (context, state, child) {
-      return MyHomePage(
-        shellContext: _shellNavigatorKey.currentContext,
-        child: child,
-      );
-    },
-    routes: <GoRoute>[
-      /// Home
-      GoRoute(path: '/', builder: (context, state) => const HomePage()),
-      GoRoute(path: '/settings', builder: (context, state) => const Settings()),
-      GoRoute(path: '/repackdetails', builder: (context, state) {
-        final repack = state.extra as Repack;
-        
-        return RepackDetails(selectedRepack: repack);
-        
-      }),
+final router = GoRouter(
+  navigatorKey: rootNavigatorKey,
+  routes: [
+    ShellRoute(
+      navigatorKey: _shellNavigatorKey,
+      builder: (context, state, child) {
+        return MyHomePage(
+          shellContext: _shellNavigatorKey.currentContext,
+          child: child,
+        );
+      },
+      routes: <GoRoute>[
+        /// Home
+        GoRoute(path: '/', builder: (context, state) => const HomePage()),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const Settings(),
+        ),
+        GoRoute(
+          path: '/repackdetails',
+          builder: (context, state) {
+            final repack = state.extra as Repack;
 
-
-      
-    ],
-  ),
-]);
+            return RepackDetails(selectedRepack: repack);
+          },
+        ),
+      ],
+    ),
+  ],
+);

@@ -19,10 +19,10 @@ class FeaturesDescriptionSection extends StatelessWidget {
               Card(
                 borderRadius: BorderRadius.all(Radius.circular(8)),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min, 
-                  crossAxisAlignment: CrossAxisAlignment.stretch, 
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Padding( 
+                    Padding(
                       padding: const EdgeInsets.all(8),
                       child: Text(
                         'About game',
@@ -46,14 +46,14 @@ class FeaturesDescriptionSection extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 16), 
+              const SizedBox(height: 16),
               Card(
                 borderRadius: BorderRadius.all(Radius.circular(8)),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min, 
-                  crossAxisAlignment: CrossAxisAlignment.stretch, 
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                     Padding( 
+                    Padding(
                       padding: const EdgeInsets.all(8),
                       child: Text(
                         'Features',
@@ -81,10 +81,7 @@ class FeaturesDescriptionSection extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 20),
-        Expanded(
-          flex: 1,
-          child: RepackInfoCard(repack: repack),
-        ),
+        Expanded(flex: 1, child: RepackInfoCard(repack: repack)),
       ],
     );
   }

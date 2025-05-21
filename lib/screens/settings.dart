@@ -7,8 +7,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:provider/provider.dart';
 
-import '../theme.dart';
-import '../widgets/page.dart';
+import '../theme.dart'; // Assuming AppTheme is defined here
+import '../widgets/page.dart'; // Assuming PageHeader, ScaffoldPage, and PageMixin are defined here
 
 const List<String> accentColorNames = [
   'System',
@@ -31,10 +31,7 @@ bool get kIsWindowEffectsSupported {
       ].contains(defaultTargetPlatform);
 }
 
-const _LinuxWindowEffects = [
-  WindowEffect.disabled,
-  WindowEffect.transparent,
-];
+const _LinuxWindowEffects = [WindowEffect.disabled, WindowEffect.transparent];
 
 const _WindowsWindowEffects = [
   WindowEffect.disabled,
@@ -113,8 +110,9 @@ class _SettingsState extends State<Settings> with PageMixin {
             children: [
               Text(
                 'What\'s new on 4.0.0',
-                style: theme.typography.body
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.typography.body?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text('June 21, 2022', style: theme.typography.caption),
               Text(
@@ -126,170 +124,121 @@ class _SettingsState extends State<Settings> with PageMixin {
         ),
         Text('Theme mode', style: FluentTheme.of(context).typography.subtitle),
         spacer,
-        ...List.generate(ThemeMode.values.length, (index) {
-          final mode = ThemeMode.values[index];
-          return Padding(
-            padding: const EdgeInsetsDirectional.only(bottom: 8.0),
-            child: RadioButton(
-              checked: appTheme.mode == mode,
-              onChanged: (value) {
-                if (value) {
-                  appTheme.mode = mode;
-
-                  if (kIsWindowEffectsSupported) {
-                    // some window effects require on [dark] to look good.
-                    // appTheme.setEffect(WindowEffect.disabled, context);
-                    appTheme.setEffect(appTheme.windowEffect, context);
-                  }
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ComboBox<ThemeMode>(
+            value: appTheme.mode,
+            items:
+                ThemeMode.values.map((mode) {
+                  return ComboBoxItem(
+                    value: mode,
+                    child: Text('$mode'.replaceAll('ThemeMode.', '')),
+                  );
+                }).toList(),
+            onChanged: (mode) {
+              if (mode != null) {
+                appTheme.mode = mode;
+                if (kIsWindowEffectsSupported) {
+                  appTheme.setEffect(appTheme.windowEffect, context);
                 }
-              },
-              content: Text('$mode'.replaceAll('ThemeMode.', '')),
-            ),
-          );
-        }),
+              }
+            },
+          ),
+        ),
         biggerSpacer,
         Text(
           'Navigation Pane Display Mode',
           style: FluentTheme.of(context).typography.subtitle,
         ),
         spacer,
-        ...List.generate(PaneDisplayMode.values.length, (index) {
-          final mode = PaneDisplayMode.values[index];
-          return Padding(
-            padding: const EdgeInsetsDirectional.only(bottom: 8.0),
-            child: RadioButton(
-              checked: appTheme.displayMode == mode,
-              onChanged: (value) {
-                if (value) appTheme.displayMode = mode;
-              },
-              content: Text(
-                mode.toString().replaceAll('PaneDisplayMode.', ''),
-              ),
-            ),
-          );
-        }),
-        biggerSpacer,
-        Text('Navigation Indicator',
-            style: FluentTheme.of(context).typography.subtitle),
-        spacer,
-        ...List.generate(NavigationIndicators.values.length, (index) {
-          final mode = NavigationIndicators.values[index];
-          return Padding(
-            padding: const EdgeInsetsDirectional.only(bottom: 8.0),
-            child: RadioButton(
-              checked: appTheme.indicator == mode,
-              onChanged: (value) {
-                if (value) appTheme.indicator = mode;
-              },
-              content: Text(
-                mode.toString().replaceAll('NavigationIndicators.', ''),
-              ),
-            ),
-          );
-        }),
-        biggerSpacer,
-        Text('Accent Color',
-            style: FluentTheme.of(context).typography.subtitle),
-        spacer,
-        Wrap(children: [
-          Tooltip(
-            message: accentColorNames[0],
-            child: _buildColorBlock(appTheme, systemAccentColor),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ComboBox<PaneDisplayMode>(
+            value: appTheme.displayMode,
+            items:
+                PaneDisplayMode.values.map((mode) {
+                  return ComboBoxItem(
+                    value: mode,
+                    child: Text(
+                      mode.toString().replaceAll('PaneDisplayMode.', ''),
+                    ),
+                  );
+                }).toList(),
+            onChanged: (mode) {
+              if (mode != null) appTheme.displayMode = mode;
+            },
           ),
-          ...List.generate(Colors.accentColors.length, (index) {
-            final color = Colors.accentColors[index];
-            return Tooltip(
-              message: accentColorNames[index + 1],
-              child: _buildColorBlock(appTheme, color),
-            );
-          }),
-        ]),
+        ),
+        biggerSpacer,
+        Text(
+          'Accent Color',
+          style: FluentTheme.of(context).typography.subtitle,
+        ),
+        spacer,
+        Wrap(
+          alignment: WrapAlignment.start,
+          children: [
+            Tooltip(
+              message: accentColorNames[0],
+              child: _buildColorBlock(
+                appTheme,
+                systemAccentColor,
+                isSystemColor: true,
+              ),
+            ),
+            ...List.generate(Colors.accentColors.length, (index) {
+              final color = Colors.accentColors[index];
+              return Tooltip(
+                message: accentColorNames[index + 1],
+                child: _buildColorBlock(appTheme, color),
+              );
+            }),
+          ],
+        ),
         if (kIsWindowEffectsSupported) ...[
           biggerSpacer,
           Text(
             'Window Transparency',
             style: FluentTheme.of(context).typography.subtitle,
           ),
-          description(
-            content: Text(
-              'Running on ${defaultTargetPlatform.toString().replaceAll('TargetPlatform.', '')}',
-            ),
-          ),
           spacer,
-          ...List.generate(currentWindowEffects.length, (index) {
-            final mode = currentWindowEffects[index];
-            return Padding(
-              padding: const EdgeInsetsDirectional.only(bottom: 8.0),
-              child: RadioButton(
-                checked: appTheme.windowEffect == mode,
-                onChanged: (value) {
-                  if (value) {
-                    appTheme.windowEffect = mode;
-                    appTheme.setEffect(mode, context);
-                  }
-                },
-                content: Text(
-                  mode.toString().replaceAll('WindowEffect.', ''),
-                ),
-              ),
-            );
-          }),
-        ],
-        biggerSpacer,
-        Text(
-          'Text Direction',
-          style: FluentTheme.of(context).typography.subtitle,
-        ),
-        spacer,
-        ...List.generate(TextDirection.values.length, (index) {
-          final direction = TextDirection.values[index];
-          return Padding(
-            padding: const EdgeInsetsDirectional.only(bottom: 8.0),
-            child: RadioButton(
-              checked: appTheme.textDirection == direction,
-              onChanged: (value) {
-                if (value) {
-                  appTheme.textDirection = direction;
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ComboBox<WindowEffect>(
+              value: appTheme.windowEffect,
+              items:
+                  currentWindowEffects.map((effect) {
+                    return ComboBoxItem(
+                      value: effect,
+                      child: Text(
+                        effect.toString().replaceAll('WindowEffect.', ''),
+                      ),
+                    );
+                  }).toList(),
+              onChanged: (effect) {
+                if (effect != null) {
+                  appTheme.windowEffect = effect;
+                  appTheme.setEffect(effect, context);
                 }
               },
-              content: Text(
-                '$direction'
-                    .replaceAll('TextDirection.', '')
-                    .replaceAll('rtl', 'Right to left')
-                    .replaceAll('ltr', 'Left to right'),
-              ),
             ),
-          );
-        }).reversed,
+          ),
+        ],
         biggerSpacer,
         Text('Locale', style: FluentTheme.of(context).typography.subtitle),
-        description(
-          content: const Text(
-            'The locale used by the fluent_ui widgets, such as TimePicker and '
-            'DatePicker. This does not reflect the language of this showcase app.',
-          ),
-        ),
         spacer,
-        Wrap(
-          spacing: 15.0,
-          runSpacing: 10.0,
-          children: List.generate(
-            supportedLocales.length,
-            (index) {
-              final locale = supportedLocales[index];
-
-              return Padding(
-                padding: const EdgeInsetsDirectional.only(bottom: 8.0),
-                child: RadioButton(
-                  checked: currentLocale == locale,
-                  onChanged: (value) {
-                    if (value) {
-                      appTheme.locale = locale;
-                    }
-                  },
-                  content: Text('$locale'),
-                ),
-              );
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ComboBox<Locale>(
+            value: currentLocale,
+            items:
+                supportedLocales.map((locale) {
+                  return ComboBoxItem(value: locale, child: Text('$locale'));
+                }).toList(),
+            onChanged: (locale) {
+              if (locale != null) {
+                appTheme.locale = locale;
+              }
             },
           ),
         ),
@@ -297,35 +246,49 @@ class _SettingsState extends State<Settings> with PageMixin {
     );
   }
 
-  Widget _buildColorBlock(AppTheme appTheme, AccentColor color) {
+  Widget _buildColorBlock(
+    AppTheme appTheme,
+    AccentColor color, {
+    bool isSystemColor = false,
+  }) {
+    bool isSelected;
+    if (isSystemColor) {
+      isSelected = appTheme.isSystemAccentSelected;
+    } else {
+      isSelected = appTheme.explicitAccentColor?.value == color.value;
+    }
+
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: Button(
         onPressed: () {
-          appTheme.color = color;
+          if (isSystemColor) {
+            appTheme.setSystemAccentColor();
+          } else {
+            appTheme.color = color;
+          }
         },
         style: ButtonStyle(
           padding: const WidgetStatePropertyAll(EdgeInsets.zero),
           backgroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.isPressed) {
-              return color.light;
-            } else if (states.isHovered) {
-              return color.lighter;
-            }
-            return color;
+            final displayColor = color;
+            if (states.isPressed) return displayColor.light;
+            if (states.isHovered) return displayColor.lighter;
+            return displayColor;
           }),
         ),
         child: Container(
           height: 40,
           width: 40,
           alignment: AlignmentDirectional.center,
-          child: appTheme.color == color
-              ? Icon(
-                  FluentIcons.check_mark,
-                  color: color.basedOnLuminance(),
-                  size: 22.0,
-                )
-              : null,
+          child:
+              isSelected
+                  ? Icon(
+                    FluentIcons.check_mark,
+                    color: color.basedOnLuminance(),
+                    size: 22.0,
+                  )
+                  : null,
         ),
       ),
     );

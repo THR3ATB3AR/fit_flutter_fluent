@@ -118,12 +118,18 @@ class _ScreenshotSectionState extends State<ScreenshotSection> {
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: Text(
-                    'Screenshots (${screenshots.length})',
-                    style: theme.typography.subtitle,
+                      'Screenshots (${screenshots.length})',
+                      style: theme.typography.subtitle,
                     ),
                   ),
                 ),
-                Divider(style: DividerThemeData(thickness: 2, horizontalMargin: EdgeInsets.all(0), verticalMargin: EdgeInsets.all(0))),
+                Divider(
+                  style: DividerThemeData(
+                    thickness: 2,
+                    horizontalMargin: EdgeInsets.all(0),
+                    verticalMargin: EdgeInsets.all(0),
+                  ),
+                ),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -138,7 +144,7 @@ class _ScreenshotSectionState extends State<ScreenshotSection> {
                               theme.brightness == Brightness.light
                                   ? theme.resources.controlStrokeColorDefault
                                   : Colors.white.withValues(alpha: 0.8);
-                    
+
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
                             child: GestureDetector(

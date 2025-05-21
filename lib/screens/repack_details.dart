@@ -34,12 +34,12 @@ class _RepackDetailsState extends State<RepackDetails> {
               maxWidth: screenshotSectionMaxWidth,
             ),
             child: SizedBox(
-              height: 600, 
+              height: 600,
               child: ScreenshotSection(repack: widget.selectedRepack),
             ),
           ),
         ),
-        const SizedBox(height: 20), 
+        const SizedBox(height: 20),
         Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(
