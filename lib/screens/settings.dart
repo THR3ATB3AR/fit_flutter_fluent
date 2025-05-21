@@ -1,14 +1,13 @@
 // ignore_for_file: constant_identifier_names
 
-import 'package:fit_flutter_fluent/widgets/changelog.dart';
+// import 'package:fit_flutter_fluent/widgets/changelog.dart';
 import 'package:flutter/foundation.dart';
-
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:provider/provider.dart';
-
-import '../theme.dart'; // Assuming AppTheme is defined here
-import '../widgets/page.dart'; // Assuming PageHeader, ScaffoldPage, and PageMixin are defined here
+import 'package:file_picker/file_picker.dart';
+import 'package:fit_flutter_fluent/theme.dart'; 
+import 'package:fit_flutter_fluent/widgets/page.dart'; 
 
 const List<String> accentColorNames = [
   'System',
@@ -89,7 +88,7 @@ class _SettingsState extends State<Settings> with PageMixin {
     final appTheme = context.watch<AppTheme>();
     const spacer = SizedBox(height: 10.0);
     const biggerSpacer = SizedBox(height: 40.0);
-    final theme = FluentTheme.of(context);
+    // final theme = FluentTheme.of(context);
 
     const supportedLocales = FluentLocalizations.supportedLocales;
     final currentLocale =
@@ -97,31 +96,54 @@ class _SettingsState extends State<Settings> with PageMixin {
     return ScaffoldPage.scrollable(
       header: const PageHeader(title: Text('Settings')),
       children: [
-        IconButton(
-          onPressed: () {
-            showDialog(
-              context: context,
-              barrierDismissible: true,
-              builder: (context) => const Changelog(),
-            );
-          },
-          icon: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'What\'s new on 4.0.0',
-                style: theme.typography.body?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text('June 21, 2022', style: theme.typography.caption),
-              Text(
-                'A native look-and-feel out of the box',
-                style: theme.typography.bodyLarge,
-              ),
-            ],
+        // IconButton(
+        //   onPressed: () {
+        //     showDialog(
+        //       context: context,
+        //       barrierDismissible: true,
+        //       builder: (context) => const Changelog(),
+        //     );
+        //   },
+        //   icon: Column(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       Text(
+        //         'What\'s new on 4.0.0',
+        //         style: theme.typography.body?.copyWith(
+        //           fontWeight: FontWeight.bold,
+        //         ),
+        //       ),
+        //       Text('June 21, 2022', style: theme.typography.caption),
+        //       Text(
+        //         'A native look-and-feel out of the box',
+        //         style: theme.typography.bodyLarge,
+        //       ),
+        //     ],
+        //   ),
+        // ),
+        Text('Default Download Path',
+            style: FluentTheme.of(context).typography.subtitle),
+        spacer,
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextBox(
+            placeholder: 'Default Download Path',
+            controller: TextEditingController(text: appTheme.downloadPath),
+            onChanged: (value) {
+              appTheme.downloadPath = value;
+            },
+            suffix: IconButton(
+              icon: const Icon(FluentIcons.folder),
+              onPressed: () async {
+                final path = await FilePicker.platform.getDirectoryPath();
+                if (path != null) {
+                  appTheme.downloadPath = path;
+                }
+              },
+            ),
           ),
         ),
+        biggerSpacer,
         Text('Theme mode', style: FluentTheme.of(context).typography.subtitle),
         spacer,
         Align(

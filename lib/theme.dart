@@ -152,6 +152,23 @@ class AppTheme extends ChangeNotifier {
 
   bool _initialEffectAppliedOnStartup = false;
 
+  // Normal settings
+
+  static const String _kDownloadPath = 'download_path';
+
+  String _downloadPath = '';
+  String get downloadPath => _downloadPath;
+  set downloadPath(String path) {
+    _downloadPath = path;
+    _saveDownloadPath(path);
+    notifyListeners();
+  }
+
+  Future<void> _saveDownloadPath(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kDownloadPath, path);
+  }
+
   Future<void> loadInitialSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -212,6 +229,15 @@ class AppTheme extends ChangeNotifier {
       } else {
         _locale = Locale(localeString);
       }
+    }
+
+    // normal settings
+
+    final String? downloadPath = prefs.getString(_kDownloadPath);
+    if (downloadPath != null) {
+      _downloadPath = downloadPath;
+    } else {
+      _downloadPath = '';
     }
   }
 
