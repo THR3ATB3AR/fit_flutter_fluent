@@ -23,8 +23,6 @@ class ScraperService {
     _repackService.popularRepacks = (await scrapePopularRepacks(
       onProgress: (i, e) {},
     ));
-    // .take(20)
-    // .toList();
   }
 
   Future<void> rescrapeAllRepacksNames() async {
@@ -90,8 +88,8 @@ class ScraperService {
         _repackService.everyRepack.add(repack);
         await _repackService.saveSingleEveryRepack(
           repack,
-        ); // Zapisz do bazy danych
-        _repackService.notifyListeners(); // Emituj zmiany przez strumień
+        );
+        _repackService.notifyListeners(); 
       } catch (e) {
         _repackService.failedRepacks[url] =
             _repackService.allRepacksNames.entries
@@ -106,7 +104,7 @@ class ScraperService {
     }
     _repackService.deleteFailedRepacksFromAllRepackNames();
     _repackService.everyRepack.sort((a, b) => a.title.compareTo(b.title));
-    print('scrapeMissingRepacks finished'); // Debugowanie
+    print('scrapeMissingRepacks finished'); 
   }
 
   Future<Map<String, String>> scrapeAllRepacksNames({
@@ -144,7 +142,7 @@ class ScraperService {
       for (int i = 0; i < titles.length; i++) {
         repacks[titles[i]] = links[i];
       }
-      // print(i);
+      
       loadingProgress.value = i / pages[pages.length - 1];
       onProgress(i, pages[pages.length - 1]);
     }
@@ -209,7 +207,7 @@ class ScraperService {
         (individualRepackPageUrls.length > 20)
             ? 20
             : individualRepackPageUrls
-                .length; // Cap at 20, or fewer if less available
+                .length; 
 
     for (int i = 0; i < itemsToScrape; i++) {
       try {
@@ -261,11 +259,10 @@ class ScraperService {
 
     for (int i = 0; i < h3Elements.length; i++) {
       final dom.Element h3Element = h3Elements[i];
-      h3Element.querySelector('span')?.remove(); // Remove span if it exists
+      h3Element.querySelector('span')?.remove();
       final String h3Text = h3Element.text.trim();
       final StringBuffer sectionContent = StringBuffer();
 
-      // Collect all elements under the current h3 until the next h3
       dom.Element? nextSibling = h3Element.nextElementSibling;
       while (nextSibling != null && nextSibling.localName != 'h3') {
         sectionContent.write(nextSibling.outerHtml);
@@ -341,7 +338,6 @@ class ScraperService {
                 )
                 .where(
                   (link) =>
-                      // (link['url']!.startsWith('https://paste.fitgirl-repacks.site') ||
                       (link['url']!.startsWith('magnet:')) &&
                       link['hostName']!.toLowerCase() != '.torrent file only',
                 )

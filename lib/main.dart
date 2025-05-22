@@ -2,6 +2,7 @@ import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fit_flutter_fluent/screens/download_manager_screen.dart';
 import 'package:fit_flutter_fluent/screens/home.dart';
 import 'package:fit_flutter_fluent/screens/repack_details.dart';
+import 'package:fit_flutter_fluent/screens/repack_library.dart';
 import 'package:fit_flutter_fluent/screens/settings.dart';
 import 'package:fit_flutter_fluent/services/repack_service.dart';
 import 'package:fluent_ui/fluent_ui.dart' hide Page;
@@ -484,12 +485,23 @@ final router = GoRouter(
         /// Home
         GoRoute(path: '/', builder: (context, state) => const HomePage()),
         GoRoute(
-  path: '/settings',
-  builder: (BuildContext context, GoRouterState state) {
-    final String? section = state.uri.queryParameters['section']; // Odczytaj parametr 'section'
-    return Settings(sectionToScrollTo: section); // Przekaż go do widgetu Settings
-  },
-),
+          path: '/repacklibrary',
+          builder: (context, state) {
+            return const RepackLibrary();
+          },
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (BuildContext context, GoRouterState state) {
+            final String? section =
+                state
+                    .uri
+                    .queryParameters['section']; // Odczytaj parametr 'section'
+            return Settings(
+              sectionToScrollTo: section,
+            ); // Przekaż go do widgetu Settings
+          },
+        ),
         GoRoute(
           path: '/downloadmanager',
           builder: (context, state) {
