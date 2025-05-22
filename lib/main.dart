@@ -1,4 +1,5 @@
 import 'package:fit_flutter_fluent/data/repack.dart';
+import 'package:fit_flutter_fluent/screens/download_manager_screen.dart';
 import 'package:fit_flutter_fluent/screens/home.dart';
 import 'package:fit_flutter_fluent/screens/repack_details.dart';
 import 'package:fit_flutter_fluent/screens/settings.dart';
@@ -485,6 +486,12 @@ final router = GoRouter(
         GoRoute(
           path: '/settings',
           builder: (context, state) => const Settings(),
+        ),
+        GoRoute(
+          path: '/downloadmanager',
+          builder: (context, state) {
+            return const DownloadManagerScreen();
+          },
         ),
         GoRoute(
           path: '/repackdetails',
