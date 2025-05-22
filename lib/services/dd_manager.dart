@@ -40,7 +40,7 @@ class DdManager {
     if (existingTask == null) {
       await downloadManager.addDownload(ddInfo.downloadLink, downloadPath);
     } else {
-      print(
+      debugPrint(
         "Download task for ${ddInfo.downloadLink} already exists. Status: ${existingTask.status.value}",
       );
     }
@@ -48,7 +48,7 @@ class DdManager {
     DownloadTask? task = downloadManager.getDownload(ddInfo.downloadLink);
 
     if (task == null) {
-      print(
+      debugPrint(
         "Error: Could not retrieve task for ${ddInfo.downloadLink} after attempting to add/get it.",
       );
       return;
@@ -131,30 +131,63 @@ class DdManager {
   if (titleToRemoveFrom != null) {
     downloadTasks.remove(titleToRemoveFrom);
     _taskGroupUpdatedController.add(titleToRemoveFrom!); 
-    print("Group $titleToRemoveFrom became empty and was removed.");
+    debugPrint("Group $titleToRemoveFrom became empty and was removed.");
   } else if (updatedTitle != null) {
     _taskGroupUpdatedController.add(updatedTitle!);
-     print("Task removed from group $updatedTitle.");
+     debugPrint("Task removed from group $updatedTitle.");
   }
 }
+
+// In DdManager.dart
 
 Future<void> removeDownloadGroup(String title) async {
   final sanitizedTitle = sanitizeFileName(title);
   if (downloadTasks.containsKey(sanitizedTitle)) {
+    // Create a copy of the list of task data to avoid modification issues during iteration
     final tasksInGroup = List<Map<String, dynamic>>.from(
       downloadTasks[sanitizedTitle]!,
     );
+
+    debugPrint("DdManager: Removing group '$sanitizedTitle'. Found ${tasksInGroup.length} tasks in DdManager's list.");
+
     for (var taskMap in tasksInGroup) {
-      final task = taskMap['task'] as DownloadTask;
-      // Check if the task is still managed by flutter_download_manager
-      if (downloadManager.getDownload(task.request.url) != null) {
-          await downloadManager.cancelDownload(task.request.url);
-          await downloadManager.removeDownload(task.request.url);
+      final task = taskMap['task'] as DownloadTask?; // Allow task to be null initially
+      final url = taskMap['url'] as String?; // Get URL directly
+
+      if (task == null && url == null) {
+        debugPrint("DdManager: Skipping task in group '$sanitizedTitle' - no task object or URL.");
+        continue;
+      }
+      
+      // Prefer URL from taskMap if available, fallback to task object
+      final taskUrl = url ?? task?.request.url;
+
+      if (taskUrl == null) {
+        debugPrint("DdManager: Skipping task in group '$sanitizedTitle' - could not determine URL.");
+        continue;
+      }
+
+      if (downloadManager.getDownload(taskUrl) != null) {
+        debugPrint("DdManager: Attempting to cancel task: $taskUrl for group '$sanitizedTitle' via plugin.");
+        try {
+          await downloadManager.cancelDownload(taskUrl);
+          // cancelDownload should trigger the plugin's internal cleanup,
+          // including removal from its _tasks map and calling _processQueue.
+          // No need to call downloadManager.removeDownload() here.
+          debugPrint("DdManager: Plugin's cancelDownload called for $taskUrl.");
+        } catch (e) {
+          debugPrint("DdManager: Error calling plugin's cancelDownload for $taskUrl: $e");
+        }
+      } else {
+        debugPrint("DdManager: Task $taskUrl for group '$sanitizedTitle' already removed or not found in plugin manager.");
       }
     }
+
     downloadTasks.remove(sanitizedTitle);
-    print("Removed download group: $sanitizedTitle");
-    _taskGroupUpdatedController.add(sanitizedTitle); // Notify about removal of group
+    debugPrint("DdManager: Removed download group '$sanitizedTitle' from DdManager's internal list.");
+    _taskGroupUpdatedController.add(sanitizedTitle); // Notify UI to update
+  } else {
+    debugPrint("DdManager: Group '$sanitizedTitle' not found in DdManager's list for removal.");
   }
 }
 
@@ -163,11 +196,11 @@ void dispose() {
   _taskGroupUpdatedController.close();
 }
 
-  void printDownloadTasks() {
+  void debugPrintDownloadTasks() {
     downloadTasks.forEach((title, tasks) {
-      print('Title: $title');
+      debugPrint('Title: $title');
       for (var task in tasks) {
-        print(
+        debugPrint(
           '  FileName: ${task['fileName']}, URL: ${task['url']}, Task Status: ${(task['task'] as DownloadTask).status.value}',
         );
       }

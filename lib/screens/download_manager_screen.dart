@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'package:fit_flutter_fluent/services/dd_manager.dart'; // Your DdManager
-// import 'utils/download_status_utils.dart'; // Your helper functions
+import 'package:fit_flutter_fluent/services/dd_manager.dart'; 
 import 'package:flutter_download_manager/flutter_download_manager.dart' as fdm;
 import 'package:fluent_ui/fluent_ui.dart';
 
-// --- Re-add helper functions here if not in a separate file ---
 
 Color getStatusColor(BuildContext context, fdm.DownloadStatus status) {
   final theme = FluentTheme.of(context);
@@ -57,7 +55,6 @@ IconData getStatusIcon(fdm.DownloadStatus status) {
       return FluentIcons.blocked12;
   }
 }
-// --- End of helper functions ---
 
 class DownloadManagerScreen extends StatefulWidget {
   const DownloadManagerScreen({super.key});
@@ -74,7 +71,7 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
   @override
   void initState() {
     super.initState();
-    _currentDownloadTasks = Map.from(_ddManager.downloadTasks); // Initial tasks
+    _currentDownloadTasks = Map.from(_ddManager.downloadTasks); 
     _groupUpdateSubscription = _ddManager.onTaskGroupUpdated.listen((_) {
       if (mounted) {
         setState(() {
@@ -117,7 +114,6 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
                     _ddManager.setMaxConcurrentDownloads(val);
                     Navigator.pop(ctx);
                   } else {
-                    // Show error or ignore
                   }
                 },
               ),
@@ -132,7 +128,6 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
       final title = entry.key;
       final batchProgressNotifier = _ddManager.getBatchProgressForTitle(title);
       if (batchProgressNotifier != null && batchProgressNotifier.value == 1.0) {
-        // Additionally check if all tasks are indeed completed
         bool allTasksActuallyCompleted = entry.value.every((taskData) {
           final task = taskData['task'] as fdm.DownloadTask?;
           return task?.status.value == fdm.DownloadStatus.completed;
@@ -141,12 +136,6 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
           titlesToRemove.add(title);
         }
       } else if (batchProgressNotifier == null || entry.value.isEmpty) {
-        // If no notifier or group is empty, it can be considered for removal
-        // (or it's already removed by DdManager logic if tasks were cancelled one by one)
-        // For explicit "Clear Completed", we mainly focus on groups that *were* downloading.
-        // Let's assume if getBatchProgressForTitle returns null for a non-empty group in our _currentDownloadTasks,
-        // it means something is off, or it's a new group not yet fully processed.
-        // For safety, only remove groups that positively report 1.0 progress.
       }
     }
 
@@ -158,15 +147,13 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
             title: const Text('No completed groups to clear.'),
             severity: InfoBarSeverity.info,
             isLong: true,
-            action: Button(child: const Text('Dismiss'), onPressed: close),
+            action: Button(onPressed: close, child: const Text('Dismiss')),
           );
         },
       );
       return;
     }
 
-    // Show confirmation dialog
-    // ignore: use_build_context_synchronously
     final confirmed = await showDialog<bool>(
       context: context,
       builder:
@@ -181,11 +168,11 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
                 onPressed: () => Navigator.pop(ctx, false),
               ),
               FilledButton(
-                child: const Text('Clear Completed'),
                 style: ButtonStyle(
-                  backgroundColor: ButtonState.all(Colors.red),
+                  backgroundColor: WidgetStatePropertyAll(Colors.red),
                 ),
                 onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Clear Completed'),
               ),
             ],
           ),
@@ -194,9 +181,7 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
     if (confirmed == true) {
       for (final title in titlesToRemove) {
         await _ddManager.removeDownloadGroup(title);
-        // The onTaskGroupUpdated stream will trigger setState and update the UI
       }
-      // ignore: use_build_context_synchronously
       await displayInfoBar(
         context,
         builder: (context, close) {
@@ -204,7 +189,7 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
             title: Text('${titlesToRemove.length} completed group(s) cleared.'),
             severity: InfoBarSeverity.success,
             isLong: true,
-            action: Button(child: const Text('Dismiss'), onPressed: close),
+            action: Button(onPressed: close, child: const Text('Dismiss')),
           );
         },
       );
@@ -265,13 +250,11 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
                 itemBuilder: (context, index) {
                   final title = groupTitles[index];
                   final tasksInGroup = _currentDownloadTasks[title]!;
-                  // Pass the original, unsanitized title if you have it, or use the sanitized one.
-                  // For simplicity, we use the sanitized title from DdManager keys.
                   return _DownloadGroupItem(
                     key: ValueKey(
                       title,
-                    ), // Important for state preservation if list order changes
-                    groupTitle: title, // This is the sanitized title
+                    ), 
+                    groupTitle: title, 
                     tasks: tasksInGroup,
                     ddManager: _ddManager,
                   );
@@ -295,9 +278,6 @@ class _DownloadGroupItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get batch progress notifier. This should ideally be managed by a StatefulWidget
-    // if we need to listen and dispose, but for a StatelessWidget, we fetch it on build.
-    // A ValueListenableBuilder for the header might be cleaner.
     final batchProgressNotifier = ddManager.getBatchProgressForTitle(
       groupTitle,
     );
@@ -307,8 +287,7 @@ class _DownloadGroupItem extends StatelessWidget {
       child: Expander(
         key: ValueKey(
           'expander_$groupTitle',
-        ), // Ensures Expander state is preserved
-        initiallyExpanded: true,
+        ), 
         header: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
@@ -370,18 +349,17 @@ class _DownloadGroupItem extends StatelessWidget {
                                 onPressed: () => Navigator.pop(ctx, false),
                               ),
                               FilledButton(
-                                child: const Text('Yes, Cancel Group'),
                                 onPressed: () => Navigator.pop(ctx, true),
                                 style: ButtonStyle(
-                                  backgroundColor: ButtonState.all(Colors.red),
+                                  backgroundColor: WidgetStatePropertyAll(Colors.red),
                                 ),
+                                child: const Text('Yes, Cancel Group'),
                               ),
                             ],
                           ),
                     );
                     if (confirmed == true) {
                       await ddManager.removeDownloadGroup(groupTitle);
-                      // UI will update via the stream listener in DownloadManagerPage
                     }
                   },
                 ),
@@ -411,7 +389,7 @@ class _DownloadGroupItem extends StatelessWidget {
                     );
                   }
                   return _DownloadFileItem(
-                    key: ValueKey(url), // Use URL as key for file item
+                    key: ValueKey(url), 
                     task: task,
                     fileName: fileName,
                     ddManager: ddManager,
@@ -458,7 +436,7 @@ class _DownloadFileItem extends StatelessWidget {
             builder: (context, progressValue, child) {
               return ProgressBar(
                 value: progressValue * 100,
-                strokeWidth: 6, // Make it a bit thicker for individual items
+                strokeWidth: 6, 
               );
             },
           ),
@@ -548,7 +526,6 @@ class _DownloadFileItem extends StatelessWidget {
                     );
                   } else if (statusValue == fdm.DownloadStatus.failed ||
                       statusValue == fdm.DownloadStatus.canceled) {
-                    // Option to remove failed/canceled task from the list
                     actions.add(
                       Tooltip(
                         message: 'Remove from list',
