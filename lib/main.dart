@@ -484,9 +484,12 @@ final router = GoRouter(
         /// Home
         GoRoute(path: '/', builder: (context, state) => const HomePage()),
         GoRoute(
-          path: '/settings',
-          builder: (context, state) => const Settings(),
-        ),
+  path: '/settings',
+  builder: (BuildContext context, GoRouterState state) {
+    final String? section = state.uri.queryParameters['section']; // Odczytaj parametr 'section'
+    return Settings(sectionToScrollTo: section); // Przekaż go do widgetu Settings
+  },
+),
         GoRoute(
           path: '/downloadmanager',
           builder: (context, state) {

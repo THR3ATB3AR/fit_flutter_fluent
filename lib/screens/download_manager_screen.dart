@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:fit_flutter_fluent/services/dd_manager.dart'; 
 import 'package:flutter_download_manager/flutter_download_manager.dart' as fdm;
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:go_router/go_router.dart';
 
 
 Color getStatusColor(BuildContext context, fdm.DownloadStatus status) {
@@ -87,40 +88,7 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
     super.dispose();
   }
 
-  void _showMaxConcurrentDownloadsDialog() {
-    final controller = TextEditingController(
-      text: _ddManager.downloadManager.maxConcurrentTasks.toString(),
-    );
-    showDialog(
-      context: context,
-      builder:
-          (ctx) => ContentDialog(
-            title: const Text('Set Max Concurrent Downloads'),
-            content: TextBox(
-              controller: controller,
-              placeholder: 'Number of downloads',
-              keyboardType: TextInputType.number,
-            ),
-            actions: [
-              Button(
-                child: const Text('Cancel'),
-                onPressed: () => Navigator.pop(ctx),
-              ),
-              FilledButton(
-                child: const Text('Set'),
-                onPressed: () {
-                  final val = int.tryParse(controller.text);
-                  if (val != null && val > 0) {
-                    _ddManager.setMaxConcurrentDownloads(val);
-                    Navigator.pop(ctx);
-                  } else {
-                  }
-                },
-              ),
-            ],
-          ),
-    );
-  }
+  
 
   Future<void> _clearAllCompletedGroups() async {
     final titlesToRemove = <String>[];
@@ -210,7 +178,9 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
             CommandBarButton(
               icon: const Icon(FluentIcons.settings),
               label: const Text('Max Concurrent'),
-              onPressed: _showMaxConcurrentDownloadsDialog,
+              onPressed: () {
+                context.go('/settings?section=maxConcurrentDownloads');
+              },
             ),
             CommandBarButton(
               icon: const Icon(FluentIcons.clear_selection),

@@ -1,4 +1,5 @@
 import 'package:fit_flutter_fluent/screens/settings.dart';
+import 'package:fit_flutter_fluent/services/dd_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:system_theme/system_theme.dart';
@@ -154,7 +155,10 @@ class AppTheme extends ChangeNotifier {
 
   // Normal settings
 
+  DdManager downloadManager = DdManager.instance;
+
   static const String _kDownloadPath = 'download_path';
+  static const String _kMaxConcurrentDownloads = 'max_concurrent_downloads';
 
   String _downloadPath = '';
   String get downloadPath => _downloadPath;
@@ -164,9 +168,24 @@ class AppTheme extends ChangeNotifier {
     notifyListeners();
   }
 
+  int _maxConcurrentDownloads = 2;
+  int get maxConcurrentDownloads => _maxConcurrentDownloads;
+  set maxConcurrentDownloads(int value) {
+    _maxConcurrentDownloads = value;
+    downloadManager.setMaxConcurrentDownloads(value);
+    _saveMaxConcurrentDownloads(value);
+    notifyListeners();
+  }
+
+
   Future<void> _saveDownloadPath(String path) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kDownloadPath, path);
+  }
+
+  Future<void> _saveMaxConcurrentDownloads(int value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kMaxConcurrentDownloads, value);
   }
 
   Future<void> loadInitialSettings() async {
@@ -238,6 +257,13 @@ class AppTheme extends ChangeNotifier {
       _downloadPath = downloadPath;
     } else {
       _downloadPath = '';
+    }
+
+    final int? maxConcurrentDownloads = prefs.getInt(_kMaxConcurrentDownloads);
+    if (maxConcurrentDownloads != null) {
+      _maxConcurrentDownloads = maxConcurrentDownloads;
+    } else {
+      _maxConcurrentDownloads = 2;
     }
   }
 
