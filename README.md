@@ -25,26 +25,26 @@
 
 This section outlines the tasks for the ongoing rewrite to implement Microsoft Fluent Design:
 
-* [ ] **Core UI Framework:**
-  * [ ] Integrate Fluent Design UI libraries/packages (e.g., `fluent_ui` for Windows, or custom Fluent-inspired widgets).
+* [X] **Core UI Framework:**
+  * [X] Integrate Fluent Design UI libraries/packages (e.g., `fluent_ui` for Windows, or custom Fluent-inspired widgets).
   * [X] Establish base Fluent theme (colors, typography, acrylic/mica materials where applicable).
 * [ ] **Component Redesign & Implementation:**
   * [X] Redesign and implement main navigation (NavigationView, TabView, etc.) using Fluent controls.
-  * [ ] Rewrite list views (repack library, downloads) with Fluent styling (e.g., ListView, GridView with Fluent item templates).
-  * [ ] Update buttons, input fields, dialogs, and other interactive elements to Fluent Design.
+  * [X] Rewrite list views (repack library, downloads) with Fluent styling (e.g., ListView, GridView with Fluent item templates).
+  * [X] Update buttons, input fields, dialogs, and other interactive elements to Fluent Design.
   * [ ] Implement Fluent iconography throughout the application.
-  * [ ] Refactor settings screen with Fluent controls (ToggleSwitch, ComboBox, etc.).
+  * [X] Refactor settings screen with Fluent controls (ToggleSwitch, ComboBox, etc.).
 * [ ] **Feature Parity with Fluent UI:**
   * [ ] Ensure all existing features from FitFlutter are functional within the new Fluent UI.
   * [ ] Port "Search Repacks" UI to Fluent.
   * [X] Port "Repack Details" view to Fluent.
   * [X] Port "Screenshots" viewer to Fluent.
-  * [ ] Port "Download Manager" UI to Fluent.
+  * [X] Port "Download Manager" UI to Fluent.
 * [ ] **Visual Polish & UX:**
   * [X] Implement Fluent motion and animations for transitions and interactions.
-  * [ ] Ensure appropriate use of Acrylic/Mica materials (especially for Windows).
-  * [ ] Test and refine light/dark mode theming with Fluent Design.
-  * [ ] Ensure responsive design for different window sizes and screen densities.
+  * [X] Ensure appropriate use of Acrylic/Mica materials (especially for Windows).
+  * [X] Test and refine light/dark mode theming with Fluent Design.
+  * [X] Ensure responsive design for different window sizes and screen densities.
   * [ ] Accessibility review for Fluent components.
 * [ ] **Testing & Refinement:**
   * [ ] Thoroughly test all UI elements and interactions.
