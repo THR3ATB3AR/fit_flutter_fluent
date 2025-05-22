@@ -23,14 +23,10 @@ class RepackService {
   bool isDataLoadedInMemory = false;
 
   Future<void> init() async {
-    await initializeDatabase(); // Ensures DB file exists and tables are created
-    // Only load from DB if not already in memory.
-    // This is crucial for preventing reloads on every RepackSlider init.
+    await initializeDatabase(); 
     if (!isDataLoadedInMemory && (await _hasDataToLoad())) {
       await loadRepacks();
     } else if (isDataLoadedInMemory) {
-      // If data is already in memory, ensure listeners are notified
-      // in case the init is called and UI expects an update.
       _controller.add(null);
     }
   }
@@ -58,15 +54,12 @@ class RepackService {
     const dbUrl =
         'https://github.com/THR3ATB3AR/fit_flutter_assets/raw/refs/heads/main/repacks.db';
 
-    // Sprawdź, czy plik bazy danych już istnieje
     if (!File(dbPath).existsSync()) {
-      // Pobierz bazę danych z URL-a
       await _downloadDatabase(dbUrl, dbPath);
     }
 
     final db = sqlite3.open(dbPath);
 
-    // Sprawdź, czy tabele istnieją i utwórz je, jeśli nie istnieją
     db.execute('''
       CREATE TABLE IF NOT EXISTS new_repacks (
         title TEXT PRIMARY KEY,
@@ -142,8 +135,8 @@ class RepackService {
     final dbPath = '${await _getAppDataPath()}\\repacks.db';
     if (!File(dbPath).existsSync()) {
       print("RepackService: Database file not found at $dbPath. Cannot load repacks.");
-      isDataLoadedInMemory = false; // Ensure flag is false
-      _controller.add(null); // Notify listeners (e.g., to show empty state)
+      isDataLoadedInMemory = false; 
+      _controller.add(null); 
       return;
     }
 
@@ -169,18 +162,16 @@ class RepackService {
           row['title'] as String: row['url'] as String
       };
 
-      isDataLoadedInMemory = true; // Data is now in memory
+      isDataLoadedInMemory = true; 
     } catch (e) {
       print("Error loading repacks from database: $e");
-      isDataLoadedInMemory = false; // Reset flag on error
-      // Optionally clear lists
+      isDataLoadedInMemory = false; 
       newRepacks.clear();
       popularRepacks.clear();
-      // ... etc.
     } finally {
       db.dispose();
     }
-    _controller.add(null); // Notify listeners
+    _controller.add(null); 
   }
 
   Future<void> saveNewRepackList() async {
@@ -209,7 +200,7 @@ class RepackService {
 
     stmt.dispose();
     db.dispose();
-    isDataLoadedInMemory = true; // Ensure it's true as data is now in memory and DB
+    isDataLoadedInMemory = true; 
     _controller.add(null);
   }
 

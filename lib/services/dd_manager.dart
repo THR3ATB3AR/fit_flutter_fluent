@@ -1,138 +1,184 @@
-// import 'dart:io';
+import 'dart:async';
+import 'package:fit_flutter_fluent/data/download_info.dart'; 
+import 'package:flutter_download_manager/flutter_download_manager.dart';
+import 'package:flutter/foundation.dart'; 
 
-// import 'package:fit_flutter_fluent/data/download_info.dart';
-// import 'package:fit_flutter_fluent/services/auto_extract.dart';
-// import 'package:flutter_download_manager/flutter_download_manager.dart';
 
-// class DdManager {
-//   final DownloadManager downloadManager = DownloadManager();
-//   final AutoExtract autoExtract = AutoExtract.instance;
+class DdManager {
+  final DownloadManager downloadManager = DownloadManager();
 
-//   DdManager._privateConstructor();
-//   Map<String, List<Map<String, dynamic>>> downloadTasks = {};
+  final StreamController<String> _taskGroupUpdatedController =
+      StreamController<String>.broadcast();
+  Stream<String> get onTaskGroupUpdated => _taskGroupUpdatedController.stream;
 
-//   static final DdManager _instance = DdManager._privateConstructor();
+  DdManager._privateConstructor() ;
 
-//   static DdManager get instance => _instance;
+  Map<String, List<Map<String, dynamic>>> downloadTasks = {};
+  static final DdManager _instance = DdManager._privateConstructor();
+  static DdManager get instance => _instance;
 
-//   String sanitizeFileName(String fileName) {
-//     final RegExp regExp = RegExp(r'[<>:"/\\|?*]');
-//     return fileName.replaceAll(regExp, '_');
-//   }
+  String sanitizeFileName(String fileName) {
+    final RegExp regExp = RegExp(r'[<>:"/\\|?*]');
+    return fileName.replaceAll(regExp, '_');
+  }
 
-//   Future<void> addDdLink(
-//       DownloadInfo ddInfo, String downloadFolder, String title) async {
-//     final sanitizedTitle = sanitizeFileName(title);
-//     final downloadPath = '$downloadFolder$sanitizedTitle/${ddInfo.fileName}';
-//     await downloadManager.addDownload(ddInfo.downloadLink, downloadPath);
+  Future<void> addDdLink(
+    DownloadInfo ddInfo,
+    String downloadFolder,
+    String title,
+  ) async {
+    final sanitizedTitle = sanitizeFileName(title);
+    String effectiveDownloadFolder = downloadFolder;
+    if (effectiveDownloadFolder.isNotEmpty &&
+        !effectiveDownloadFolder.endsWith('/')) {
+      effectiveDownloadFolder += '/';
+    }
+    final downloadPath =
+        '$effectiveDownloadFolder$sanitizedTitle/${ddInfo.fileName}';
 
-//     if (!downloadTasks.containsKey(sanitizedTitle)) {
-//       downloadTasks[sanitizedTitle] = [];
-//     }
-//     downloadTasks[sanitizedTitle]!.add({
-//       'fileName': ddInfo.fileName,
-//       'task': downloadManager.getDownload(ddInfo.downloadLink)!
-//     });
-//     if (autoExtract.turnedOn && !Platform.isAndroid){
-//       printSanitizedTitleWhenCompleted(
-//         sanitizedTitle, '$downloadFolder$sanitizedTitle');
-//     }
-//   }
+    var existingTask = downloadManager.getDownload(ddInfo.downloadLink);
+    if (existingTask == null) {
+      await downloadManager.addDownload(ddInfo.downloadLink, downloadPath);
+    } else {
+      print(
+        "Download task for ${ddInfo.downloadLink} already exists. Status: ${existingTask.status.value}",
+      );
+    }
 
-//   DownloadTask? getDownloadTask(DownloadInfo ddInfo) {
-//     return downloadManager.getDownload(ddInfo.downloadLink);
-//   }
+    DownloadTask? task = downloadManager.getDownload(ddInfo.downloadLink);
 
-//   Future<void> cancelDownload(String url) async {
-//     await downloadManager.cancelDownload(url);
-//   }
+    if (task == null) {
+      print(
+        "Error: Could not retrieve task for ${ddInfo.downloadLink} after attempting to add/get it.",
+      );
+      return;
+    }
 
-//   Future<void> pauseDownload(String url) async {
-//     await downloadManager.pauseDownload(url);
-//   }
+    if (!downloadTasks.containsKey(sanitizedTitle)) {
+      downloadTasks[sanitizedTitle] = [];
+    }
 
-//   Future<void> resumeDownload(String url) async {
-//     await downloadManager.resumeDownload(url);
-//   }
+    bool taskAlreadyInGroup = downloadTasks[sanitizedTitle]!.any(
+      (t) => (t['task'] as DownloadTask).request.url == ddInfo.downloadLink,
+    );
 
-//   Map<String, List<Map<String, dynamic>>> getDownloadTasks() {
-//     return downloadTasks;
-//   }
+    if (!taskAlreadyInGroup) {
+      downloadTasks[sanitizedTitle]!.add({
+        'fileName': ddInfo.fileName,
+        'url': ddInfo.downloadLink,
+        'task': task,
+      });
+      _taskGroupUpdatedController.add(sanitizedTitle); 
+    }
+  }
 
-//   void removeDownloadTask(String url) {
-//     downloadTasks.forEach((title, tasks) {
-//       tasks.removeWhere((task) => task['task'].request.url == url);
-//     });
-//     downloadTasks.removeWhere((title, tasks) => tasks.isEmpty);
-//   }
+  DownloadTask? getDownloadTask(DownloadInfo ddInfo) {
+    return downloadManager.getDownload(ddInfo.downloadLink);
+  }
 
-//   void printDownloadTasks() {
-//     downloadTasks.forEach((title, tasks) {
-//       print('Title: $title');
-//       for (var task in tasks) {
-//         print('  FileName: ${task['fileName']}, Task: ${task['task']}');
-//       }
-//     });
-//   }
+  DownloadTask? getDownloadTaskByUrl(String url) {
+    return downloadManager.getDownload(url);
+  }
 
-//   void setMaxConcurrentDownloads(int maxDownloads) {
-//     downloadManager.maxConcurrentTasks = maxDownloads;
-//   }
+  Future<void> cancelDownload(String url) async {
+    await downloadManager.cancelDownload(url);
+    removeDownloadTaskByUrl(url);
+  }
 
-//   void printSanitizedTitleWhenCompleted(
-//       String sanitizedTitle, String downloadPath) {
-//     if (!downloadTasks.containsKey(sanitizedTitle)) return;
+  Future<void> pauseDownload(String url) async {
+    await downloadManager.pauseDownload(url);
+  }
 
-//     final tasks = downloadTasks[sanitizedTitle]!;
+  Future<void> resumeDownload(String url) async {
+    await downloadManager.resumeDownload(url);
+  }
 
-//     // Podziel zadania na opcjonalne i pozostałe
-//     final optionalTasks = tasks.where((task) {
-//       final fileName = task['fileName'] as String;
-//       return fileName.startsWith('fg-selective') ||
-//           fileName.startsWith('fg-optional');
-//     }).toList();
+  Map<String, List<Map<String, dynamic>>> getDownloadTasks() {
+    return downloadTasks;
+  }
 
-//     final mainTasks = tasks.where((task) {
-//       final fileName = task['fileName'] as String;
-//       return !fileName.startsWith('fg-selective') &&
-//           !fileName.startsWith('fg-optional');
-//     }).toList();
+  // Zmieniono nazwę dla jasności
+  void removeDownloadTaskByUrl(String url) {
+    String? titleToRemoveFrom;
+    downloadTasks.forEach((title, tasks) {
+      tasks.removeWhere((task) {
+        String taskUrl =
+            task['url'] as String? ??
+            (task['task'] as DownloadTask).request.url;
+        return taskUrl == url;
+      });
+      if (tasks.isEmpty) {
+        titleToRemoveFrom = title;
+      }
+    });
+    if (titleToRemoveFrom != null) {
+      downloadTasks.remove(titleToRemoveFrom);
+    }
+  }
 
-//     // Sprawdź, czy wszystkie główne zadania są ukończone
-//     bool allMainTasksCompleted = mainTasks.every((task) =>
-//         (task['task'] as DownloadTask).status.value ==
-//         DownloadStatus.completed);
+  Future<void> removeDownloadGroup(String title) async {
+    final sanitizedTitle = sanitizeFileName(title);
+    if (downloadTasks.containsKey(sanitizedTitle)) {
+      final tasksInGroup = List<Map<String, dynamic>>.from(
+        downloadTasks[sanitizedTitle]!,
+      );
+      for (var taskMap in tasksInGroup) {
+        final task = taskMap['task'] as DownloadTask;
+        await downloadManager.cancelDownload(task.request.url);
+        await downloadManager.removeDownload(
+          task.request.url,
+        ); 
+      }
+      downloadTasks.remove(sanitizedTitle); 
+      print("Removed download group: $sanitizedTitle");
+    }
+  }
 
-//     // Sprawdź, czy wszystkie opcjonalne zadania są ukończone
-//     bool allOptionalTasksCompleted = optionalTasks.every((task) =>
-//         (task['task'] as DownloadTask).status.value ==
-//         DownloadStatus.completed);
+  void printDownloadTasks() {
+    downloadTasks.forEach((title, tasks) {
+      print('Title: $title');
+      for (var task in tasks) {
+        print(
+          '  FileName: ${task['fileName']}, URL: ${task['url']}, Task Status: ${(task['task'] as DownloadTask).status.value}',
+        );
+      }
+    });
+  }
 
-//     if (allMainTasksCompleted) {
-//       print('All main tasks for "$sanitizedTitle" are completed.');
+  void setMaxConcurrentDownloads(int maxDownloads) {
+    downloadManager.maxConcurrentTasks = maxDownloads;
+  }
+  ValueNotifier<double>? getBatchProgressForTitle(String title) {
+    final sanitizedTitle = sanitizeFileName(title);
+    if (!downloadTasks.containsKey(sanitizedTitle) ||
+        downloadTasks[sanitizedTitle]!.isEmpty) {
+      return null;
+    }
 
-//       mainTasks.forEach((task) {
-//         tasks.remove(task);
-//       });
-//     }
+    final tasksForTitle = downloadTasks[sanitizedTitle]!;
+    final List<String> urls =
+        tasksForTitle.map((taskMap) => taskMap['url'] as String).toList();
 
-//     if (allOptionalTasksCompleted) {
-//       print('All optional tasks for "$sanitizedTitle" are completed.');
+    if (urls.isEmpty) {
+      return ValueNotifier<double>(1.0);
+    }
+    return downloadManager.getBatchDownloadProgress(urls);
+  }
 
-//       optionalTasks.forEach((task) {
-//         tasks.remove(task);
-//       });
-//     }
+  Future<void>? whenBatchCompleteForTitle(String title) {
+    final sanitizedTitle = sanitizeFileName(title);
+    if (!downloadTasks.containsKey(sanitizedTitle) ||
+        downloadTasks[sanitizedTitle]!.isEmpty) {
+      return null;
+    }
 
-//     // Sprawdź, czy wszystkie zadania są ukończone
-//     if (tasks.isEmpty) {
-//       print('All tasks for "$sanitizedTitle" are completed.');
-//       autoExtract.extract(downloadPath);
-//       downloadTasks.remove(sanitizedTitle);
-//     } else {
-//       Future.delayed(const Duration(seconds: 1), () {
-//         printSanitizedTitleWhenCompleted(sanitizedTitle, downloadPath);
-//       });
-//     }
-//   }
-// }
+    final tasksForTitle = downloadTasks[sanitizedTitle]!;
+    final List<String> urls =
+        tasksForTitle.map((taskMap) => taskMap['url'] as String).toList();
+
+    if (urls.isEmpty) {
+      return Future.value();
+    }
+    return downloadManager.whenBatchDownloadsComplete(urls);
+  }
+}

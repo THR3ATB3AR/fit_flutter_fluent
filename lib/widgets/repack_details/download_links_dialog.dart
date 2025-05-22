@@ -1,3 +1,4 @@
+import 'package:fit_flutter_fluent/services/dd_manager.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:fit_flutter_fluent/data/download_info.dart'; 
 import 'package:fit_flutter_fluent/services/host_service.dart';
@@ -131,37 +132,37 @@ class _DownloadLinksDialogState extends State<DownloadLinksDialog> {
     });
   }
 
-  void _startDownloadSelected() {
-    List<DownloadInfo> itemsToDownload = _selectedTreeItems
-        .where((item) => item.value is DownloadInfo) 
-        .map((item) => item.value as DownloadInfo)
-        .toList();
+  void _startDownloadSelected() async {
+  List<DownloadInfo> itemsToDownload = _selectedTreeItems
+      .where((item) => item.value is DownloadInfo)
+      .map((item) => item.value as DownloadInfo)
+      .toList();
 
-    if (itemsToDownload.isNotEmpty) {
-      debugPrint('Attempting to download ${itemsToDownload.length} items to ${widget.downloadPath}:');
-      for (var item in itemsToDownload) {
-        debugPrint('- ${item.fileName} from ${item.downloadLink}');
-      }
-      Navigator.pop(context);
-      showDialog(
-        context: context, 
-        builder: (ctx) => ContentDialog(
-          title: Text("Download Initiated (Placeholder)"),
-          content: Text("${itemsToDownload.length} file(s) would start downloading to ${widget.downloadPath}."),
-          actions: [Button(child: Text("OK"), onPressed: ()=>Navigator.pop(ctx))],
-        )
-      );
-    } else {
-      showDialog(
-        context: context, 
-        builder: (ctx) => ContentDialog(
-          title: Text("No Files Selected"),
-          content: Text("Please select one or more files from the tree to download."),
-          actions: [Button(child: Text("OK"), onPressed: ()=>Navigator.pop(ctx))],
-        )
-      );
+  if (itemsToDownload.isNotEmpty) {
+    final ddManager = DdManager.instance;
+    for (var item in itemsToDownload) {
+      await ddManager.addDdLink(item, widget.downloadPath, widget.repackTitle);
     }
+    Navigator.pop(context);
+    showDialog(
+      context: context,
+      builder: (ctx) => ContentDialog(
+        title: const Text("Download Started"),
+        content: Text("${itemsToDownload.length} file(s) added to download manager."),
+        actions: [Button(child: const Text("OK"), onPressed: () => Navigator.pop(ctx))],
+      ),
+    );
+  } else {
+    showDialog(
+      context: context,
+      builder: (ctx) => ContentDialog(
+        title: const Text("No Files Selected"),
+        content: const Text("Please select one or more files from the tree to download."),
+        actions: [Button(child: const Text("OK"), onPressed: () => Navigator.pop(ctx))],
+      ),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {

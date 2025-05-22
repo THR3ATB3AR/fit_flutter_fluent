@@ -6,7 +6,8 @@ import 'package:fit_flutter_fluent/widgets/fluent_chip.dart';
 import 'package:fit_flutter_fluent/widgets/repack_details/download_links_dialog.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
-
+import 'dart:async'; 
+import 'package:fit_flutter_fluent/services/dd_manager.dart'; 
 import 'package:fit_flutter_fluent/services/host_service.dart'; 
 
 class RepackHeader extends StatefulWidget {
@@ -20,7 +21,12 @@ class RepackHeader extends StatefulWidget {
 class _RepackHeaderState extends State<RepackHeader> {
   String? _selectedDownloadMethod;
   Map<String, String>? _selectedMirror;
-  final HostService _hostService = HostService(); // Instantiate HostService
+  final HostService _hostService = HostService();
+
+  final DdManager _ddManager = DdManager.instance;
+  ValueNotifier<double>? _batchProgressNotifier;
+  double _batchProgress = 0.0;
+  StreamSubscription? _taskGroupUpdateSubscription;
 
   @override
   void initState() {
@@ -33,18 +39,57 @@ class _RepackHeaderState extends State<RepackHeader> {
         _selectedMirror = mirrors.first;
       }
     }
+
+    _setupProgressListener();
+    _taskGroupUpdateSubscription = _ddManager.onTaskGroupUpdated.listen((updatedSanitizedTitle) {
+      if (mounted && updatedSanitizedTitle == _ddManager.sanitizeFileName(widget.repack.title)) {
+        _setupProgressListener(); 
+      }
+    });
+  }
+
+  void _setupProgressListener() {
+    _batchProgressNotifier?.removeListener(_onProgressChanged);
+
+    _batchProgressNotifier = _ddManager.getBatchProgressForTitle(widget.repack.title);
+
+    if (mounted) { 
+      setState(() {
+        if (_batchProgressNotifier != null) {
+          _batchProgress = _batchProgressNotifier!.value;
+          _batchProgressNotifier!.addListener(_onProgressChanged);
+        } else {
+          _batchProgress = 0.0; 
+        }
+      });
+    }
+  }
+
+  void _onProgressChanged() {
+    if (mounted && _batchProgressNotifier != null) {
+      setState(() {
+        _batchProgress = _batchProgressNotifier!.value;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _batchProgressNotifier?.removeListener(_onProgressChanged);
+    _taskGroupUpdateSubscription?.cancel();
+    super.dispose();
   }
 
   void _showDownloadLinksProcessingDialog(String repackTitle, String mirrorUrlsString, String downloadPath) {
     showDialog(
       context: context,
-      barrierDismissible: false, // User cannot dismiss by tapping outside while loading
+      barrierDismissible: false, 
       builder: (dialogContext) {
         return DownloadLinksDialog(
           repackTitle: repackTitle,
           mirrorUrlsString: mirrorUrlsString,
           downloadPath: downloadPath,
-          hostService: _hostService, // Pass the HostService instance
+          hostService: _hostService, 
         );
       },
     );
@@ -58,11 +103,8 @@ class _RepackHeaderState extends State<RepackHeader> {
     showDialog(
       context: context,
       builder: (dialogContext) {
-        // Use StatefulBuilder to manage the dialog's internal state for selections
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setStateDialog) {
-            // These local variables hold the state for THIS dialog instance
-            // Initialized from the main state, but changes are local until "Next"
             String? currentDialogSelectedMethod = _selectedDownloadMethod;
             Map<String, String>? currentDialogSelectedMirror = _selectedMirror;
 
@@ -103,7 +145,7 @@ class _RepackHeaderState extends State<RepackHeader> {
                               if (newValue != null) {
                                 setStateDialog(() { 
                                   currentDialogSelectedMethod = newValue;
-                                  currentDialogSelectedMirror = null; // Reset mirror
+                                  currentDialogSelectedMirror = null; 
                                   List<Map<String, String>>? mirrors = widget
                                       .repack
                                       .downloadLinks[currentDialogSelectedMethod!];
@@ -157,7 +199,6 @@ class _RepackHeaderState extends State<RepackHeader> {
                           final path =
                               await FilePicker.platform.getDirectoryPath();
                           if (path != null) {
-                            // Controller updates TextBox, no need for setStateDialog for this
                             localDownloadPathController.text = path;
                           }
                         },
@@ -175,7 +216,6 @@ class _RepackHeaderState extends State<RepackHeader> {
                 ),
                 FilledButton(
                   onPressed: () {
-                    // Persist dialog selections back to the main state
                     _selectedDownloadMethod = currentDialogSelectedMethod;
                     _selectedMirror = currentDialogSelectedMirror;
 
@@ -191,9 +231,8 @@ class _RepackHeaderState extends State<RepackHeader> {
                       debugPrint('Selected Mirror URL(s): ${_selectedMirror!['url']}');
                       debugPrint('Download Path for this operation: $downloadPathForThisOperation');
                       
-                      Navigator.pop(dialogContext); // Close this first dialog
+                      Navigator.pop(dialogContext); 
 
-                      // Show the second dialog for processing links
                       _showDownloadLinksProcessingDialog(
                         widget.repack.title,
                         _selectedMirror!['url']!, 
@@ -201,13 +240,12 @@ class _RepackHeaderState extends State<RepackHeader> {
                       );
 
                     } else {
-                      // Inform user to make selections
                       showDialog(
-                        context: context, // Use main context for this simple info dialog
+                        context: context, 
                         builder: (ctx) => ContentDialog(
-                          title: Text("Selection Incomplete"),
-                          content: Text("Please select a download method, a mirror, and ensure the mirror has URLs."),
-                          actions: [Button(child: Text("OK"), onPressed: ()=>Navigator.pop(ctx))],
+                          title: const Text("Selection Incomplete"),
+                          content: const Text("Please select a download method, a mirror, and ensure the mirror has URLs."),
+                          actions: [Button(child: const Text("OK"), onPressed: ()=>Navigator.pop(ctx))],
                         )
                       );
                     }
@@ -220,18 +258,18 @@ class _RepackHeaderState extends State<RepackHeader> {
         );
       },
     ).then((_) {
-      // Dispose the controller when the dialog (and its StatefulBuilder) is gone.
       localDownloadPathController.dispose(); 
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
-    // ... (rest of your RepackHeader build method is unchanged)
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start, 
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
@@ -240,18 +278,17 @@ class _RepackHeaderState extends State<RepackHeader> {
                 fit: BoxFit.cover,
                 width: 100,
                 height: 100,
-                errorWidget:(context, url, error) => Container(width:100, height:100, color: Colors.grey[40], child: Center(child: Icon(FluentIcons.error, size: 24))),
-                placeholder: (context, url) => Container(width:100, height:100, color: Colors.grey[40], child: Center(child: ProgressRing())),
-
+                errorWidget:(context, url, error) => Container(width:100, height:100, color: Colors.grey[40], child: const Center(child: Icon(FluentIcons.error, size: 24))),
+                placeholder: (context, url) => Container(width:100, height:100, color: Colors.grey[40], child: const Center(child: ProgressRing())),
               ),
             ),
             const SizedBox(width: 40),
-            Expanded( // Added Expanded to prevent overflow if title is very long
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.repack.title, // Use full title, let Text widget handle overflow with maxLines if needed
+                    widget.repack.title,
                     style: const TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.w600,
@@ -284,25 +321,58 @@ class _RepackHeaderState extends State<RepackHeader> {
                   .toList(),
         ),
         const SizedBox(height: 20),
-        FilledButton(
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all(
-              FluentTheme.of(context).accentColor,
+        SizedBox(
+          width: 170,
+          child: FilledButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(
+                FluentTheme.of(context).accentColor,
+              ),
+              padding: WidgetStateProperty.all(
+                const EdgeInsets.only(left: 15, top: 15, bottom: 15),
+              ),
             ),
-            padding: WidgetStateProperty.all(
-              const EdgeInsets.only(right: 80, left: 15, top: 15, bottom: 15),
-            ),
-          ),
-          onPressed: widget.repack.downloadLinks.isEmpty ? null : showDownloadDialog, // Disable if no download links
-          child: Text(
-            "Download",
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
+            onPressed: widget.repack.downloadLinks.isEmpty ? null : showDownloadDialog,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: const Text(
+                "Download",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
             ),
           ),
         ),
+
+        if (_batchProgressNotifier != null) 
+          Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+
+                SizedBox(
+                  width: 170,
+                  child: ProgressBar(
+                    value: _batchProgress * 100, 
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _batchProgress == 1.0
+                      ? 'Download complete!'
+                      : _batchProgress == 0.0
+                          ? 'Download pending...'
+                          : 'Downloading: ${(_batchProgress * 100).toStringAsFixed(0)}%',
+                  style: FluentTheme.of(context).typography.body,
+                ),
+                
+              ],
+            ),
+          ),
       ],
     );
   }
