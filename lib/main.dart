@@ -71,9 +71,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _appTheme,
-      builder: (context, child) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: _appTheme), 
+        ChangeNotifierProvider(create: (_) => SearchProvider()), 
+      ],
+      child: Builder(builder: (context) { 
         final appTheme = context.watch<AppTheme>();
 
         return FluentApp.router(
@@ -128,7 +131,7 @@ class MyApp extends StatelessWidget {
           routerDelegate: router.routerDelegate,
           routeInformationProvider: router.routeInformationProvider,
         );
-      },
+      }),
     );
   }
 }
@@ -149,8 +152,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with WindowListener {
   bool value = false;
-
-  // int index = 0;
 
   final viewKey = GlobalKey(debugLabel: 'Navigation View Key');
   final searchKey = GlobalKey(debugLabel: 'Search Bar Key');
@@ -201,9 +202,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 }).toList(),
           );
         }
-        // ignore: unnecessary_type_check
-        if (e is PaneItem) return buildPaneItem(e);
-        return e;
+        return buildPaneItem(e);
       }).toList();
   late final List<NavigationPaneItem> footerItems = [
     PaneItemSeparator(),
@@ -272,20 +271,19 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = FluentLocalizations.of(context);
+  final localizations = FluentLocalizations.of(context);
+  final appTheme = context.watch<AppTheme>();
+  final searchProvider = Provider.of<SearchProvider>(context, listen: false);
 
-    final appTheme = context.watch<AppTheme>();
-    if (widget.shellContext != null) {
-      if (router.canPop() == false) {
-        setState(() {});
-      }
+  if (widget.shellContext != null) {
+    if (router.canPop() == false) {
     }
+  }
     return NavigationView(
       key: viewKey,
       appBar: NavigationAppBar(
         automaticallyImplyLeading: false,
         leading: () {
-          // final enabled = widget.shellContext != null && router.canPop();
           final enabled = true;
 
           onPressed() {
@@ -341,82 +339,64 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
         ),
       ),
       paneBodyBuilder: (item, child) {
-        final name =
-            item?.key is ValueKey ? (item!.key as ValueKey).value : null;
-        return FocusTraversalGroup(
-          key: ValueKey('body$name'),
-          child: widget.child,
-        );
-      },
-      pane: NavigationPane(
-        selected: _calculateSelectedIndex(context),
-
-        displayMode: appTheme.displayMode,
-        indicator: () {
-          switch (appTheme.indicator) {
-            case NavigationIndicators.end:
-              return const EndNavigationIndicator();
-            case NavigationIndicators.sticky:
-              return const StickyNavigationIndicator();
-          }
-        }(),
-        items: originalItems,
-        autoSuggestBox: Builder(
-          builder: (context) {
-            return AutoSuggestBox(
-              key: searchKey,
-              focusNode: searchFocusNode,
-              controller: searchController,
-              unfocusedColor: Colors.transparent,
-              // also need to include sub items from [PaneItemExpander] items
-              items:
-                  <PaneItem>[
-                    ...originalItems
-                        .whereType<PaneItemExpander>()
-                        .expand<PaneItem>((item) {
-                          return [item, ...item.items.whereType<PaneItem>()];
-                        }),
-                    ...originalItems
-                        .where(
-                          (item) =>
-                              item is PaneItem && item is! PaneItemExpander,
-                        )
-                        .cast<PaneItem>(),
-                  ].map((item) {
-                    assert(item.title is Text);
-                    final text = (item.title as Text).data!;
-                    return AutoSuggestBoxItem(
-                      label: text,
-                      value: text,
-                      onSelected: () {
-                        item.onTap?.call();
-                        searchController.clear();
-                        searchFocusNode.unfocus();
-                        final view = NavigationView.of(context);
-                        if (view.compactOverlayOpen) {
-                          view.compactOverlayOpen = false;
-                        } else if (view.minimalPaneOpen) {
-                          view.minimalPaneOpen = false;
-                        }
-                      },
-                    );
-                  }).toList(),
-              trailingIcon: IgnorePointer(
-                child: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(FluentIcons.search),
-                ),
-              ),
-              placeholder: 'Search',
-            );
-          },
-        ),
-        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-        footerItems: footerItems,
+      final name =
+          item?.key is ValueKey ? (item!.key as ValueKey).value : null;
+      return FocusTraversalGroup(
+        key: ValueKey('body$name'),
+        child: widget.child,
+      );
+    },
+    pane: NavigationPane(
+      selected: _calculateSelectedIndex(context),
+      displayMode: appTheme.displayMode,
+      indicator: () {
+        switch (appTheme.indicator) {
+          case NavigationIndicators.end:
+            return const EndNavigationIndicator();
+          case NavigationIndicators.sticky:
+            return const StickyNavigationIndicator();
+        }
+      }(),
+      items: originalItems,
+      autoSuggestBox: Builder(
+        builder: (context) {
+          return TextBox( 
+            key: searchKey,
+            focusNode: searchFocusNode,
+            controller: searchController,
+            unfocusedColor: Colors.transparent,
+            placeholder: 'Search',
+            onChanged: (text) {
+              searchProvider.updateSearchQuery(text);
+            },
+            onSubmitted: (value) {
+              if (searchController.text.isEmpty) {
+                  return;
+                }
+                context.go('/repacklibrary');
+                searchProvider.updateSearchQuery(searchController.text);
+                searchFocusNode.unfocus();
+            },
+            suffix: IconButton( 
+              onPressed: () {
+                if (searchController.text.isEmpty) {
+                  return;
+                }
+                context.go('/repacklibrary');
+                searchProvider.updateSearchQuery(searchController.text);
+                searchFocusNode.unfocus();
+              },
+              icon: const Icon(FluentIcons.search),
+            ),
+          );
+        },
       ),
-      onOpenSearch: searchFocusNode.requestFocus,
-    );
-  }
+      autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+      footerItems: footerItems,
+    ),
+    onOpenSearch: searchFocusNode.requestFocus,
+  );
+}
 
   @override
   void onWindowClose() async {
@@ -482,7 +462,6 @@ final router = GoRouter(
         );
       },
       routes: <GoRoute>[
-        /// Home
         GoRoute(path: '/', builder: (context, state) => const HomePage()),
         GoRoute(
           path: '/repacklibrary',
@@ -496,10 +475,10 @@ final router = GoRouter(
             final String? section =
                 state
                     .uri
-                    .queryParameters['section']; // Odczytaj parametr 'section'
+                    .queryParameters['section']; 
             return Settings(
               sectionToScrollTo: section,
-            ); // Przekaż go do widgetu Settings
+            ); 
           },
         ),
         GoRoute(

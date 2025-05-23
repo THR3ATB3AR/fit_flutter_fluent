@@ -36,7 +36,7 @@ This section outlines the tasks for the ongoing rewrite to implement Microsoft F
   * [X] Refactor settings screen with Fluent controls (ToggleSwitch, ComboBox, etc.).
 * [ ] **Feature Parity with Fluent UI:**
   * [ ] Ensure all existing features from FitFlutter are functional within the new Fluent UI.
-  * [ ] Port "Search Repacks" UI to Fluent.
+  * [X] Port "Search Repacks" UI to Fluent.
   * [X] Port "Repack Details" view to Fluent.
   * [X] Port "Screenshots" viewer to Fluent.
   * [X] Port "Download Manager" UI to Fluent.

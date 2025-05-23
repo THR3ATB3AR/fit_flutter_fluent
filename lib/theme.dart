@@ -298,6 +298,20 @@ class AppTheme extends ChangeNotifier {
   }
 }
 
+class SearchProvider extends ChangeNotifier {
+  String _searchQuery = '';
+
+  String get searchQuery => _searchQuery;
+
+  void updateSearchQuery(String newQuery) {
+    if (_searchQuery != newQuery) {
+      _searchQuery = newQuery.trim(); // Trim whitespace
+      notifyListeners();
+    }
+  }
+}
+
+
 AccentColor get systemAccentColor {
   if ((defaultTargetPlatform == TargetPlatform.windows ||
           defaultTargetPlatform == TargetPlatform.android) &&
