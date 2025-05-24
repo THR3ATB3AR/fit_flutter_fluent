@@ -16,31 +16,33 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = FluentTheme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 6.0,
-      ), // Increased vertical padding
+      padding: const EdgeInsets.symmetric(vertical: 8.0), // Increased vertical padding
       child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start, // Align icon with first line of text
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
             icon,
-            size: 18,
+            size: 18, // Consistent icon size
             color: theme.accentColor.defaultBrushFor(theme.brightness),
           ),
-          const SizedBox(width: 10),
-          Text(
-            '$label: ',
-            style: theme.typography.bodyStrong?.copyWith(
-              // Or use a slightly dimmer color if bodyStrong is too much
-              // color: theme.resources.textFillColorSecondary,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: theme.typography.body,
-              softWrap: true, // Ensure text wraps
+          const SizedBox(width: 12), // Slightly increased spacing
+          Expanded( // Use Expanded to allow label and value to take space
+            child: RichText(
+              text: TextSpan(
+                style: theme.typography.body, // Default text style
+                children: [
+                  TextSpan(
+                    text: '$label: ',
+                    style: theme.typography.bodyStrong,
+                  ),
+                  TextSpan(
+                    text: value,
+                    style: theme.typography.body?.copyWith(
+                      color: theme.resources.textFillColorSecondary, // Softer color for value
+                    )
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -58,19 +60,14 @@ class RepackInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = FluentTheme.of(context);
     // Define these strings, potentially using AppLocalizations
-    final String genresLabel =
-        "Genres"; // AppLocalizations.of(context)!.genres;
-    final String companyLabel =
-        "Company"; // AppLocalizations.of(context)!.company;
-    final String languageLabel =
-        "Language"; // AppLocalizations.of(context)!.language;
-    final String originalSizeLabel =
-        "Original Size"; // AppLocalizations.of(context)!.originalSize;
-    final String repackSizeLabel =
-        "Repack Size"; // AppLocalizations.of(context)!.repackSize;
+    const String genresLabel = "Genres";
+    const String companyLabel = "Company";
+    const String languageLabel = "Language";
+    const String originalSizeLabel = "Original Size";
+    const String repackSizeLabel = "Repack Size";
 
     return Card(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(8.0),
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -79,13 +76,13 @@ class RepackInfoCard extends StatelessWidget {
           Row(
             children: [
               Icon(
-                FluentIcons.info_solid,
+                FluentIcons.info_solid, // Using info_solid for a filled look
                 color: theme.accentColor.defaultBrushFor(theme.brightness),
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
-                'Repack info',
+                'Repack Information',
                 style: theme.typography.subtitle?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -93,42 +90,20 @@ class RepackInfoCard extends StatelessWidget {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 8.0,
-            ), // Added padding for divider
+            padding: const EdgeInsets.symmetric(vertical: 12.0), // Adjusted padding
             child: Divider(
               style: DividerThemeData(
-                thickness: 2,
+                thickness: 1,
                 horizontalMargin: EdgeInsets.zero,
                 verticalMargin: EdgeInsets.zero,
               ),
             ),
           ),
-          _InfoRow(
-            icon: FluentIcons.tag,
-            label: genresLabel,
-            value: repack.genres,
-          ),
-          _InfoRow(
-            icon: FluentIcons.developer_tools,
-            label: companyLabel,
-            value: repack.company,
-          ), // Changed icon
-          _InfoRow(
-            icon: FluentIcons.locale_language,
-            label: languageLabel,
-            value: repack.language,
-          ),
-          _InfoRow(
-            icon: FluentIcons.size_legacy,
-            label: originalSizeLabel,
-            value: repack.originalSize,
-          ),
-          _InfoRow(
-            icon: FluentIcons.save_all,
-            label: repackSizeLabel,
-            value: repack.repackSize,
-          ), // Changed icon
+          _InfoRow(icon: FluentIcons.tag, label: genresLabel, value: repack.genres),
+          _InfoRow(icon: FluentIcons.people, label: companyLabel, value: repack.company), // Changed icon to People for company
+          _InfoRow(icon: FluentIcons.locale_language, label: languageLabel, value: repack.language),
+          _InfoRow(icon: FluentIcons.hard_drive, label: originalSizeLabel, value: repack.originalSize), // Changed icon
+          _InfoRow(icon: FluentIcons.publish_content, label: repackSizeLabel, value: repack.repackSize), // Changed icon
         ],
       ),
     );

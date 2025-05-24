@@ -6,19 +6,22 @@ class FluentChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = FluentTheme.of(context);
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), // Adjusted padding
       decoration: BoxDecoration(
-        color: FluentTheme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(100),
+        color: theme.resources.subtleFillColorSecondary, // Using a subtle fill
+        borderRadius: BorderRadius.circular(16), // Softer radius
         border: Border.all(
-          color: FluentTheme.of(context).activeColor,
+          color: theme.resources.controlStrokeColorDefault, // Standard border
           width: 1,
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Text(label),
+      child: Text(
+        label,
+        style: theme.typography.caption?.copyWith(
+          color: theme.resources.textFillColorSecondary,
+        ),
       ),
     );
   }

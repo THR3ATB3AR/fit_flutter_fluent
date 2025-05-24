@@ -15,74 +15,61 @@ class FeaturesDescriptionSection extends StatelessWidget {
           flex: 2,
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Card(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Text(
-                        'About game',
-                        style: FluentTheme.of(context).typography.subtitle,
-                      ),
-                    ),
-                    Divider(
-                      style: DividerThemeData(
-                        horizontalMargin: EdgeInsets.all(0),
-                        verticalMargin: EdgeInsets.all(0),
-                        thickness: 2,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        repack.description,
-                        style: FluentTheme.of(context).typography.body,
-                      ),
-                    ),
-                  ],
-                ),
+              _buildSectionCard(
+                context,
+                title: 'About game',
+                content: repack.description,
               ),
               const SizedBox(height: 16),
-              Card(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Text(
-                        'Features',
-                        style: FluentTheme.of(context).typography.subtitle,
-                      ),
-                    ),
-                    Divider(
-                      style: DividerThemeData(
-                        horizontalMargin: EdgeInsets.all(0),
-                        verticalMargin: EdgeInsets.all(0),
-                        thickness: 2,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        repack.repackFeatures,
-                        style: FluentTheme.of(context).typography.body,
-                      ),
-                    ),
-                  ],
-                ),
+              _buildSectionCard(
+                context,
+                title: 'Features',
+                content: repack.repackFeatures,
               ),
             ],
           ),
         ),
-        const SizedBox(width: 20),
+        const SizedBox(width: 16), // Consistent spacing
         Expanded(flex: 1, child: RepackInfoCard(repack: repack)),
       ],
+    );
+  }
+
+  Widget _buildSectionCard(BuildContext context,
+      {required String title, required String content}) {
+    final theme = FluentTheme.of(context);
+    return Card(
+      borderRadius: BorderRadius.circular(8.0),
+      padding: EdgeInsets.zero, // Control padding internally
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, top: 16.0, right: 16.0, bottom: 8.0),
+            child: Text(
+              title,
+              style: theme.typography.subtitle?.copyWith(fontWeight: FontWeight.w600),
+            ),
+          ),
+          const Divider(
+            style: DividerThemeData(
+              thickness: 1,
+              horizontalMargin: EdgeInsets.zero,
+              verticalMargin: EdgeInsets.zero,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              content,
+              style: theme.typography.body,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
