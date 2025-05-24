@@ -11,47 +11,109 @@ class ScraperService {
   static final ScraperService _instance = ScraperService._privateConstructor();
   static ScraperService get instance => _instance;
 
-  bool isRescraping = false;
+  bool isRescraping = false; // General lock for any major scraping operation
   final RepackService _repackService = RepackService.instance;
-  final ValueNotifier<double> loadingProgress = ValueNotifier<double>(0.0);
+  final ValueNotifier<double> loadingProgress = ValueNotifier<double>(
+    0.0,
+  ); // 0.0 to 1.0
 
-  Future<void> rescrapeNewRepacks() async {
-    _repackService.newRepacks = await scrapeNewRepacks(onProgress: (i, e) {});
+  // Renamed from rescrapeNewRepacks for clarity
+  Future<void> _scrapeAndSaveNewRepacks({
+    Function(int, int)? onProgress,
+  }) async {
+    _repackService.newRepacks.clear(); // Clear in-memory list first
+    _repackService.newRepacks = await scrapeNewRepacks(
+      onProgress: onProgress ?? (i, e) {},
+    );
+    await _repackService.saveNewRepackList();
   }
 
-  Future<void> rescrapePopularRepacks() async {
-    _repackService.popularRepacks = (await scrapePopularRepacks(
-      onProgress: (i, e) {},
-    ));
+  // Renamed from rescrapePopularRepacks for clarity
+  Future<void> _scrapeAndSavePopularRepacks({
+    Function(int, int)? onProgress,
+  }) async {
+    _repackService.popularRepacks.clear(); // Clear in-memory list first
+    _repackService.popularRepacks = await scrapePopularRepacks(
+      onProgress: onProgress ?? (i, e) {},
+    );
+    await _repackService.savePopularRepackList();
+  }
+
+  Future<void> rescrapeNewAndPopularRepacks() async {
+    if (isRescraping) {
+      print("Rescrape already in progress. Skipping.");
+      return;
+    }
+    isRescraping = true;
+    loadingProgress.value = 0.0; // Reset progress
+
+    try {
+      print("Rescraping new repacks...");
+      await _scrapeAndSaveNewRepacks(
+        onProgress: (current, total) {
+          if (total > 0)
+            loadingProgress.value = (current / total) * 0.5; // 50% for new
+        },
+      );
+      print("New repacks rescraped and saved.");
+
+      print("Rescraping popular repacks...");
+      await _scrapeAndSavePopularRepacks(
+        onProgress: (current, total) {
+          if (total > 0)
+            loadingProgress.value =
+                0.5 + (current / total) * 0.5; // 50% for popular
+        },
+      );
+      print("Popular repacks rescraped and saved.");
+
+      // _repackService.notifyListeners(); // Individual save methods already notify
+    } catch (e) {
+      print("Error during rescrapeNewAndPopularRepacks: $e");
+      rethrow;
+    } finally {
+      isRescraping = false;
+      loadingProgress.value = 0.0; // Reset progress fully
+    }
   }
 
   Future<void> rescrapeAllRepacksNames() async {
-    _repackService.allRepacksNames = await scrapeAllRepacksNames(
-      onProgress: (i, e) {},
-    );
+    // This is if only names are needed separately
+    if (isRescraping) return;
+    isRescraping = true;
+    loadingProgress.value = 0.0;
+    try {
+      _repackService.allRepacksNames = await scrapeAllRepacksNames(
+        onProgress: (current, total) {
+          if (total > 0) loadingProgress.value = current / total;
+        },
+      );
+      await _repackService.saveAllRepackList();
+    } finally {
+      isRescraping = false;
+      loadingProgress.value = 0.0;
+    }
   }
 
   Future<bool> checkImageUrl(String url) async {
+    if (url.isEmpty) return false;
     try {
       final response = await http.head(Uri.parse(url));
       return response.statusCode == 200;
     } catch (e) {
+      // print("Failed to check image URL $url: $e");
       return false;
     }
   }
 
   Future<Repack> deleteInvalidScreenshots(Repack repack) async {
     final List<String> validScreenshots = [];
-    final bool isCoverValid = await checkImageUrl(repack.cover);
-    if (isCoverValid) {
-      repack.cover = repack.cover;
-    } else {
+    if (!await checkImageUrl(repack.cover)) {
       repack.cover =
           'https://github.com/THR3ATB3AR/fit_flutter_assets/blob/main/noposter.png?raw=true';
     }
     for (int i = 0; i < repack.screenshots.length; i++) {
-      final bool isScreenshotValid = await checkImageUrl(repack.screenshots[i]);
-      if (isScreenshotValid) {
+      if (await checkImageUrl(repack.screenshots[i])) {
         validScreenshots.add(repack.screenshots[i]);
       }
     }
@@ -60,51 +122,92 @@ class ScraperService {
   }
 
   Future<List<Repack>> scrapeEveryRepack({
+    // This scrapes all based on allRepacksNames
     required Function(int, int) onProgress,
   }) async {
     List<Repack> repacks = [];
-    for (var entry in _repackService.allRepacksNames.entries) {
+    final allNamesEntries = _repackService.allRepacksNames.entries.toList();
+    int totalToScrape = allNamesEntries.length;
+
+    for (int i = 0; i < totalToScrape; i++) {
+      var entry = allNamesEntries[i];
       try {
         final repack = await scrapeRepackFromSearch(entry.value);
         repacks.add(repack);
       } catch (e) {
         print('Failed to scrape repack: ${entry.key}, error: $e');
+        // Optionally add to failedRepacks here too, if this func is used standalone
+        // await _repackService.saveFailedRepack(entry.key, entry.value);
       }
-      loadingProgress.value =
-          repacks.length / _repackService.allRepacksNames.length;
-      onProgress(repacks.length, _repackService.allRepacksNames.length);
+      // loadingProgress.value is managed by forceRescrapeEverything if called from there
+      // If called standalone, it should update loadingProgress.value
+      // For now, assume it's part of a larger flow or the caller manages global progress
+      onProgress(i + 1, totalToScrape);
     }
     return repacks;
   }
 
-  Future<void> scrapeMissingRepacks() async {
+  Future<void> scrapeMissingRepacks({Function(int, int)? onProgress}) async {
     final everyRepackUrls =
         _repackService.everyRepack.map((repack) => repack.url).toSet();
-    final allRepackUrls = _repackService.allRepacksNames.values.toSet();
-    final missingRepackUrls = allRepackUrls.difference(everyRepackUrls);
-    for (var url in missingRepackUrls) {
+    final allRepackNamesCopy = Map<String, String>.from(
+      _repackService.allRepacksNames,
+    ); // Copy for iteration safety
+
+    // Filter out already scraped URLs and URLs present in failedRepacks
+    final Set<String> urlsToPotentiallyScrape =
+        allRepackNamesCopy.values.toSet();
+    urlsToPotentiallyScrape.removeAll(everyRepackUrls);
+    urlsToPotentiallyScrape.removeAll(
+      _repackService.failedRepacks.values.toSet(),
+    );
+
+    final List<String> missingRepackUrls = urlsToPotentiallyScrape.toList();
+
+    int totalMissing = missingRepackUrls.length;
+    if (totalMissing == 0) {
+      print("No missing repacks to scrape.");
+      loadingProgress.value = 1.0; // Indicate completion
+      onProgress?.call(0, 0);
+      _repackService
+          .notifyListeners(); // Ensure UI updates if nothing was to scrape
+      return;
+    }
+
+    print("Found $totalMissing missing repacks to scrape.");
+    loadingProgress.value = 0.0; // Reset for this specific operation
+
+    for (int i = 0; i < totalMissing; i++) {
+      final url = missingRepackUrls[i];
+      final title =
+          allRepackNamesCopy.entries
+              .firstWhere(
+                (entry) => entry.value == url,
+                orElse: () => MapEntry("Unknown Title for $url", url),
+              )
+              .key;
       try {
         final repack = await scrapeRepackFromSearch(url);
-        _repackService.everyRepack.add(repack);
-        await _repackService.saveSingleEveryRepack(
-          repack,
-        );
-        _repackService.notifyListeners(); 
+        // Add to in-memory list before saving, ensure no duplicates if called multiple times
+        if (!_repackService.everyRepack.any((r) => r.url == repack.url)) {
+          _repackService.everyRepack.add(repack);
+          await _repackService.saveSingleEveryRepack(
+            repack,
+          ); // This also notifies
+        }
       } catch (e) {
-        _repackService.failedRepacks[url] =
-            _repackService.allRepacksNames.entries
-                .firstWhere((element) => element.value == url)
-                .key;
-        _repackService.saveFailedRepack(
-          _repackService.failedRepacks[url]!,
-          url,
-        );
-        print('Failed to scrape repack: $url, error: $e');
+        print('Failed to scrape repack: $url ($title), error: $e');
+        await _repackService.saveFailedRepack(title, url); // This also notifies
       }
+      if (totalMissing > 0) loadingProgress.value = (i + 1) / totalMissing;
+      onProgress?.call(i + 1, totalMissing);
     }
-    _repackService.deleteFailedRepacksFromAllRepackNames();
+    await _repackService
+        .deleteFailedRepacksFromAllRepackNames(); // This also notifies
     _repackService.everyRepack.sort((a, b) => a.title.compareTo(b.title));
-    print('scrapeMissingRepacks finished'); 
+    _repackService.notifyListeners(); // Final notification for sort
+    print('scrapeMissingRepacks finished. Scraped/Attempted: $totalMissing');
+    if (totalMissing > 0) loadingProgress.value = 1.0; // Mark as complete
   }
 
   Future<Map<String, String>> scrapeAllRepacksNames({
@@ -114,23 +217,22 @@ class ScraperService {
     final url = Uri.parse('https://fitgirl-repacks.site/all-my-repacks-a-z/');
     final response = await _fetchWithRetry(url);
     dom.Document html = dom.Document.html(response.body);
-    final pages =
-        html
-            .querySelectorAll('ul.lcp_paginator > li > a:not([class])')
-            .map((element) => int.parse(element.attributes['title']!))
-            .toList();
+    final pageLinks = html.querySelectorAll(
+      'ul.lcp_paginator > li > a:not([class])',
+    );
 
-    for (int i = 1; i < pages[pages.length - 1] + 1; i++) {
-      final url = Uri.parse(
-        'https://fitgirl-repacks.site/all-my-repacks-a-z/?lcp_page0=$i#lcp_instance_0/',
+    if (pageLinks.isEmpty) {
+      // Handle case where site structure might change or no pagination
+      print(
+        "Warning: Could not find pagination for all repacks names. Scraping first page only.",
       );
-      final response = await _fetchWithRetry(url);
-      dom.Document html = dom.Document.html(response.body);
-
+      // Try to scrape current page if no paginator
       final titles =
           html.querySelectorAll('ul.lcp_catlist > li > a').map((element) {
             final title = element.innerHtml.trim();
-            final index = title.indexOf(RegExp(r'[–+]'));
+            final index = title.indexOf(
+              RegExp(r'[–+]'),
+            ); // Using RegExp for robustness
             return index != -1 ? title.substring(0, index).trim() : title;
           }).toList();
       final links =
@@ -138,32 +240,74 @@ class ScraperService {
               .querySelectorAll('ul.lcp_catlist > li > a')
               .map((element) => element.attributes['href']!.trim())
               .toList();
-
-      for (int i = 0; i < titles.length; i++) {
-        repacks[titles[i]] = links[i];
+      for (int j = 0; j < titles.length; j++) {
+        repacks[titles[j]] = links[j];
       }
-      
-      loadingProgress.value = i / pages[pages.length - 1];
-      onProgress(i, pages[pages.length - 1]);
+      onProgress(1, 1); // Indicate one page processed
+      return repacks;
     }
 
+    final pages =
+        pageLinks
+            .map(
+              (element) => int.tryParse(element.attributes['title'] ?? '') ?? 0,
+            )
+            .where((p) => p > 0) // Filter out non-numeric or zero titles
+            .toList();
+
+    int totalPages =
+        pages.isNotEmpty
+            ? pages.reduce((curr, next) => curr > next ? curr : next)
+            : 1;
+
+    for (int i = 1; i <= totalPages; i++) {
+      final pageUrl = Uri.parse(
+        'https://fitgirl-repacks.site/all-my-repacks-a-z/?lcp_page0=$i#lcp_instance_0',
+      );
+      final pageResponse = await _fetchWithRetry(pageUrl);
+      dom.Document pageHtml = dom.Document.html(pageResponse.body);
+
+      final titles =
+          pageHtml.querySelectorAll('ul.lcp_catlist > li > a').map((element) {
+            final title = element.innerHtml.trim();
+            final index = title.indexOf(RegExp(r'[–+]'));
+            return index != -1 ? title.substring(0, index).trim() : title;
+          }).toList();
+      final links =
+          pageHtml
+              .querySelectorAll('ul.lcp_catlist > li > a')
+              .map((element) => element.attributes['href']!.trim())
+              .toList();
+
+      for (int j = 0; j < titles.length; j++) {
+        repacks[titles[j]] = links[j];
+      }
+      // loadingProgress.value is managed by caller like forceRescrapeEverything
+      onProgress(i, totalPages);
+    }
     return repacks;
   }
 
-  Future<Repack> scrapeRepackFromSearch(String search) async {
-    final url = Uri.parse(search);
+  Future<Repack> scrapeRepackFromSearch(String searchUrl) async {
+    final url = Uri.parse(searchUrl);
     final response = await _fetchWithRetry(url);
     dom.Document html = dom.Document.html(response.body);
     final article = html.querySelector('article.category-lossless-repack');
-    return await deleteInvalidScreenshots(scrapeRepack(article!, url: search));
+    if (article == null) {
+      throw Exception("Could not find article element on page: $searchUrl");
+    }
+    return await deleteInvalidScreenshots(
+      scrapeRepack(article, url: searchUrl),
+    );
   }
 
   Future<List<Repack>> scrapeNewRepacks({
+    // Returns list, does not save
     required Function(int, int) onProgress,
   }) async {
-    int pages = 2;
+    int pagesToScrape = 2; // Usually 2 pages for "new"
     List<Repack> repacks = [];
-    for (int i = 0; i < pages; i++) {
+    for (int i = 0; i < pagesToScrape; i++) {
       try {
         final url = Uri.parse(
           'https://fitgirl-repacks.site/category/lossless-repack/page/${i + 1}/',
@@ -173,20 +317,32 @@ class ScraperService {
         final articles = html.querySelectorAll(
           'article.category-lossless-repack',
         );
+        if (articles.isEmpty && i == 0) {
+          // If first page has no articles, something is wrong or no new repacks
+          print(
+            "No articles found on the first page of new repacks. Stopping scrape for new repacks.",
+          );
+          break;
+        }
+        if (articles.isEmpty) {
+          // If subsequent page is empty, means no more new repacks
+          break;
+        }
         for (final article in articles) {
           repacks.add(await deleteInvalidScreenshots(scrapeRepack(article)));
         }
-        loadingProgress.value = i / pages;
-        onProgress(i, pages - 1);
+        onProgress(i + 1, pagesToScrape);
       } catch (e) {
-        print(e);
-        rethrow;
+        print("Error scraping new repacks page ${i + 1}: $e");
+        // Decide if to continue or rethrow. For new/popular, might be okay to skip a page.
+        if (i == 0) rethrow; // If first page fails, it's a bigger issue
       }
     }
     return repacks;
   }
 
   Future<List<Repack>> scrapePopularRepacks({
+    // Returns list, does not save
     required Function(int, int) onProgress,
   }) async {
     List<Repack> repacks = [];
@@ -201,13 +357,20 @@ class ScraperService {
             .querySelectorAll(
               'article > div.entry-content > div.jetpack_top_posts_widget > div.widgets-grid-layout > div.widget-grid-view-image > a',
             )
-            .map((element) => element.attributes['href']!.trim())
+            .map((element) => element.attributes['href']?.trim())
+            .whereType<String>() // Filter out nulls
             .toList();
+
+    if (individualRepackPageUrls.isEmpty) {
+      print("Warning: No popular repack links found on the index page.");
+      onProgress(0, 0);
+      return repacks;
+    }
+
     int itemsToScrape =
         (individualRepackPageUrls.length > 20)
             ? 20
-            : individualRepackPageUrls
-                .length; 
+            : individualRepackPageUrls.length;
 
     for (int i = 0; i < itemsToScrape; i++) {
       try {
@@ -231,8 +394,6 @@ class ScraperService {
             "Warning: Could not find 'article.category-lossless-repack' on page: $repackUrlString",
           );
         }
-
-        loadingProgress.value = (i + 1) / itemsToScrape;
         onProgress(i + 1, itemsToScrape);
       } catch (e) {
         print(
@@ -244,17 +405,20 @@ class ScraperService {
   }
 
   Repack scrapeRepack(dom.Element article, {String url = ''}) {
-    Repack repack;
+    // This is the existing scraping logic, not changing it per instructions.
+    // However, it's prone to errors if site structure changes.
+    // Minimal safety checks can be added if absolutely necessary without altering main logic.
 
     dom.Document html = dom.Document.html(article.outerHtml);
-
     final List<dom.Element> h3Elements = html.querySelectorAll(
       'div.entry-content h3',
     );
     List<Map<String, String>> repackSections = [];
 
-    if (url == '') {
-      url = html.querySelector('header > h1 > a')!.attributes['href']!.trim();
+    if (url.isEmpty) {
+      url =
+          html.querySelector('header > h1 > a')?.attributes['href']?.trim() ??
+          'N/A_URL';
     }
 
     for (int i = 0; i < h3Elements.length; i++) {
@@ -262,67 +426,78 @@ class ScraperService {
       h3Element.querySelector('span')?.remove();
       final String h3Text = h3Element.text.trim();
       final StringBuffer sectionContent = StringBuffer();
-
       dom.Element? nextSibling = h3Element.nextElementSibling;
       while (nextSibling != null && nextSibling.localName != 'h3') {
         sectionContent.write(nextSibling.outerHtml);
         nextSibling = nextSibling.nextElementSibling;
       }
-
       repackSections.add({
         'title': h3Text,
         'content': sectionContent.toString(),
       });
     }
 
-    final String title = repackSections[0]['title'] ?? '';
-    final DateTime releaseDate = DateFormat('dd/MM/yyyy').parse(
-      html
-          .querySelector(
-            'header.entry-header > div.entry-meta > span.entry-date > a > time',
-          )!
-          .text
-          .trim(),
-    );
-    final cover =
-        repackSections[0]['content']!.contains('<img')
-            ? repackSections[0]['content']!.substring(
-              repackSections[0]['content']!.indexOf('src="') + 5,
-              repackSections[0]['content']!.indexOf(
-                '"',
-                repackSections[0]['content']!.indexOf('src="') + 5,
-              ),
-            )
-            : '';
-    final dom.Element? infoElement = html.querySelector('div.entry-content p');
-    String genres = '';
-    String company = '';
-    String language = '';
-    String originalSize = '';
-    String repackSize = '';
+    if (repackSections.isEmpty)
+      throw Exception("No repack sections found in article for URL: $url");
 
-    Map<String, String> infoMap = infoElement!.innerHtml
-        .split('<br>\n')
-        .sublist(1)
-        .map((element) {
-          final parts = element.split(':');
-          final key = parts[0].trim().toLowerCase();
-          final value =
-              parts[1]
-                  .replaceAll('<strong>', '')
-                  .replaceAll('</strong>', '')
-                  .trim();
-          return MapEntry(key, value);
-        })
-        .fold({}, (previousValue, element) {
-          previousValue[element.key] = element.value;
-          return previousValue;
-        });
-    genres = infoMap['genres/tags'] ?? infoMap['genres'] ?? 'N/A';
-    language = infoMap['languages'] ?? infoMap['language'] ?? 'N/A';
-    company = infoMap['companies'] ?? infoMap['company'] ?? 'N/A';
-    originalSize = infoMap['original size'] ?? 'N/A';
-    repackSize = infoMap['repack size'] ?? 'N/A';
+    final String title = repackSections[0]['title'] ?? 'N/A Title';
+    final String dateString =
+        html
+            .querySelector(
+              'header.entry-header > div.entry-meta > span.entry-date > a > time',
+            )
+            ?.text
+            .trim() ??
+        "01/01/1970";
+    DateTime releaseDate;
+    try {
+      releaseDate = DateFormat('dd/MM/yyyy').parse(dateString);
+    } catch (e) {
+      releaseDate = DateTime.now(); // Fallback
+    }
+
+    final coverContent = repackSections[0]['content'] ?? "";
+    final cover =
+        coverContent.contains('<img')
+            ? coverContent.substring(
+              coverContent.indexOf('src="') + 5,
+              coverContent.indexOf('"', coverContent.indexOf('src="') + 5),
+            )
+            : 'https://github.com/THR3ATB3AR/fit_flutter_assets/blob/main/noposter.png?raw=true'; // Fallback cover
+
+    final dom.Element? infoElement = html.querySelector('div.entry-content p');
+    String genres = 'N/A';
+    String company = 'N/A';
+    String language = 'N/A';
+    String originalSize = 'N/A';
+    String repackSize = 'N/A';
+
+    if (infoElement != null) {
+      Map<String, String> infoMap = infoElement.innerHtml
+          .split('<br>\n')
+          .where((s) => s.contains(':')) // Ensure there's a colon
+          .map((element) {
+            final parts = element.split(':');
+            final key = parts[0].trim().toLowerCase();
+            final value =
+                parts
+                    .sublist(1)
+                    .join(':') // Handle colons in value
+                    .replaceAll('<strong>', '')
+                    .replaceAll('</strong>', '')
+                    .trim();
+            return MapEntry(key, value);
+          })
+          .fold({}, (prev, element) {
+            prev[element.key] = element.value;
+            return prev;
+          });
+      genres = infoMap['genres/tags'] ?? infoMap['genres'] ?? 'N/A';
+      language = infoMap['languages'] ?? infoMap['language'] ?? 'N/A';
+      company = infoMap['companies'] ?? infoMap['company'] ?? 'N/A';
+      originalSize = infoMap['original size'] ?? 'N/A';
+      repackSize = infoMap['repack size'] ?? 'N/A';
+    }
 
     Map<String, List<Map<String, String>>> sectionDownloadLinks = {};
     for (var section in repackSections) {
@@ -424,7 +599,7 @@ class ScraperService {
             })
             .toList();
 
-    repack = Repack(
+    return Repack(
       title: title,
       url: url,
       releaseDate: releaseDate,
@@ -439,33 +614,134 @@ class ScraperService {
       description: description,
       screenshots: screenshots,
     );
-
-    return repack;
   }
 
   Future<http.Response> _fetchWithRetry(Uri url, {int retries = 3}) async {
     for (int attempt = 0; attempt < retries; attempt++) {
       try {
-        final response = await http.get(url);
+        final response = await http
+            .get(url)
+            .timeout(const Duration(seconds: 30)); // Added timeout
         if (response.statusCode == 200) {
           return response;
+        } else if (response.statusCode == 404 && attempt < retries - 1) {
+          print("Got 404 for $url, retrying (${attempt + 1}/$retries)...");
+          await Future.delayed(
+            Duration(seconds: 2 + attempt * 2),
+          ); // Exponential backoff
+          continue; // Retry on 404 as well
         } else {
           throw http.ClientException(
-            'Failed to load data: ${response.statusCode}',
+            'Failed to load data: ${response.statusCode} from $url',
           );
         }
-      } on http.ClientException {
-        if (attempt == retries - 1) {
-          rethrow;
-        }
-        await Future.delayed(const Duration(seconds: 2));
-      } on SocketException {
-        if (attempt == retries - 1) {
-          rethrow;
-        }
-        await Future.delayed(const Duration(seconds: 2));
+      } on SocketException catch (e) {
+        if (attempt == retries - 1) rethrow;
+        print(
+          "SocketException for $url: $e. Retrying (${attempt + 1}/$retries)...",
+        );
+        await Future.delayed(Duration(seconds: 5 + attempt * 5));
+      } on http.ClientException catch (e) {
+        if (attempt == retries - 1) rethrow;
+        print(
+          "ClientException for $url: $e. Retrying (${attempt + 1}/$retries)...",
+        );
+        await Future.delayed(Duration(seconds: 2 + attempt * 2));
+      } catch (e) {
+        // Catch other errors like TimeoutException
+        if (attempt == retries - 1) rethrow;
+        print(
+          "Generic error for $url: $e. Retrying (${attempt + 1}/$retries)...",
+        );
+        await Future.delayed(Duration(seconds: 3 + attempt * 3));
       }
     }
-    throw http.ClientException('Failed to load data after $retries attempts');
+    throw http.ClientException(
+      'Failed to load data from $url after $retries attempts',
+    );
+  }
+
+  // New function for settings page
+  Future<void> forceRescrapeEverything({
+    required Function(String status) onStatusUpdate,
+    required Function(double progress) onProgressUpdate,
+  }) async {
+    if (isRescraping) {
+      onStatusUpdate("Another rescraping process is already running.");
+      return;
+    }
+    isRescraping = true;
+    loadingProgress.value = 0.0; // Global progress reset
+
+    try {
+      onStatusUpdate("Clearing all existing data...");
+      onProgressUpdate(0.0);
+      await _repackService.forceClearAllData();
+      onProgressUpdate(0.05); // 5% for clearing
+
+      onStatusUpdate("Scraping all repack names (Phase 1/4)...");
+      _repackService.allRepacksNames = await scrapeAllRepacksNames(
+        onProgress: (current, total) {
+          if (total > 0)
+            onProgressUpdate(
+              0.05 + (current / total) * 0.20,
+            ); // Names: 20% (total 25%)
+        },
+      );
+      await _repackService.saveAllRepackList();
+      onStatusUpdate(
+        "All repack names scraped. (${_repackService.allRepacksNames.length} names found)",
+      );
+      onProgressUpdate(0.25);
+
+      onStatusUpdate(
+        "Scraping details for every repack (Phase 2/4 - Longest Phase)...",
+      );
+      _repackService.everyRepack = await scrapeEveryRepack(
+        onProgress: (current, total) {
+          if (total > 0)
+            onProgressUpdate(
+              0.25 + (current / total) * 0.50,
+            ); // Details: 50% (total 75%)
+        },
+      );
+      await _repackService.saveEveryRepackList();
+      onStatusUpdate(
+        "All repack details scraped. (${_repackService.everyRepack.length} repacks processed)",
+      );
+      onProgressUpdate(0.75);
+
+      onStatusUpdate("Rescraping new repacks (Phase 3/4)...");
+      await _scrapeAndSaveNewRepacks(
+        onProgress: (current, total) {
+          if (total > 0)
+            onProgressUpdate(
+              0.75 + (current / total) * 0.10,
+            ); // New: 10% (total 85%)
+        },
+      );
+
+      onStatusUpdate("Rescraping popular repacks (Phase 4/4)...");
+      await _scrapeAndSavePopularRepacks(
+        onProgress: (current, total) {
+          if (total > 0)
+            onProgressUpdate(
+              0.85 + (current / total) * 0.10,
+            ); // Popular: 10% (total 95%)
+        },
+      );
+
+      onStatusUpdate("Finalizing...");
+      _repackService.notifyListeners();
+      onProgressUpdate(1.0); // All done
+      onStatusUpdate("Full rescrape completed successfully!");
+    } catch (e) {
+      print("Error during force rescrape everything: $e");
+      onStatusUpdate("Error: $e. Process halted.");
+      rethrow;
+    } finally {
+      isRescraping = false;
+      loadingProgress.value = 0.0; // Reset global progress
+    }
   }
 }

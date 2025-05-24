@@ -1,13 +1,13 @@
-// repack_library.dart
 import 'dart:async';
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fit_flutter_fluent/services/repack_service.dart';
+import 'package:fit_flutter_fluent/services/scraper_service.dart';
 import 'package:fit_flutter_fluent/widgets/repack_item.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart'; // Import Provider
-import 'package:fit_flutter_fluent/theme.dart'; // Import SearchProvider (adjust path if needed)
+import 'package:provider/provider.dart';
+import 'package:fit_flutter_fluent/theme.dart';
 
 class RepackLibrary extends StatefulWidget {
   const RepackLibrary({super.key});
@@ -19,26 +19,25 @@ class RepackLibrary extends StatefulWidget {
 class _RepackLibraryState extends State<RepackLibrary> {
   final RepackService _repackService = RepackService.instance;
 
-  List<Repack> _fullRepackListFromService =
-      []; // Raw data from service (all repacks)
-  List<Repack> _filteredRepacksForDisplay =
-      []; // Data after applying search filter
-  List<Repack> _paginatedRepacks =
-      []; // Paginated subset of _filteredRepacksForDisplay
+  List<Repack> _fullRepackListFromService = [];
+  List<Repack> _filteredRepacksForDisplay = [];
+  List<Repack> _paginatedRepacks = [];
 
   bool _isLoadingInitial = true;
   bool _isLoadingMore = false;
   final ScrollController _scrollController = ScrollController();
-  final int _itemsPerPage = 24; // Or your preferred number
+  final int _itemsPerPage = 24;
 
   StreamSubscription? _repackServiceSubscription;
-  String _activeSearchQuery = ''; // Local cache of the current search query
+  String _activeSearchQuery = '';
+
+  bool _isSyncingLibrary = false;
+  String _syncStatusText = ""; 
 
   @override
   void initState() {
     super.initState();
 
-    // Subscribe to RepackService updates
     _repackServiceSubscription = _repackService.repacksStream.listen((_) {
       if (!mounted) return;
       final newServiceData = _repackService.everyRepack;
@@ -50,23 +49,23 @@ class _RepackLibraryState extends State<RepackLibrary> {
           _fullRepackListFromService = List.from(newServiceData);
           _performFilteringAndPagination();
         } else if (_isLoadingInitial) {
-          // Data same, but was initial loading, so process
+          _fullRepackListFromService = List.from(
+            newServiceData,
+          );
           _performFilteringAndPagination();
         }
       } else {
-        // Data not loaded or cleared
         _fullRepackListFromService = [];
         _performFilteringAndPagination();
       }
     });
 
-    // Initial data load attempt
     if (_repackService.isDataLoadedInMemory) {
       _fullRepackListFromService = List.from(_repackService.everyRepack);
-      // _activeSearchQuery will be picked up by didChangeDependencies
-      // _performFilteringAndPagination will be called by didChangeDependencies
+      if (_isLoadingInitial) {
+         _performFilteringAndPagination();
+      }
     } else {
-      // _isLoadingInitial is already true, wait for service stream or didChangeDependencies
     }
 
     _scrollController.addListener(_onScroll);
@@ -75,16 +74,13 @@ class _RepackLibraryState extends State<RepackLibrary> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // This method is called when the widget is first built and when its
-    // dependencies (like SearchProvider) change.
     final newSearchQuery = Provider.of<SearchProvider>(context).searchQuery;
 
-    // If search query changed OR it's the very first time processing (isLoadingInitial)
     if (_activeSearchQuery != newSearchQuery || _isLoadingInitial) {
       _activeSearchQuery = newSearchQuery;
-      // Ensure full list is available if service has loaded it
       if (_repackService.isDataLoadedInMemory &&
-          _fullRepackListFromService.isEmpty) {
+          _fullRepackListFromService.isEmpty &&
+          _repackService.everyRepack.isNotEmpty) {
         _fullRepackListFromService = List.from(_repackService.everyRepack);
       }
       _performFilteringAndPagination();
@@ -94,18 +90,16 @@ class _RepackLibraryState extends State<RepackLibrary> {
   void _performFilteringAndPagination() {
     if (!mounted) return;
 
-    // If service data isn't ready and we don't have a local copy
     if (!_repackService.isDataLoadedInMemory &&
-        _fullRepackListFromService.isEmpty) {
+        _fullRepackListFromService.isEmpty &&
+        _activeSearchQuery.isEmpty) { 
       setState(() {
-        // _isLoadingInitial remains true, show loading indicator
         _filteredRepacksForDisplay = [];
         _paginatedRepacks = [];
       });
       return;
     }
 
-    // Apply search filter
     if (_activeSearchQuery.isEmpty) {
       _filteredRepacksForDisplay = List.from(_fullRepackListFromService);
     } else {
@@ -117,18 +111,24 @@ class _RepackLibraryState extends State<RepackLibrary> {
           }).toList();
     }
 
-    // Paginate the filtered list
     _paginatedRepacks = _filteredRepacksForDisplay.take(_itemsPerPage).toList();
 
     bool wasInitialLoading = _isLoadingInitial;
 
     setState(() {
-      if (wasInitialLoading) {
-        _isLoadingInitial =
-            false; // Data processed, initial loading phase is over
+      if (wasInitialLoading &&
+          (_repackService.isDataLoadedInMemory ||
+              _fullRepackListFromService.isNotEmpty ||
+              _activeSearchQuery.isNotEmpty)) {
+        _isLoadingInitial = false;
       }
-      // Reset scroll position when filter changes or initial load completes
-      if (_scrollController.hasClients) {
+      if (_scrollController.hasClients &&
+          (wasInitialLoading ||
+              _activeSearchQuery !=
+                  Provider.of<SearchProvider>(
+                    context,
+                    listen: false,
+                  ).searchQuery)) {
         _scrollController.jumpTo(0);
       }
     });
@@ -139,26 +139,19 @@ class _RepackLibraryState extends State<RepackLibrary> {
             _scrollController.position.maxScrollExtent - 400 &&
         !_isLoadingMore &&
         _paginatedRepacks.length < _filteredRepacksForDisplay.length) {
-      // Compare with filtered list
       _loadMorePaginatedItems();
     }
   }
 
   Future<void> _loadMorePaginatedItems() async {
     if (_isLoadingMore || !mounted) return;
-
     setState(() => _isLoadingMore = true);
-
-    // Simulate delay for realism if desired
-    // await Future.delayed(const Duration(milliseconds: 300));
-
     final currentLength = _paginatedRepacks.length;
     final moreItems =
         _filteredRepacksForDisplay
             .skip(currentLength)
             .take(_itemsPerPage)
             .toList();
-
     if (mounted) {
       setState(() {
         _paginatedRepacks.addAll(moreItems);
@@ -166,6 +159,120 @@ class _RepackLibraryState extends State<RepackLibrary> {
       });
     }
   }
+
+  void _updateSyncStatusText(String newStatus) {
+    if (mounted) {
+      setState(() {
+        _syncStatusText = newStatus;
+      });
+    }
+  }
+
+    Future<void> _syncRepackLibrary() async {
+    if (!mounted) return;
+    setState(() {
+      _isSyncingLibrary = true;
+      _syncStatusText = "Starting library sync...";
+      ScraperService.instance.loadingProgress.value = 0.0; 
+    });
+
+    try {
+      _updateSyncStatusText("Fetching all repack names...");
+      ScraperService.instance.loadingProgress.value = 0.0;
+
+      final allNames = await ScraperService.instance.scrapeAllRepacksNames(
+        onProgress: (current, total) {
+          if (mounted) {
+            _updateSyncStatusText(
+              "Fetching names: $current/$total pages",
+            );
+            if (total > 0) {
+              ScraperService.instance.loadingProgress.value = current.toDouble() / total.toDouble();
+            } else {
+              ScraperService.instance.loadingProgress.value = 0.0;
+            }
+          }
+        },
+      );
+      _repackService.allRepacksNames = allNames;
+      await _repackService.saveAllRepackList();
+
+      if (mounted) {
+        _updateSyncStatusText(
+          "Scraping missing repack details...\nThis may take a while.",
+        );
+        // Reset progress for the next scraping phase
+        ScraperService.instance.loadingProgress.value = 0.0;
+      }
+
+      // Assuming ScraperService.scrapeMissingRepacks internally updates
+      // ScraperService.instance.loadingProgress.value.
+      // If it doesn't, you would add a similar onProgress update here.
+      await ScraperService.instance.scrapeMissingRepacks(
+        onProgress: (current, total) {
+          if (mounted) {
+            _updateSyncStatusText(
+              "Scraping details: $current/$total missing repacks",
+            );
+            // If ScraperService.scrapeMissingRepacks does NOT update loadingProgress itself:
+            // if (total > 0) {
+            //   ScraperService.instance.loadingProgress.value = current.toDouble() / total.toDouble();
+            // } else {
+            //   ScraperService.instance.loadingProgress.value = 0.0;
+            // }
+          }
+        },
+      );
+
+      if (mounted) {
+        displayInfoBar(
+          context,
+          builder: (context, close) {
+            return InfoBar(
+              title: const Text('Success'),
+              content: const Text('Repack library synchronized.'),
+              action: IconButton(
+                icon: const Icon(FluentIcons.clear),
+                onPressed: close,
+              ),
+              severity: InfoBarSeverity.success,
+            );
+          },
+        );
+      }
+    } catch (e) {
+      print("Error syncing repack library: $e");
+      if (mounted) {
+        displayInfoBar(
+          context,
+          builder: (context, close) {
+            return InfoBar(
+              title: const Text('Error'),
+              content: Text('Failed to sync library: $e'),
+              action: IconButton(
+                icon: const Icon(FluentIcons.clear),
+                onPressed: close,
+              ),
+              severity: InfoBarSeverity.error,
+            );
+          },
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSyncingLibrary = false;
+          _syncStatusText = ""; // Clear status text
+        });
+        ScraperService.instance.loadingProgress.value = 0.0; // Reset global progress fully at the end
+        // After sync, refresh data
+        _fullRepackListFromService = List.from(_repackService.everyRepack);
+        _performFilteringAndPagination();
+      }
+    }
+  }
+
+  // _showSyncProgressDialog method is removed.
 
   @override
   void dispose() {
@@ -177,104 +284,167 @@ class _RepackLibraryState extends State<RepackLibrary> {
 
   @override
   Widget build(BuildContext context) {
-    // No need to watch SearchProvider directly in build if didChangeDependencies handles it.
+    final pageHeader = PageHeader(
+      title: const Text('Repack Library'),
+      commandBar: CommandBar(
+        primaryItems: [
+          CommandBarButton(
+            icon: _isSyncingLibrary
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: ProgressRing(strokeWidth: 2.0),
+                  )
+                : const Icon(FluentIcons.sync),
+            label: const Text('Sync Library'),
+            onPressed: _isSyncingLibrary ? null : _syncRepackLibrary,
+          ),
+        ],
+      ),
+    );
 
-    if (_isLoadingInitial && _paginatedRepacks.isEmpty) {
-      return const ScaffoldPage(content: Center(child: ProgressRing()));
-    }
-
-    if (_filteredRepacksForDisplay.isEmpty && !_isLoadingInitial) {
-      return ScaffoldPage(
-        header: const PageHeader(title: Text('Repack Library')),
-        content: Center(
-          child: Text(
-            _activeSearchQuery.isEmpty
-                ? "No repacks found in the library."
-                : "No repacks found matching '$_activeSearchQuery'.",
-            style: FluentTheme.of(context).typography.bodyLarge,
+    Widget? syncProgressWidget;
+    if (_isSyncingLibrary) {
+      syncProgressWidget = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Card(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Syncing Library...',
+                style: FluentTheme.of(context).typography.subtitle,
+              ),
+              const SizedBox(height: 8),
+              Text(_syncStatusText, style: FluentTheme.of(context).typography.body),
+              const SizedBox(height: 16),
+              ValueListenableBuilder<double>(
+                valueListenable: ScraperService.instance.loadingProgress,
+                builder: (context, value, child) {
+                  if (value > 0 && value <= 1) {
+                    return ProgressBar(value: value * 100);
+                  }
+                  return const ProgressRing(); // Indeterminate
+                },
+              ),
+              ValueListenableBuilder<double>(
+                valueListenable: ScraperService.instance.loadingProgress,
+                builder: (context, value, child) {
+                  if (value > 0 && value <= 1) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text('${(value * 100).toStringAsFixed(1)}%'),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
           ),
         ),
       );
     }
 
-    return ScaffoldPage(
-      header: const PageHeader(title: Text('Repack Library')),
-      content: LayoutBuilder(
-        builder: (context, constraints) {
-          final double screenWidth = constraints.maxWidth;
-          int crossAxisCount;
+    Widget buildMainContentArea() {
+      // 1. Initial loading state for the whole page
+      if (_isLoadingInitial && _paginatedRepacks.isEmpty && !_repackService.isDataLoadedInMemory) {
+        return const Expanded(child: Center(child: ProgressRing()));
+      }
 
-          if (screenWidth < 600) {
-            crossAxisCount = 4;
-          } else if (screenWidth < 900) {
-            crossAxisCount = 5;
-          } else if (screenWidth < 1200) {
-            crossAxisCount = 6;
-          } else if (screenWidth < 1500) {
-            crossAxisCount = 7;
-          } else {
-            crossAxisCount = 8;
-          }
+      // 2. "No repacks" state
+      if (!_isLoadingInitial && _filteredRepacksForDisplay.isEmpty) {
+        return Expanded(
+          child: Center(
+            child: Text(
+              _activeSearchQuery.isEmpty
+                  ? "No repacks found in the library."
+                  : "No repacks found matching '$_activeSearchQuery'.",
+              style: FluentTheme.of(context).typography.bodyLarge,
+            ),
+          ),
+        );
+      }
 
-          const double cardInternalHorizontalMargin = 16.0;
-          const double gridPadding = 8.0;
-          const double gridItemSpacing = 0.0;
+      // 3. GridView state
+      return Expanded(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double screenWidth = constraints.maxWidth;
+            int crossAxisCount;
 
-          final double totalHorizontalPaddingAndSpacing =
-              (gridPadding * 2) + (gridItemSpacing * (crossAxisCount - 1));
-          final double availableWidthForCards =
-              screenWidth - totalHorizontalPaddingAndSpacing;
-          final double cardWidth = availableWidthForCards / crossAxisCount;
-          final double repackItemHeight =
-              (cardWidth - cardInternalHorizontalMargin) / 0.65;
+            if (screenWidth < 600) {crossAxisCount = 4;}
+            else if (screenWidth < 900) {crossAxisCount = 5;}
+            else if (screenWidth < 1200) {crossAxisCount = 6;}
+            else if (screenWidth < 1500) {crossAxisCount = 7;}
+            else {crossAxisCount = 8;}
 
-          if (repackItemHeight <= 0 ||
-              cardWidth <= cardInternalHorizontalMargin) {
-            return const Center(
-              child: Text(
-                "The window is too narrow to display items correctly.\nPlease resize the window.",
-                textAlign: TextAlign.center,
+            const double cardInternalHorizontalMargin = 16.0;
+            const double gridPadding = 8.0;
+            const double gridItemSpacing = 0.0;
+
+            final double totalHorizontalPaddingAndSpacing =
+                (gridPadding * 2) + (gridItemSpacing * (crossAxisCount - 1));
+            final double availableWidthForCards =
+                screenWidth - totalHorizontalPaddingAndSpacing;
+            final double cardWidth = availableWidthForCards / crossAxisCount;
+            final double repackItemHeight =
+                (cardWidth - cardInternalHorizontalMargin) / 0.65;
+
+            if (repackItemHeight <= 0 ||
+                cardWidth <= cardInternalHorizontalMargin) {
+              return const Center(
+                child: Text(
+                  "The window is too narrow to display items correctly.\nPlease resize the window.",
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+
+            final double cellAspectRatio = cardWidth / repackItemHeight;
+
+            return GridView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(gridPadding),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                childAspectRatio: cellAspectRatio,
+                mainAxisSpacing: gridItemSpacing,
+                crossAxisSpacing: gridItemSpacing,
               ),
-            );
-          }
-
-          final double cellAspectRatio = cardWidth / repackItemHeight;
-
-          return Column(
-            children: [
-              Expanded(
-                child: GridView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(gridPadding),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    childAspectRatio: cellAspectRatio,
-                    mainAxisSpacing: gridItemSpacing,
-                    crossAxisSpacing: gridItemSpacing,
-                  ),
-                  itemCount: _paginatedRepacks.length, // Use paginated list
-                  itemBuilder: (context, index) {
-                    final repack = _paginatedRepacks[index];
-                    return GestureDetector(
-                      onTap: () {
-                        context.push("/repackdetails", extra: repack);
-                      },
-                      child: RepackItem(
-                        repack: repack,
-                        itemHeight: repackItemHeight,
-                      ),
-                    );
+              itemCount: _paginatedRepacks.length,
+              itemBuilder: (context, index) {
+                final repack = _paginatedRepacks[index];
+                return GestureDetector(
+                  onTap: () {
+                    context.push("/repackdetails", extra: repack);
                   },
-                ),
-              ),
-              if (_isLoadingMore)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: ProgressRing(),
-                ),
-            ],
-          );
-        },
+                  child: RepackItem(
+                    repack: repack,
+                    itemHeight: repackItemHeight,
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      );
+    }
+
+    return ScaffoldPage(
+      header: pageHeader,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (syncProgressWidget != null) syncProgressWidget,
+          buildMainContentArea(),
+          if (_isLoadingMore && !_isSyncingLibrary) // Show only if not syncing
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: ProgressRing(),
+            ),
+        ],
       ),
     );
   }

@@ -1,4 +1,7 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:async';
+import 'package:fit_flutter_fluent/services/scraper_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart';
@@ -73,12 +76,9 @@ List<WindowEffect> get currentWindowEffects {
 }
 
 class Settings extends StatefulWidget {
-  final String? sectionToScrollTo; 
+  final String? sectionToScrollTo;
 
-  const Settings({
-    super.key,
-    this.sectionToScrollTo,
-  }); 
+  const Settings({super.key, this.sectionToScrollTo});
 
   @override
   State<Settings> createState() => _SettingsState();
@@ -96,8 +96,17 @@ class _SettingsState extends State<Settings> with PageMixin {
   final GlobalKey _accentColorKey = GlobalKey();
   final GlobalKey _windowTransparencyKey = GlobalKey();
   final GlobalKey _localeKey = GlobalKey();
+  final GlobalKey _dataManagementKey = GlobalKey();
 
   late final Map<String, GlobalKey> _sectionKeys;
+
+  bool _isForceRescraping = false;
+  String _forceRescrapeDialogStatus = "";
+  double _forceRescrapeDialogProgress = 0.0;
+
+  late Function(String) _updateForceRescrapeDialogStatusCallback = (status) {};
+  late Function(double) _updateForceRescrapeDialogProgressCallback =
+      (progress) {};
 
   @override
   void initState() {
@@ -109,36 +118,17 @@ class _SettingsState extends State<Settings> with PageMixin {
       'paneDisplayMode': _paneDisplayModeKey,
       'accentColor': _accentColorKey,
       'windowTransparency': _windowTransparencyKey,
-      'locale':
-          _localeKey, 
+      'locale': _localeKey,
+      'dataManagement': _dataManagementKey,
     };
 
-    
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      } 
-
+      if (!mounted) return;
       final sectionToScroll = widget.sectionToScrollTo;
-      debugPrint(
-        '[Settings initState - postFrameCallback] sectionToScrollTo: "$sectionToScroll"',
-      );
-
       if (sectionToScroll != null && sectionToScroll.isNotEmpty) {
         if (_sectionKeys.containsKey(sectionToScroll)) {
-          debugPrint(
-            '[Settings initState - postFrameCallback] Found key for section "$sectionToScroll". Attempting to scroll.',
-          );
           _scrollToSection(_sectionKeys[sectionToScroll]!);
-        } else {
-          debugPrint(
-            '[Settings initState - postFrameCallback] WARN: Section key "$sectionToScroll" not found in _sectionKeys. Available keys: ${_sectionKeys.keys.join(', ')}',
-          );
         }
-      } else {
-        debugPrint(
-          '[Settings initState - postFrameCallback] No section specified or section is empty. Not scrolling.',
-        );
       }
     });
   }
@@ -151,27 +141,19 @@ class _SettingsState extends State<Settings> with PageMixin {
   }
 
   void _scrollToSection(GlobalKey key) {
-    _highlightTimer?.cancel(); 
-
+    _highlightTimer?.cancel();
     final context = key.currentContext;
     if (context != null) {
       Scrollable.ensureVisible(
         context,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
-        alignment: 0.0, 
+        alignment: 0.0,
       ).then((_) {
-        
         if (mounted) {
-          setState(() {
-            _currentlyHighlightedKey = key;
-          });
+          setState(() => _currentlyHighlightedKey = key);
           _highlightTimer = Timer(const Duration(seconds: 1), () {
-            if (mounted) {
-              setState(() {
-                _currentlyHighlightedKey = null;
-              });
-            }
+            if (mounted) setState(() => _currentlyHighlightedKey = null);
           });
         }
       });
@@ -185,8 +167,9 @@ class _SettingsState extends State<Settings> with PageMixin {
   }) {
     bool isHighlighted = _currentlyHighlightedKey == key;
     return Container(
-      key: key, 
+      key: key,
       padding: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.only(bottom: 8.0),
       decoration: BoxDecoration(
         color:
             isHighlighted
@@ -196,7 +179,9 @@ class _SettingsState extends State<Settings> with PageMixin {
         border:
             isHighlighted
                 ? Border.all(
-                  color: Colors.transparent,
+                  color: FluentTheme.of(
+                    context,
+                  ).accentColor.withValues(alpha: 0.3),
                   width: 1,
                 )
                 : null,
@@ -205,10 +190,148 @@ class _SettingsState extends State<Settings> with PageMixin {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ...children,
-          if (addBiggerSpacerAfter)
-            const SizedBox(height: 40.0 - 8.0),
+          if (addBiggerSpacerAfter) const SizedBox(height: 32.0),
         ],
       ),
+    );
+  }
+
+  Future<void> _forceRescrapeAllData() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => ContentDialog(
+            title: const Text('Confirm Force Rescrape'),
+            content: const Text(
+              'This will delete ALL locally stored repack data and re-download everything from the source. '
+              'This process can take a very long time and consume significant network data. Are you sure?',
+            ),
+            actions: [
+              Button(
+                child: const Text('Cancel'),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              FilledButton(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStatePropertyAll(Colors.red.dark),
+                ),
+                child: const Text('Yes, Rescrape All'),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
+          ),
+    );
+
+    if (result != true) return;
+
+    if (!mounted) return;
+    setState(() {
+      _isForceRescraping = true;
+    });
+    _showForceRescrapeProgressDialog("Starting full data rescrape...");
+
+    try {
+      await ScraperService.instance.forceRescrapeEverything(
+        onStatusUpdate: (status) {
+          if (mounted) {
+            _updateForceRescrapeDialogStatusCallback(status);
+          }
+        },
+        onProgressUpdate: (progress) {
+          if (mounted) {
+            _updateForceRescrapeDialogProgressCallback(progress);
+          }
+        },
+      );
+
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        displayInfoBar(
+          context,
+          builder: (context, close) {
+            return InfoBar(
+              title: const Text('Success'),
+              content: const Text('All data has been forcefully rescraped.'),
+              action: IconButton(
+                icon: const Icon(FluentIcons.clear),
+                onPressed: close,
+              ),
+              severity: InfoBarSeverity.success,
+            );
+          },
+        );
+      }
+    } catch (e) {
+      print("Error during force rescrape: $e");
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        _updateForceRescrapeDialogStatusCallback("Error: $e");
+        displayInfoBar(
+          context,
+          builder: (context, close) {
+            return InfoBar(
+              title: const Text('Error'),
+              content: Text('Failed to force rescrape data: $e'),
+              action: IconButton(
+                icon: const Icon(FluentIcons.clear),
+                onPressed: close,
+              ),
+              severity: InfoBarSeverity.error,
+            );
+          },
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isForceRescraping = false);
+        ScraperService.instance.loadingProgress.value = 0.0;
+      }
+    }
+  }
+
+  void _showForceRescrapeProgressDialog(String initialMessage) {
+    _forceRescrapeDialogStatus = initialMessage;
+    _forceRescrapeDialogProgress = 0.0;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return ContentDialog(
+          title: const Text('Force Rescraping Data'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setDialogState) {
+              _updateForceRescrapeDialogStatusCallback = (newStatus) {
+                if (mounted && dialogContext.mounted) {
+                  setDialogState(() => _forceRescrapeDialogStatus = newStatus);
+                }
+              };
+              _updateForceRescrapeDialogProgressCallback = (newProgress) {
+                if (mounted && dialogContext.mounted) {
+                  setDialogState(
+                    () => _forceRescrapeDialogProgress = newProgress,
+                  );
+                }
+              };
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_forceRescrapeDialogStatus),
+                  const SizedBox(height: 16),
+                  ProgressBar(value: _forceRescrapeDialogProgress * 100),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${(_forceRescrapeDialogProgress * 100).toStringAsFixed(1)}% Complete',
+                  ),
+                  const SizedBox(height: 16),
+                  const Center(child: ProgressRing()),
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -217,15 +340,21 @@ class _SettingsState extends State<Settings> with PageMixin {
     assert(debugCheckHasMediaQuery(context));
     final appTheme = context.watch<AppTheme>();
     const spacer = SizedBox(height: 10.0);
+    const bigSpacer = SizedBox(height: 24.0);
 
-    const supportedLocales = FluentLocalizations.supportedLocales;
+    final supportedLocales = FluentLocalizations.supportedLocales;
     final currentLocale =
         appTheme.locale ?? Localizations.maybeLocaleOf(context);
 
     return ScaffoldPage.scrollable(
       header: const PageHeader(title: Text('Settings')),
-      scrollController: _scrollController, 
+      scrollController: _scrollController,
       children: [
+        Text('Downloads', style: FluentTheme.of(context).typography.title),
+        spacer,
+        const Divider(
+          style: DividerThemeData(horizontalMargin: EdgeInsets.zero),
+        ),
         _buildSectionWrapper(_downloadPathKey, [
           Text(
             'Default Download Path',
@@ -237,21 +366,20 @@ class _SettingsState extends State<Settings> with PageMixin {
             child: TextBox(
               placeholder: 'Default Download Path',
               controller: TextEditingController(text: appTheme.downloadPath),
-              onChanged: (value) {
-                appTheme.downloadPath = value;
-              },
+              readOnly: true,
               suffix: IconButton(
-                icon: const Icon(FluentIcons.folder),
+                icon: const Icon(FluentIcons.folder_open),
                 onPressed: () async {
                   final path = await FilePicker.platform.getDirectoryPath();
                   if (path != null) {
                     appTheme.downloadPath = path;
+                    setState(() {});
                   }
                 },
               ),
             ),
           ),
-        ]),
+        ], addBiggerSpacerAfter: false),
         _buildSectionWrapper(_maxConcurrentDownloadsKey, [
           Text(
             'Max Concurrent Downloads',
@@ -261,10 +389,11 @@ class _SettingsState extends State<Settings> with PageMixin {
           Align(
             alignment: Alignment.centerLeft,
             child: IntrinsicWidth(
-              child: NumberBox(
+              child: NumberBox<int>(
                 value: appTheme.maxConcurrentDownloads,
                 mode: SpinButtonPlacementMode.inline,
                 min: 1,
+                max: 10,
                 clearButton: false,
                 onChanged: (value) {
                   if (value != null) {
@@ -274,7 +403,13 @@ class _SettingsState extends State<Settings> with PageMixin {
               ),
             ),
           ),
-        ]),
+        ], addBiggerSpacerAfter: false),
+        bigSpacer,
+        Text('Appearance', style: FluentTheme.of(context).typography.title),
+        spacer,
+        const Divider(
+          style: DividerThemeData(horizontalMargin: EdgeInsets.zero),
+        ),
         _buildSectionWrapper(_themeModeKey, [
           Text(
             'Theme mode',
@@ -289,7 +424,7 @@ class _SettingsState extends State<Settings> with PageMixin {
                   ThemeMode.values.map((mode) {
                     return ComboBoxItem(
                       value: mode,
-                      child: Text('$mode'.replaceAll('ThemeMode.', '')),
+                      child: Text(mode.toString().split('.').last),
                     );
                   }).toList(),
               onChanged: (mode) {
@@ -302,7 +437,7 @@ class _SettingsState extends State<Settings> with PageMixin {
               },
             ),
           ),
-        ]),
+        ], addBiggerSpacerAfter: false),
         _buildSectionWrapper(_paneDisplayModeKey, [
           Text(
             'Navigation Pane Display Mode',
@@ -317,9 +452,7 @@ class _SettingsState extends State<Settings> with PageMixin {
                   PaneDisplayMode.values.map((mode) {
                     return ComboBoxItem(
                       value: mode,
-                      child: Text(
-                        mode.toString().replaceAll('PaneDisplayMode.', ''),
-                      ),
+                      child: Text(mode.toString().split('.').last),
                     );
                   }).toList(),
               onChanged: (mode) {
@@ -327,7 +460,7 @@ class _SettingsState extends State<Settings> with PageMixin {
               },
             ),
           ),
-        ]),
+        ], addBiggerSpacerAfter: false),
         _buildSectionWrapper(_accentColorKey, [
           Text(
             'Accent Color',
@@ -335,6 +468,8 @@ class _SettingsState extends State<Settings> with PageMixin {
           ),
           spacer,
           Wrap(
+            spacing: 4.0,
+            runSpacing: 4.0,
             alignment: WrapAlignment.start,
             children: [
               Tooltip(
@@ -354,7 +489,7 @@ class _SettingsState extends State<Settings> with PageMixin {
               }),
             ],
           ),
-        ]),
+        ], addBiggerSpacerAfter: false),
         if (kIsWindowEffectsSupported)
           _buildSectionWrapper(_windowTransparencyKey, [
             Text(
@@ -370,9 +505,7 @@ class _SettingsState extends State<Settings> with PageMixin {
                     currentWindowEffects.map((effect) {
                       return ComboBoxItem(
                         value: effect,
-                        child: Text(
-                          effect.toString().replaceAll('WindowEffect.', ''),
-                        ),
+                        child: Text(effect.toString().split('.').last),
                       );
                     }).toList(),
                 onChanged: (effect) {
@@ -383,36 +516,77 @@ class _SettingsState extends State<Settings> with PageMixin {
                 },
               ),
             ),
-          ]),
-        _buildSectionWrapper(
-          _localeKey,
-          [
-            Text('Locale', style: FluentTheme.of(context).typography.subtitle),
-            spacer,
-            Align(
-              alignment: Alignment.centerLeft,
-              child: ComboBox<Locale>(
-                value: currentLocale,
-                items:
-                    supportedLocales.map((locale) {
-                      return ComboBoxItem(
-                        value: locale,
-                        child: Text('$locale'),
-                      );
-                    }).toList(),
-                onChanged: (locale) {
-                  if (locale != null) {
-                    appTheme.locale = locale;
-                  }
-                },
+          ], addBiggerSpacerAfter: false),
+        _buildSectionWrapper(_localeKey, [
+          Text('Locale', style: FluentTheme.of(context).typography.subtitle),
+          spacer,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ComboBox<Locale>(
+              value: currentLocale,
+              items:
+                  supportedLocales.map((locale) {
+                    return ComboBoxItem(value: locale, child: Text('$locale'));
+                  }).toList(),
+              onChanged: (locale) {
+                if (locale != null) {
+                  appTheme.locale = locale;
+                }
+              },
+            ),
+          ),
+        ], addBiggerSpacerAfter: false),
+
+        bigSpacer,
+        Text(
+          'Data Management',
+          style: FluentTheme.of(context).typography.title,
+        ),
+        spacer,
+        const Divider(
+          style: DividerThemeData(horizontalMargin: EdgeInsets.zero),
+        ),
+        _buildSectionWrapper(_dataManagementKey, [
+          Text(
+            'Force Rescrape All Data',
+            style: FluentTheme.of(context).typography.subtitle,
+          ),
+          spacer,
+          Text(
+            'This will delete ALL locally stored repack data and re-download everything from the source. '
+            'Warning: This process can take a very long time and consume significant network data. Use with caution.',
+            style: FluentTheme.of(context).typography.body,
+          ),
+          spacer,
+          FilledButton(
+            onPressed: _isForceRescraping ? null : _forceRescrapeAllData,
+            style: ButtonStyle(
+              backgroundColor: ButtonState.all(Colors.red.dark),
+              padding: ButtonState.all(
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
             ),
-          ],
-          addBiggerSpacerAfter: false,
-        ),
+            child:
+                _isForceRescraping
+                    ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: ProgressRing(strokeWidth: 2.0),
+                        ),
+                        SizedBox(width: 12),
+                        Text('Rescraping... See Dialog'),
+                      ],
+                    )
+                    : const Text('Force Rescrape All Data Now'),
+          ),
+        ], addBiggerSpacerAfter: false),
       ],
     );
   }
+
   Widget _buildColorBlock(
     AppTheme appTheme,
     AccentColor color, {
@@ -436,13 +610,16 @@ class _SettingsState extends State<Settings> with PageMixin {
           }
         },
         style: ButtonStyle(
-          padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+          padding: WidgetStatePropertyAll(EdgeInsets.zero),
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             final displayColor = color;
             if (states.isPressed) return displayColor.light;
             if (states.isHovered) return displayColor.lighter;
             return displayColor;
           }),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          ),
         ),
         child: Container(
           height: 40,
@@ -453,7 +630,7 @@ class _SettingsState extends State<Settings> with PageMixin {
                   ? Icon(
                     FluentIcons.check_mark,
                     color: color.basedOnLuminance(),
-                    size: 22.0,
+                    size: 20.0,
                   )
                   : null,
         ),
@@ -461,4 +638,3 @@ class _SettingsState extends State<Settings> with PageMixin {
     );
   }
 }
-

@@ -31,6 +31,7 @@ This section outlines the tasks for the ongoing rewrite to implement Microsoft F
 * [ ] **Component Redesign & Implementation:**
   * [X] Redesign and implement main navigation (NavigationView, TabView, etc.) using Fluent controls.
   * [X] Rewrite list views (repack library, downloads) with Fluent styling (e.g., ListView, GridView with Fluent item templates).
+  * [X] Rewrite scraping methods.
   * [X] Update buttons, input fields, dialogs, and other interactive elements to Fluent Design.
   * [ ] Implement Fluent iconography throughout the application.
   * [X] Refactor settings screen with Fluent controls (ToggleSwitch, ComboBox, etc.).

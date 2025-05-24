@@ -56,14 +56,8 @@ void main() async {
     await windowManager.setMinimumSize(const Size(670, 690));
     await windowManager.setPreventClose(true);
     await windowManager.setSkipTaskbar(false);
-
-    await windowManager.show();
-    await windowManager.focus();
-
-    runApp(const MyApp());
-  } else {
-    runApp(const MyApp());
   }
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -73,65 +67,73 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: _appTheme), 
-        ChangeNotifierProvider(create: (_) => SearchProvider()), 
+        ChangeNotifierProvider.value(value: _appTheme),
+        ChangeNotifierProvider(create: (_) => SearchProvider()),
       ],
-      child: Builder(builder: (context) { 
-        final appTheme = context.watch<AppTheme>();
+      child: Builder(
+        builder: (context) {
+          final appTheme = context.watch<AppTheme>();
 
-        return FluentApp.router(
-          title: appTitle,
-          themeMode: appTheme.mode,
-          debugShowCheckedModeBanner: false,
-          color: appTheme.color,
-          darkTheme: FluentThemeData(
-            brightness: Brightness.dark,
-            accentColor: appTheme.color,
-            visualDensity: VisualDensity.standard,
-            focusTheme: FocusThemeData(
-              glowFactor: is10footScreen(context) ? 2.0 : 0.0,
-            ),
-          ),
-          theme: FluentThemeData(
-            accentColor: appTheme.color,
-            visualDensity: VisualDensity.standard,
-            focusTheme: FocusThemeData(
-              glowFactor: is10footScreen(context) ? 2.0 : 0.0,
-            ),
-          ),
-          locale: appTheme.locale,
-          builder: (context, child) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              appTheme.applyInitialWindowEffectIfNeeded(context);
-            });
-
-            return Directionality(
-              textDirection: appTheme.textDirection,
-              child: NavigationPaneTheme(
-                data: NavigationPaneThemeData(
-                  backgroundColor:
-                      appTheme.windowEffect !=
-                                  flutter_acrylic.WindowEffect.disabled &&
-                              (appTheme.windowEffect ==
-                                      flutter_acrylic.WindowEffect.mica ||
-                                  appTheme.windowEffect ==
-                                      flutter_acrylic.WindowEffect.acrylic ||
-                                  appTheme.windowEffect ==
-                                      flutter_acrylic.WindowEffect.tabbed ||
-                                  appTheme.windowEffect ==
-                                      flutter_acrylic.WindowEffect.transparent)
-                          ? Colors.transparent
-                          : null,
-                ),
-                child: child!,
+          return FluentApp.router(
+            title: appTitle,
+            themeMode: appTheme.mode,
+            debugShowCheckedModeBanner: false,
+            color: appTheme.color,
+            darkTheme: FluentThemeData(
+              brightness: Brightness.dark,
+              accentColor: appTheme.color,
+              visualDensity: VisualDensity.standard,
+              focusTheme: FocusThemeData(
+                glowFactor: is10footScreen(context) ? 2.0 : 0.0,
               ),
-            );
-          },
-          routeInformationParser: router.routeInformationParser,
-          routerDelegate: router.routerDelegate,
-          routeInformationProvider: router.routeInformationProvider,
-        );
-      }),
+            ),
+            theme: FluentThemeData(
+              accentColor: appTheme.color,
+              visualDensity: VisualDensity.standard,
+              focusTheme: FocusThemeData(
+                glowFactor: is10footScreen(context) ? 2.0 : 0.0,
+              ),
+            ),
+            locale: appTheme.locale,
+            builder: (context, child) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                appTheme.applyInitialWindowEffectIfNeeded(context);
+                if (isDesktop) {
+                  windowManager.show();
+                  windowManager.focus();
+                }
+              });
+
+              return Directionality(
+                textDirection: appTheme.textDirection,
+                child: NavigationPaneTheme(
+                  data: NavigationPaneThemeData(
+                    backgroundColor:
+                        appTheme.windowEffect !=
+                                    flutter_acrylic.WindowEffect.disabled &&
+                                (appTheme.windowEffect ==
+                                        flutter_acrylic.WindowEffect.mica ||
+                                    appTheme.windowEffect ==
+                                        flutter_acrylic.WindowEffect.acrylic ||
+                                    appTheme.windowEffect ==
+                                        flutter_acrylic.WindowEffect.tabbed ||
+                                    appTheme.windowEffect ==
+                                        flutter_acrylic
+                                            .WindowEffect
+                                            .transparent)
+                            ? Colors.transparent
+                            : null,
+                  ),
+                  child: child!,
+                ),
+              );
+            },
+            routeInformationParser: router.routeInformationParser,
+            routerDelegate: router.routerDelegate,
+            routeInformationProvider: router.routeInformationProvider,
+          );
+        },
+      ),
     );
   }
 }
@@ -204,6 +206,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
         }
         return buildPaneItem(e);
       }).toList();
+
   late final List<NavigationPaneItem> footerItems = [
     PaneItemSeparator(),
     PaneItem(
@@ -257,6 +260,19 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           .toList()
           .indexWhere((element) => element.key == Key(location));
       if (indexFooter == -1) {
+        if (location.startsWith('/settings?section=')) {
+          indexFooter = footerItems
+              .where((element) => element.key != null)
+              .toList()
+              .indexWhere((element) => element.key == const Key('/settings'));
+          if (indexFooter != -1) {
+            return originalItems
+                    .where((element) => element.key != null)
+                    .toList()
+                    .length +
+                indexFooter;
+          }
+        }
         return 0;
       }
       return originalItems
@@ -271,21 +287,15 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-  final localizations = FluentLocalizations.of(context);
-  final appTheme = context.watch<AppTheme>();
-  final searchProvider = Provider.of<SearchProvider>(context, listen: false);
+    final localizations = FluentLocalizations.of(context);
+    final appTheme = context.watch<AppTheme>();
+    final searchProvider = Provider.of<SearchProvider>(context, listen: false);
 
-  if (widget.shellContext != null) {
-    if (router.canPop() == false) {
-    }
-  }
     return NavigationView(
       key: viewKey,
       appBar: NavigationAppBar(
         automaticallyImplyLeading: false,
         leading: () {
-          final enabled = true;
-
           onPressed() {
             if (router.canPop()) {
               context.pop();
@@ -315,7 +325,6 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                     ),
                     title: Text(localizations.backButtonTooltip),
                     body: const SizedBox.shrink(),
-                    enabled: enabled,
                   ).build(
                     context,
                     false,
@@ -339,46 +348,37 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
         ),
       ),
       paneBodyBuilder: (item, child) {
-      final name =
-          item?.key is ValueKey ? (item!.key as ValueKey).value : null;
-      return FocusTraversalGroup(
-        key: ValueKey('body$name'),
-        child: widget.child,
-      );
-    },
-    pane: NavigationPane(
-      selected: _calculateSelectedIndex(context),
-      displayMode: appTheme.displayMode,
-      indicator: () {
-        switch (appTheme.indicator) {
-          case NavigationIndicators.end:
-            return const EndNavigationIndicator();
-          case NavigationIndicators.sticky:
-            return const StickyNavigationIndicator();
-        }
-      }(),
-      items: originalItems,
-      autoSuggestBox: Builder(
-        builder: (context) {
-          return TextBox( 
-            key: searchKey,
-            focusNode: searchFocusNode,
-            controller: searchController,
-            unfocusedColor: Colors.transparent,
-            placeholder: 'Search',
-            onChanged: (text) {
-              searchProvider.updateSearchQuery(text);
-            },
-            onSubmitted: (value) {
-              if (searchController.text.isEmpty) {
-                  return;
-                }
-                context.go('/repacklibrary');
-                searchProvider.updateSearchQuery(searchController.text);
-                searchFocusNode.unfocus();
-            },
-            suffix: IconButton( 
-              onPressed: () {
+        final name =
+            item?.key is ValueKey ? (item!.key as ValueKey).value : null;
+        return FocusTraversalGroup(
+          key: ValueKey('body$name'),
+          child: widget.child,
+        );
+      },
+      pane: NavigationPane(
+        selected: _calculateSelectedIndex(context),
+        displayMode: appTheme.displayMode,
+        indicator: () {
+          switch (appTheme.indicator) {
+            case NavigationIndicators.end:
+              return const EndNavigationIndicator();
+            case NavigationIndicators.sticky:
+              return const StickyNavigationIndicator();
+          }
+        }(),
+        items: originalItems,
+        autoSuggestBox: Builder(
+          builder: (context) {
+            return TextBox(
+              key: searchKey,
+              focusNode: searchFocusNode,
+              controller: searchController,
+              unfocusedColor: Colors.transparent,
+              placeholder: 'Search',
+              onChanged: (text) {
+                searchProvider.updateSearchQuery(text);
+              },
+              onSubmitted: (value) {
                 if (searchController.text.isEmpty) {
                   return;
                 }
@@ -386,17 +386,26 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 searchProvider.updateSearchQuery(searchController.text);
                 searchFocusNode.unfocus();
               },
-              icon: const Icon(FluentIcons.search),
-            ),
-          );
-        },
+              suffix: IconButton(
+                onPressed: () {
+                  if (searchController.text.isEmpty) {
+                    return;
+                  }
+                  context.go('/repacklibrary');
+                  searchProvider.updateSearchQuery(searchController.text);
+                  searchFocusNode.unfocus();
+                },
+                icon: const Icon(FluentIcons.search),
+              ),
+            );
+          },
+        ),
+        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+        footerItems: footerItems,
       ),
-      autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-      footerItems: footerItems,
-    ),
-    onOpenSearch: searchFocusNode.requestFocus,
-  );
-}
+      onOpenSearch: searchFocusNode.requestFocus,
+    );
+  }
 
   @override
   void onWindowClose() async {
@@ -472,13 +481,8 @@ final router = GoRouter(
         GoRoute(
           path: '/settings',
           builder: (BuildContext context, GoRouterState state) {
-            final String? section =
-                state
-                    .uri
-                    .queryParameters['section']; 
-            return Settings(
-              sectionToScrollTo: section,
-            ); 
+            final String? section = state.uri.queryParameters['section'];
+            return Settings(sectionToScrollTo: section);
           },
         ),
         GoRoute(
@@ -491,7 +495,6 @@ final router = GoRouter(
           path: '/repackdetails',
           builder: (context, state) {
             final repack = state.extra as Repack;
-
             return RepackDetails(selectedRepack: repack);
           },
         ),

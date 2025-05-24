@@ -114,7 +114,6 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
           return InfoBar(
             title: const Text('No completed groups to clear.'),
             severity: InfoBarSeverity.info,
-            isLong: true,
             action: Button(onPressed: close, child: const Text('Dismiss')),
           );
         },
@@ -156,7 +155,6 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
           return InfoBar(
             title: Text('${titlesToRemove.length} completed group(s) cleared.'),
             severity: InfoBarSeverity.success,
-            isLong: true,
             action: Button(onPressed: close, child: const Text('Dismiss')),
           );
         },

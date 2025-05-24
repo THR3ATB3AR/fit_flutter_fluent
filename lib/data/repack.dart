@@ -77,4 +77,22 @@ class Repack {
       screenshots: List<String>.from(jsonDecode(row['screenshots'])),
     );
   }
+
+  List toSqliteParams() {
+    return [
+      title,
+      url,
+      releaseDate.toIso8601String(),
+      cover,
+      genres,
+      language,
+      company,
+      originalSize,
+      repackSize,
+      jsonEncode(downloadLinks),
+      repackFeatures,
+      description,
+      jsonEncode(screenshots),
+    ];
+  }
 }
