@@ -31,7 +31,7 @@ class FeaturesDescriptionSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: 16), // Consistent spacing
+        const SizedBox(width: 16), 
         Expanded(flex: 1, child: RepackInfoCard(repack: repack)),
       ],
     );
@@ -42,7 +42,7 @@ class FeaturesDescriptionSection extends StatelessWidget {
     final theme = FluentTheme.of(context);
     return Card(
       borderRadius: BorderRadius.circular(8.0),
-      padding: EdgeInsets.zero, // Control padding internally
+      padding: EdgeInsets.zero, 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,

@@ -30,15 +30,15 @@ bool get isDesktop {
 final _appTheme = AppTheme();
 
 Future<void> _requestPermissions() async {
-    if (Platform.isAndroid) {
-      final status = await Permission.manageExternalStorage.request();
-      if (status.isGranted) {
-        print('Permission granted');
-      } else {
-        print('Permission denied');
-      }
+  if (Platform.isAndroid) {
+    final status = await Permission.manageExternalStorage.request();
+    if (status.isGranted) {
+      print('Permission granted');
+    } else {
+      print('Permission denied');
     }
   }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -41,8 +41,9 @@ class _RepackHeaderState extends State<RepackHeader> {
     }
 
     _setupProgressListener();
-    _taskGroupUpdateSubscription =
-        _ddManager.onTaskGroupUpdated.listen((updatedSanitizedTitle) {
+    _taskGroupUpdateSubscription = _ddManager.onTaskGroupUpdated.listen((
+      updatedSanitizedTitle,
+    ) {
       if (mounted &&
           updatedSanitizedTitle ==
               _ddManager.sanitizeFileName(widget.repack.title)) {
@@ -53,8 +54,9 @@ class _RepackHeaderState extends State<RepackHeader> {
 
   void _setupProgressListener() {
     _batchProgressNotifier?.removeListener(_onProgressChanged);
-    _batchProgressNotifier =
-        _ddManager.getBatchProgressForTitle(widget.repack.title);
+    _batchProgressNotifier = _ddManager.getBatchProgressForTitle(
+      widget.repack.title,
+    );
 
     if (mounted) {
       setState(() {
@@ -84,7 +86,10 @@ class _RepackHeaderState extends State<RepackHeader> {
   }
 
   void _showDownloadLinksProcessingDialog(
-      String repackTitle, String mirrorUrlsString, String downloadPath) {
+    String repackTitle,
+    String mirrorUrlsString,
+    String downloadPath,
+  ) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -114,8 +119,9 @@ class _RepackHeaderState extends State<RepackHeader> {
 
             List<Map<String, String>> currentMirrorsForDialog = [];
             if (currentDialogSelectedMethod != null &&
-                widget.repack.downloadLinks
-                    .containsKey(currentDialogSelectedMethod)) {
+                widget.repack.downloadLinks.containsKey(
+                  currentDialogSelectedMethod,
+                )) {
               currentMirrorsForDialog =
                   widget.repack.downloadLinks[currentDialogSelectedMethod]!;
             }
@@ -136,22 +142,24 @@ class _RepackHeaderState extends State<RepackHeader> {
                           child: ComboBox<String>(
                             value: currentDialogSelectedMethod,
                             isExpanded: true,
-                            items: widget.repack.downloadLinks.keys
-                                .map(
-                                  (key) => ComboBoxItem<String>(
-                                    value: key,
-                                    child: Text(key),
-                                  ),
-                                )
-                                .toList(),
+                            items:
+                                widget.repack.downloadLinks.keys
+                                    .map(
+                                      (key) => ComboBoxItem<String>(
+                                        value: key,
+                                        child: Text(key),
+                                      ),
+                                    )
+                                    .toList(),
                             onChanged: (String? newValue) {
                               if (newValue != null) {
                                 setStateDialog(() {
                                   currentDialogSelectedMethod = newValue;
                                   currentDialogSelectedMirror = null;
-                                  List<Map<String, String>>? mirrors = widget
-                                      .repack.downloadLinks[
-                                          currentDialogSelectedMethod!];
+                                  List<Map<String, String>>? mirrors =
+                                      widget
+                                          .repack
+                                          .downloadLinks[currentDialogSelectedMethod!];
                                   if (mirrors != null && mirrors.isNotEmpty) {
                                     currentDialogSelectedMirror = mirrors.first;
                                   }
@@ -169,13 +177,14 @@ class _RepackHeaderState extends State<RepackHeader> {
                           child: ComboBox<Map<String, String>>(
                             value: currentDialogSelectedMirror,
                             isExpanded: true,
-                            items: currentMirrorsForDialog.map((mirrorMap) {
-                              final hostName = mirrorMap['hostName']!;
-                              return ComboBoxItem<Map<String, String>>(
-                                value: mirrorMap,
-                                child: Text(hostName),
-                              );
-                            }).toList(),
+                            items:
+                                currentMirrorsForDialog.map((mirrorMap) {
+                                  final hostName = mirrorMap['hostName']!;
+                                  return ComboBoxItem<Map<String, String>>(
+                                    value: mirrorMap,
+                                    child: Text(hostName),
+                                  );
+                                }).toList(),
                             onChanged: (Map<String, String>? newValue) {
                               if (newValue != null) {
                                 setStateDialog(() {
@@ -211,10 +220,11 @@ class _RepackHeaderState extends State<RepackHeader> {
               ),
               actions: [
                 Button(
-                    child: const Text('Close'),
-                    onPressed: () {
-                      Navigator.pop(dialogContext);
-                    }),
+                  child: const Text('Close'),
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                  },
+                ),
                 FilledButton(
                   onPressed: () {
                     final String downloadPathForThisOperation =
@@ -223,23 +233,25 @@ class _RepackHeaderState extends State<RepackHeader> {
                     if (downloadPathForThisOperation.isEmpty) {
                       showDialog(
                         context: context,
-                        builder: (ctx) => ContentDialog(
-                          title: const Text("Download Location Empty"),
-                          content: const Text(
-                              "Please select or enter a download location."),
-                          actions: [
-                            Button(
-                                child: const Text("OK"),
-                                onPressed: () => Navigator.pop(ctx))
-                          ],
-                        ),
+                        builder:
+                            (ctx) => ContentDialog(
+                              title: const Text("Download Location Empty"),
+                              content: const Text(
+                                "Please select or enter a download location.",
+                              ),
+                              actions: [
+                                Button(
+                                  child: const Text("OK"),
+                                  onPressed: () => Navigator.pop(ctx),
+                                ),
+                              ],
+                            ),
                       );
                       return;
                     }
 
                     _selectedDownloadMethod = currentDialogSelectedMethod;
                     _selectedMirror = currentDialogSelectedMirror;
-
 
                     if (_selectedDownloadMethod != null &&
                         _selectedMirror != null &&
@@ -254,17 +266,21 @@ class _RepackHeaderState extends State<RepackHeader> {
                       );
                     } else {
                       showDialog(
-                          context: context,
-                          builder: (ctx) => ContentDialog(
-                                title: const Text("Selection Incomplete"),
-                                content: const Text(
-                                    "Please select a download method and a mirror."),
-                                actions: [
-                                  Button(
-                                      child: const Text("OK"),
-                                      onPressed: () => Navigator.pop(ctx))
-                                ],
-                              ));
+                        context: context,
+                        builder:
+                            (ctx) => ContentDialog(
+                              title: const Text("Selection Incomplete"),
+                              content: const Text(
+                                "Please select a download method and a mirror.",
+                              ),
+                              actions: [
+                                Button(
+                                  child: const Text("OK"),
+                                  onPressed: () => Navigator.pop(ctx),
+                                ),
+                              ],
+                            ),
+                      );
                     }
                   },
                   child: const Text('Next'),
@@ -285,14 +301,13 @@ class _RepackHeaderState extends State<RepackHeader> {
     final typography = theme.typography;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 24.0), // Add overall bottom padding
+      padding: const EdgeInsets.only(bottom: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Cover Image
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8.0),
@@ -309,24 +324,32 @@ class _RepackHeaderState extends State<RepackHeader> {
                   child: CachedNetworkImage(
                     imageUrl: widget.repack.cover,
                     fit: BoxFit.cover,
-                    width: 120, // Slightly larger
-                    height: 120, // Slightly larger
-                    errorWidget: (context, url, error) => Container(
-                        width: 120,
-                        height: 120,
-                        color: theme.resources.subtleFillColorSecondary,
-                        child: Center(
-                            child: Icon(FluentIcons.photo_error,
-                                size: 32, color: theme.inactiveColor))),
-                    placeholder: (context, url) => Container(
-                        width: 120,
-                        height: 120,
-                        color: theme.resources.subtleFillColorTertiary,
-                        child: const Center(child: ProgressRing())),
+                    width: 120,
+                    height: 120,
+                    errorWidget:
+                        (context, url, error) => Container(
+                          width: 120,
+                          height: 120,
+                          color: theme.resources.subtleFillColorSecondary,
+                          child: Center(
+                            child: Icon(
+                              FluentIcons.photo_error,
+                              size: 32,
+                              color: theme.inactiveColor,
+                            ),
+                          ),
+                        ),
+                    placeholder:
+                        (context, url) => Container(
+                          width: 120,
+                          height: 120,
+                          color: theme.resources.subtleFillColorTertiary,
+                          child: const Center(child: ProgressRing()),
+                        ),
                   ),
                 ),
               ),
-              const SizedBox(width: 24), // Increased spacing
+              const SizedBox(width: 24),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,62 +358,74 @@ class _RepackHeaderState extends State<RepackHeader> {
                     Text(
                       widget.repack.title,
                       style: typography.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold, letterSpacing: 0.5),
-                      maxLines: 3, // Allow more lines for longer titles
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       widget.repack.company,
-                      style: typography.bodyLarge
-                          ?.copyWith(color: theme.inactiveColor),
+                      style: typography.bodyLarge?.copyWith(
+                        color: theme.inactiveColor,
+                      ),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24), // Increased spacing
-          // Genres
+          const SizedBox(height: 24),
+
           if (widget.repack.genres.isNotEmpty)
             Wrap(
-              spacing: 8.0, // Spacing between chips
-              runSpacing: 8.0, // Spacing between lines of chips
-              children: widget.repack.genres
-                  .split(',')
-                  .map((g) => FluentChip(label: g.trim()))
-                  .toList(),
+              spacing: 8.0,
+              runSpacing: 8.0,
+              children:
+                  widget.repack.genres
+                      .split(',')
+                      .map((g) => FluentChip(label: g.trim()))
+                      .toList(),
             ),
-          const SizedBox(height: 24), // Increased spacing
-          // Download Button
+          const SizedBox(height: 24),
           SizedBox(
-            width: 180, // Slightly wider
+            width: 180,
             child: FilledButton(
               style: ButtonStyle(
                 padding: WidgetStateProperty.all(
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
-                // backgroundColor can inherit from accentColor by default
               ),
               onPressed:
-                  widget.repack.downloadLinks.isEmpty ? null : showDownloadDialog,
+                  widget.repack.downloadLinks.isEmpty
+                      ? null
+                      : showDownloadDialog,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(FluentIcons.download,
-                      size: 16, color: theme.brightness == Brightness.dark ? Colors.black : Colors.white),
+                  Icon(
+                    FluentIcons.download,
+                    size: 16,
+                    color:
+                        theme.brightness == Brightness.dark
+                            ? Colors.black
+                            : Colors.white,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     "Download",
                     style: typography.bodyStrong?.copyWith(
-                      color: theme.brightness == Brightness.dark ? Colors.black : Colors.white
+                      color:
+                          theme.brightness == Brightness.dark
+                              ? Colors.black
+                              : Colors.white,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          // Progress Bar Section
           if (_batchProgressNotifier != null)
             Padding(
               padding: const EdgeInsets.only(top: 20.0),
@@ -398,7 +433,7 @@ class _RepackHeaderState extends State<RepackHeader> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: 180, // Match button width
+                    width: 180,
                     child: ProgressBar(
                       value: _batchProgress * 100,
                       backgroundColor: theme.resources.subtleFillColorSecondary,
@@ -409,8 +444,8 @@ class _RepackHeaderState extends State<RepackHeader> {
                     _batchProgress == 1.0
                         ? 'Download complete!'
                         : _batchProgress == 0.0
-                            ? 'Download pending...'
-                            : 'Downloading: ${(_batchProgress * 100).toStringAsFixed(0)}%',
+                        ? 'Download pending...'
+                        : 'Downloading: ${(_batchProgress * 100).toStringAsFixed(0)}%',
                     style: typography.body,
                   ),
                 ],
