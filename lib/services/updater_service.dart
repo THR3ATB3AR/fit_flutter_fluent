@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,13 +17,13 @@ class UpdaterService {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else if (response.statusCode == 403) {
-        print('GitHub API rate limit likely exceeded. Headers: ${response.headers}');
+        debugPrint('GitHub API rate limit likely exceeded. Headers: ${response.headers}');
         throw Exception('GitHub API rate limit exceeded. Please try again later.');
       } else {
         throw Exception('Failed to fetch latest release info from GitHub (Status ${response.statusCode})');
       }
     } catch (e) {
-      print("Error in getLatestReleaseData: $e");
+      debugPrint("Error in getLatestReleaseData: $e");
       rethrow;
     }
   }
@@ -61,7 +62,7 @@ class UpdaterService {
       
       return latestVersion != appVersion;
     } catch (e) {
-      print("Error in isUpdateAvailable: $e");
+      debugPrint("Error in isUpdateAvailable: $e");
       return false; 
     }
   }
@@ -90,16 +91,16 @@ class UpdaterService {
       throw Exception('Asset download URL or name is missing.');
     }
 
-    final directory = await getTemporaryDirectory(); // Use temporary for installer
+    final directory = await getTemporaryDirectory(); 
     final filePath = '${directory.path}${Platform.pathSeparator}$fileName';
 
-    print('Downloading latest release from $downloadUrl to $filePath');
+    debugPrint('Downloading latest release from $downloadUrl to $filePath');
     final fileResponse = await http.get(Uri.parse(downloadUrl));
 
     if (fileResponse.statusCode == 200) {
       final file = File(filePath);
       await file.writeAsBytes(fileResponse.bodyBytes);
-      print('Downloaded latest release to $filePath');
+      debugPrint('Downloaded latest release to $filePath');
       return filePath;
     } else {
       throw Exception('Failed to download release asset (Status ${fileResponse.statusCode})');
@@ -108,24 +109,24 @@ class UpdaterService {
 
   Future<void> runDownloadedSetup(String filePath) async {
     if (!Platform.isWindows) {
-      print('Automatic setup execution is only supported on Windows for this example.');
+      debugPrint('Automatic setup execution is only supported on Windows for this example.');
       return;
     }
     try {
-      print('Attempting to run setup: $filePath /VERYSILENT');
+      debugPrint('Attempting to run setup: $filePath /VERYSILENT');
       final result = await Process.run(filePath, ['/VERYSILENT']); 
       if (result.exitCode == 0) {
-        print('Setup ran successfully (or started in background). Exit code: ${result.exitCode}');
-        print('Stdout: ${result.stdout}');
-        print('Stderr: ${result.stderr}');
+        debugPrint('Setup ran successfully (or started in background). Exit code: ${result.exitCode}');
+        debugPrint('Stdout: ${result.stdout}');
+        debugPrint('Stderr: ${result.stderr}');
       } else {
-        print('Setup failed or reported an issue. Exit code: ${result.exitCode}');
-        print('Stdout: ${result.stdout}');
-        print('Stderr: ${result.stderr}');
+        debugPrint('Setup failed or reported an issue. Exit code: ${result.exitCode}');
+        debugPrint('Stdout: ${result.stdout}');
+        debugPrint('Stderr: ${result.stderr}');
         throw Exception('Setup failed with exit code ${result.exitCode}. Installer output: ${result.stderr}');
       }
     } catch (e) {
-      print('Failed to run setup: $e');
+      debugPrint('Failed to run setup: $e');
       throw Exception('Failed to run setup: $e');
     }
   }

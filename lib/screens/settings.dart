@@ -671,7 +671,7 @@ class _SettingsState extends State<Settings> with PageMixin {
               children: [
                 FilledButton(
                   style: ButtonStyle(
-                    backgroundColor: ButtonState.all(Colors.green.dark),
+                    backgroundColor: WidgetStatePropertyAll(Colors.green.lighter),
                   ),
                   onPressed: () {
                     updateProvider.downloadAndInstallUpdate(context);
@@ -727,8 +727,8 @@ class _SettingsState extends State<Settings> with PageMixin {
           FilledButton(
             onPressed: _isForceRescraping ? null : _forceRescrapeAllData,
             style: ButtonStyle(
-              backgroundColor: ButtonState.all(Colors.red.dark),
-              padding: ButtonState.all(
+              backgroundColor: WidgetStatePropertyAll(Colors.red.dark),
+              padding: WidgetStatePropertyAll(
                 const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
             ),

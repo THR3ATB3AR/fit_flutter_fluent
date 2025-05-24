@@ -41,35 +41,37 @@ class ScraperService {
 
   Future<void> rescrapeNewAndPopularRepacks() async {
     if (isRescraping) {
-      print("Rescrape already in progress. Skipping.");
+      debugPrint("Rescrape already in progress. Skipping.");
       return;
     }
     isRescraping = true;
     loadingProgress.value = 0.0; // Reset progress
 
     try {
-      print("Rescraping new repacks...");
+      debugPrint("Rescraping new repacks...");
       await _scrapeAndSaveNewRepacks(
         onProgress: (current, total) {
-          if (total > 0)
+          if (total > 0) {
             loadingProgress.value = (current / total) * 0.5; // 50% for new
+          }
         },
       );
-      print("New repacks rescraped and saved.");
+      debugPrint("New repacks rescraped and saved.");
 
-      print("Rescraping popular repacks...");
+      debugPrint("Rescraping popular repacks...");
       await _scrapeAndSavePopularRepacks(
         onProgress: (current, total) {
-          if (total > 0)
+          if (total > 0) {
             loadingProgress.value =
                 0.5 + (current / total) * 0.5; // 50% for popular
+          }
         },
       );
-      print("Popular repacks rescraped and saved.");
+      debugPrint("Popular repacks rescraped and saved.");
 
       // _repackService.notifyListeners(); // Individual save methods already notify
     } catch (e) {
-      print("Error during rescrapeNewAndPopularRepacks: $e");
+      debugPrint("Error during rescrapeNewAndPopularRepacks: $e");
       rethrow;
     } finally {
       isRescraping = false;
@@ -101,7 +103,7 @@ class ScraperService {
       final response = await http.head(Uri.parse(url));
       return response.statusCode == 200;
     } catch (e) {
-      // print("Failed to check image URL $url: $e");
+      // debugPrint("Failed to check image URL $url: $e");
       return false;
     }
   }
@@ -135,7 +137,7 @@ class ScraperService {
         final repack = await scrapeRepackFromSearch(entry.value);
         repacks.add(repack);
       } catch (e) {
-        print('Failed to scrape repack: ${entry.key}, error: $e');
+        debugPrint('Failed to scrape repack: ${entry.key}, error: $e');
         // Optionally add to failedRepacks here too, if this func is used standalone
         // await _repackService.saveFailedRepack(entry.key, entry.value);
       }
@@ -166,7 +168,7 @@ class ScraperService {
 
     int totalMissing = missingRepackUrls.length;
     if (totalMissing == 0) {
-      print("No missing repacks to scrape.");
+      debugPrint("No missing repacks to scrape.");
       loadingProgress.value = 1.0; // Indicate completion
       onProgress?.call(0, 0);
       _repackService
@@ -174,7 +176,7 @@ class ScraperService {
       return;
     }
 
-    print("Found $totalMissing missing repacks to scrape.");
+    debugPrint("Found $totalMissing missing repacks to scrape.");
     loadingProgress.value = 0.0; // Reset for this specific operation
 
     for (int i = 0; i < totalMissing; i++) {
@@ -196,7 +198,7 @@ class ScraperService {
           ); // This also notifies
         }
       } catch (e) {
-        print('Failed to scrape repack: $url ($title), error: $e');
+        debugPrint('Failed to scrape repack: $url ($title), error: $e');
         await _repackService.saveFailedRepack(title, url); // This also notifies
       }
       if (totalMissing > 0) loadingProgress.value = (i + 1) / totalMissing;
@@ -206,7 +208,7 @@ class ScraperService {
         .deleteFailedRepacksFromAllRepackNames(); // This also notifies
     _repackService.everyRepack.sort((a, b) => a.title.compareTo(b.title));
     _repackService.notifyListeners(); // Final notification for sort
-    print('scrapeMissingRepacks finished. Scraped/Attempted: $totalMissing');
+    debugPrint('scrapeMissingRepacks finished. Scraped/Attempted: $totalMissing');
     if (totalMissing > 0) loadingProgress.value = 1.0; // Mark as complete
   }
 
@@ -223,7 +225,7 @@ class ScraperService {
 
     if (pageLinks.isEmpty) {
       // Handle case where site structure might change or no pagination
-      print(
+      debugPrint(
         "Warning: Could not find pagination for all repacks names. Scraping first page only.",
       );
       // Try to scrape current page if no paginator
@@ -319,7 +321,7 @@ class ScraperService {
         );
         if (articles.isEmpty && i == 0) {
           // If first page has no articles, something is wrong or no new repacks
-          print(
+          debugPrint(
             "No articles found on the first page of new repacks. Stopping scrape for new repacks.",
           );
           break;
@@ -333,7 +335,7 @@ class ScraperService {
         }
         onProgress(i + 1, pagesToScrape);
       } catch (e) {
-        print("Error scraping new repacks page ${i + 1}: $e");
+        debugPrint("Error scraping new repacks page ${i + 1}: $e");
         // Decide if to continue or rethrow. For new/popular, might be okay to skip a page.
         if (i == 0) rethrow; // If first page fails, it's a bigger issue
       }
@@ -362,7 +364,7 @@ class ScraperService {
             .toList();
 
     if (individualRepackPageUrls.isEmpty) {
-      print("Warning: No popular repack links found on the index page.");
+      debugPrint("Warning: No popular repack links found on the index page.");
       onProgress(0, 0);
       return repacks;
     }
@@ -390,13 +392,13 @@ class ScraperService {
           );
           repacks.add(repack);
         } else {
-          print(
+          debugPrint(
             "Warning: Could not find 'article.category-lossless-repack' on page: $repackUrlString",
           );
         }
         onProgress(i + 1, itemsToScrape);
       } catch (e) {
-        print(
+        debugPrint(
           'Error scraping popular repack from ${individualRepackPageUrls[i]}: $e',
         );
       }
@@ -437,8 +439,9 @@ class ScraperService {
       });
     }
 
-    if (repackSections.isEmpty)
+    if (repackSections.isEmpty) {
       throw Exception("No repack sections found in article for URL: $url");
+    }
 
     final String title = repackSections[0]['title'] ?? 'N/A Title';
     final String dateString =
@@ -625,7 +628,7 @@ class ScraperService {
         if (response.statusCode == 200) {
           return response;
         } else if (response.statusCode == 404 && attempt < retries - 1) {
-          print("Got 404 for $url, retrying (${attempt + 1}/$retries)...");
+          debugPrint("Got 404 for $url, retrying (${attempt + 1}/$retries)...");
           await Future.delayed(
             Duration(seconds: 2 + attempt * 2),
           ); // Exponential backoff
@@ -637,20 +640,20 @@ class ScraperService {
         }
       } on SocketException catch (e) {
         if (attempt == retries - 1) rethrow;
-        print(
+        debugPrint(
           "SocketException for $url: $e. Retrying (${attempt + 1}/$retries)...",
         );
         await Future.delayed(Duration(seconds: 5 + attempt * 5));
       } on http.ClientException catch (e) {
         if (attempt == retries - 1) rethrow;
-        print(
+        debugPrint(
           "ClientException for $url: $e. Retrying (${attempt + 1}/$retries)...",
         );
         await Future.delayed(Duration(seconds: 2 + attempt * 2));
       } catch (e) {
         // Catch other errors like TimeoutException
         if (attempt == retries - 1) rethrow;
-        print(
+        debugPrint(
           "Generic error for $url: $e. Retrying (${attempt + 1}/$retries)...",
         );
         await Future.delayed(Duration(seconds: 3 + attempt * 3));
@@ -662,7 +665,7 @@ class ScraperService {
   }
 
   // New function for settings page
-  Future<void> forceRescrapeEverything({
+ Future<void> forceRescrapeEverything({
     required Function(String status) onStatusUpdate,
     required Function(double progress) onProgressUpdate,
   }) async {
@@ -682,15 +685,17 @@ class ScraperService {
       onStatusUpdate("Scraping all repack names (Phase 1/4)...");
       _repackService.allRepacksNames = await scrapeAllRepacksNames(
         onProgress: (current, total) {
-          if (total > 0)
+          if (total > 0) {
             onProgressUpdate(
               0.05 + (current / total) * 0.20,
             ); // Names: 20% (total 25%)
+            onStatusUpdate("Scraping all repack names (Phase 1/4): Page $current of $total");
+          }
         },
       );
       await _repackService.saveAllRepackList();
       onStatusUpdate(
-        "All repack names scraped. (${_repackService.allRepacksNames.length} names found)",
+        "All repack names scraped. (${_repackService.allRepacksNames.length} names found) (Phase 1/4 Complete)",
       );
       onProgressUpdate(0.25);
 
@@ -699,46 +704,60 @@ class ScraperService {
       );
       _repackService.everyRepack = await scrapeEveryRepack(
         onProgress: (current, total) {
-          if (total > 0)
+          if (total > 0) {
             onProgressUpdate(
               0.25 + (current / total) * 0.50,
             ); // Details: 50% (total 75%)
+            onStatusUpdate("Scraping details for every repack (Phase 2/4): Repack $current of $total");
+          }
         },
       );
       await _repackService.saveEveryRepackList();
       onStatusUpdate(
-        "All repack details scraped. (${_repackService.everyRepack.length} repacks processed)",
+        "All repack details scraped. (${_repackService.everyRepack.length} repacks processed) (Phase 2/4 Complete)",
       );
       onProgressUpdate(0.75);
 
       onStatusUpdate("Rescraping new repacks (Phase 3/4)...");
       await _scrapeAndSaveNewRepacks(
         onProgress: (current, total) {
-          if (total > 0)
+          if (total > 0) {
             onProgressUpdate(
               0.75 + (current / total) * 0.10,
             ); // New: 10% (total 85%)
+            onStatusUpdate("Rescraping new repacks (Phase 3/4): Page $current of $total");
+          }
         },
       );
+       onStatusUpdate("New repacks rescraped. (Phase 3/4 Complete)");
+       onProgressUpdate(0.85);
+
 
       onStatusUpdate("Rescraping popular repacks (Phase 4/4)...");
       await _scrapeAndSavePopularRepacks(
         onProgress: (current, total) {
-          if (total > 0)
+          if (total > 0) {
             onProgressUpdate(
               0.85 + (current / total) * 0.10,
             ); // Popular: 10% (total 95%)
+            onStatusUpdate("Rescraping popular repacks (Phase 4/4): Item $current of $total");
+          }
         },
       );
+      onStatusUpdate("Popular repacks rescraped. (Phase 4/4 Complete)");
+      onProgressUpdate(0.95);
+
 
       onStatusUpdate("Finalizing...");
       _repackService.notifyListeners();
+      // Small delay for finalization to show before completion message
+      await Future.delayed(const Duration(milliseconds: 500)); 
       onProgressUpdate(1.0); // All done
       onStatusUpdate("Full rescrape completed successfully!");
     } catch (e) {
-      print("Error during force rescrape everything: $e");
+      debugPrint("Error during force rescrape everything: $e");
       onStatusUpdate("Error: $e. Process halted.");
-      rethrow;
+      // Do not rethrow if onStatusUpdate is used for final error reporting to UI
     } finally {
       isRescraping = false;
       loadingProgress.value = 0.0; // Reset global progress
