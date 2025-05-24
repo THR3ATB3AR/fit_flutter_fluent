@@ -74,6 +74,7 @@ class _HomePageState extends State<HomePage> with PageMixin {
       header: PageHeader(
         title: const Text('Home'),
         commandBar: CommandBar(
+          mainAxisAlignment: MainAxisAlignment.end,
           primaryItems: [
             CommandBarButton(
               icon:

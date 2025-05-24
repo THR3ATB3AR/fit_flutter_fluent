@@ -32,7 +32,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
   String _activeSearchQuery = '';
 
   bool _isSyncingLibrary = false;
-  String _syncStatusText = ""; 
+  String _syncStatusText = "";
 
   @override
   void initState() {
@@ -49,9 +49,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
           _fullRepackListFromService = List.from(newServiceData);
           _performFilteringAndPagination();
         } else if (_isLoadingInitial) {
-          _fullRepackListFromService = List.from(
-            newServiceData,
-          );
+          _fullRepackListFromService = List.from(newServiceData);
           _performFilteringAndPagination();
         }
       } else {
@@ -63,10 +61,9 @@ class _RepackLibraryState extends State<RepackLibrary> {
     if (_repackService.isDataLoadedInMemory) {
       _fullRepackListFromService = List.from(_repackService.everyRepack);
       if (_isLoadingInitial) {
-         _performFilteringAndPagination();
+        _performFilteringAndPagination();
       }
-    } else {
-    }
+    } else {}
 
     _scrollController.addListener(_onScroll);
   }
@@ -92,7 +89,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
 
     if (!_repackService.isDataLoadedInMemory &&
         _fullRepackListFromService.isEmpty &&
-        _activeSearchQuery.isEmpty) { 
+        _activeSearchQuery.isEmpty) {
       setState(() {
         _filteredRepacksForDisplay = [];
         _paginatedRepacks = [];
@@ -168,12 +165,12 @@ class _RepackLibraryState extends State<RepackLibrary> {
     }
   }
 
-    Future<void> _syncRepackLibrary() async {
+  Future<void> _syncRepackLibrary() async {
     if (!mounted) return;
     setState(() {
       _isSyncingLibrary = true;
       _syncStatusText = "Starting library sync...";
-      ScraperService.instance.loadingProgress.value = 0.0; 
+      ScraperService.instance.loadingProgress.value = 0.0;
     });
 
     try {
@@ -183,11 +180,10 @@ class _RepackLibraryState extends State<RepackLibrary> {
       final allNames = await ScraperService.instance.scrapeAllRepacksNames(
         onProgress: (current, total) {
           if (mounted) {
-            _updateSyncStatusText(
-              "Fetching names: $current/$total pages",
-            );
+            _updateSyncStatusText("Fetching names: $current/$total pages");
             if (total > 0) {
-              ScraperService.instance.loadingProgress.value = current.toDouble() / total.toDouble();
+              ScraperService.instance.loadingProgress.value =
+                  current.toDouble() / total.toDouble();
             } else {
               ScraperService.instance.loadingProgress.value = 0.0;
             }
@@ -264,7 +260,8 @@ class _RepackLibraryState extends State<RepackLibrary> {
           _isSyncingLibrary = false;
           _syncStatusText = ""; // Clear status text
         });
-        ScraperService.instance.loadingProgress.value = 0.0; // Reset global progress fully at the end
+        ScraperService.instance.loadingProgress.value =
+            0.0; // Reset global progress fully at the end
         // After sync, refresh data
         _fullRepackListFromService = List.from(_repackService.everyRepack);
         _performFilteringAndPagination();
@@ -287,15 +284,17 @@ class _RepackLibraryState extends State<RepackLibrary> {
     final pageHeader = PageHeader(
       title: const Text('Repack Library'),
       commandBar: CommandBar(
+        mainAxisAlignment: MainAxisAlignment.end,
         primaryItems: [
           CommandBarButton(
-            icon: _isSyncingLibrary
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: ProgressRing(strokeWidth: 2.0),
-                  )
-                : const Icon(FluentIcons.sync),
+            icon:
+                _isSyncingLibrary
+                    ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: ProgressRing(strokeWidth: 2.0),
+                    )
+                    : const Icon(FluentIcons.sync),
             label: const Text('Sync Library'),
             onPressed: _isSyncingLibrary ? null : _syncRepackLibrary,
           ),
@@ -318,7 +317,10 @@ class _RepackLibraryState extends State<RepackLibrary> {
                 style: FluentTheme.of(context).typography.subtitle,
               ),
               const SizedBox(height: 8),
-              Text(_syncStatusText, style: FluentTheme.of(context).typography.body),
+              Text(
+                _syncStatusText,
+                style: FluentTheme.of(context).typography.body,
+              ),
               const SizedBox(height: 16),
               ValueListenableBuilder<double>(
                 valueListenable: ScraperService.instance.loadingProgress,
@@ -349,7 +351,9 @@ class _RepackLibraryState extends State<RepackLibrary> {
 
     Widget buildMainContentArea() {
       // 1. Initial loading state for the whole page
-      if (_isLoadingInitial && _paginatedRepacks.isEmpty && !_repackService.isDataLoadedInMemory) {
+      if (_isLoadingInitial &&
+          _paginatedRepacks.isEmpty &&
+          !_repackService.isDataLoadedInMemory) {
         return const Expanded(child: Center(child: ProgressRing()));
       }
 
@@ -374,11 +378,17 @@ class _RepackLibraryState extends State<RepackLibrary> {
             final double screenWidth = constraints.maxWidth;
             int crossAxisCount;
 
-            if (screenWidth < 600) {crossAxisCount = 4;}
-            else if (screenWidth < 900) {crossAxisCount = 5;}
-            else if (screenWidth < 1200) {crossAxisCount = 6;}
-            else if (screenWidth < 1500) {crossAxisCount = 7;}
-            else {crossAxisCount = 8;}
+            if (screenWidth < 600) {
+              crossAxisCount = 4;
+            } else if (screenWidth < 900) {
+              crossAxisCount = 5;
+            } else if (screenWidth < 1200) {
+              crossAxisCount = 6;
+            } else if (screenWidth < 1500) {
+              crossAxisCount = 7;
+            } else {
+              crossAxisCount = 8;
+            }
 
             const double cardInternalHorizontalMargin = 16.0;
             const double gridPadding = 8.0;
@@ -440,10 +450,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
           if (syncProgressWidget != null) syncProgressWidget,
           buildMainContentArea(),
           if (_isLoadingMore && !_isSyncingLibrary) // Show only if not syncing
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: ProgressRing(),
-            ),
+            const Padding(padding: EdgeInsets.all(16.0), child: ProgressRing()),
         ],
       ),
     );

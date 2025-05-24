@@ -1,9 +1,8 @@
 import 'dart:async';
-import 'package:fit_flutter_fluent/services/dd_manager.dart'; 
+import 'package:fit_flutter_fluent/services/dd_manager.dart';
 import 'package:flutter_download_manager/flutter_download_manager.dart' as fdm;
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
-
 
 Color getStatusColor(BuildContext context, fdm.DownloadStatus status) {
   final theme = FluentTheme.of(context);
@@ -72,7 +71,7 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
   @override
   void initState() {
     super.initState();
-    _currentDownloadTasks = Map.from(_ddManager.downloadTasks); 
+    _currentDownloadTasks = Map.from(_ddManager.downloadTasks);
     _groupUpdateSubscription = _ddManager.onTaskGroupUpdated.listen((_) {
       if (mounted) {
         setState(() {
@@ -88,8 +87,6 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
     super.dispose();
   }
 
-  
-
   Future<void> _clearAllCompletedGroups() async {
     final titlesToRemove = <String>[];
     for (var entry in _currentDownloadTasks.entries) {
@@ -103,8 +100,7 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
         if (allTasksActuallyCompleted) {
           titlesToRemove.add(title);
         }
-      } else if (batchProgressNotifier == null || entry.value.isEmpty) {
-      }
+      } else if (batchProgressNotifier == null || entry.value.isEmpty) {}
     }
 
     if (titlesToRemove.isEmpty) {
@@ -219,10 +215,8 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
                   final title = groupTitles[index];
                   final tasksInGroup = _currentDownloadTasks[title]!;
                   return _DownloadGroupItem(
-                    key: ValueKey(
-                      title,
-                    ), 
-                    groupTitle: title, 
+                    key: ValueKey(title),
+                    groupTitle: title,
                     tasks: tasksInGroup,
                     ddManager: _ddManager,
                   );
@@ -253,9 +247,7 @@ class _DownloadGroupItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Expander(
-        key: ValueKey(
-          'expander_$groupTitle',
-        ), 
+        key: ValueKey('expander_$groupTitle'),
         header: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
@@ -319,7 +311,9 @@ class _DownloadGroupItem extends StatelessWidget {
                               FilledButton(
                                 onPressed: () => Navigator.pop(ctx, true),
                                 style: ButtonStyle(
-                                  backgroundColor: WidgetStatePropertyAll(Colors.red),
+                                  backgroundColor: WidgetStatePropertyAll(
+                                    Colors.red,
+                                  ),
                                 ),
                                 child: const Text('Yes, Cancel Group'),
                               ),
@@ -357,7 +351,7 @@ class _DownloadGroupItem extends StatelessWidget {
                     );
                   }
                   return _DownloadFileItem(
-                    key: ValueKey(url), 
+                    key: ValueKey(url),
                     task: task,
                     fileName: fileName,
                     ddManager: ddManager,
@@ -402,10 +396,7 @@ class _DownloadFileItem extends StatelessWidget {
           ValueListenableBuilder<double>(
             valueListenable: task.progress,
             builder: (context, progressValue, child) {
-              return ProgressBar(
-                value: progressValue * 100,
-                strokeWidth: 6, 
-              );
+              return ProgressBar(value: progressValue * 100, strokeWidth: 6);
             },
           ),
           const SizedBox(height: 8),
