@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 import 'dart:async';
+import 'package:fit_flutter_fluent/providers/update_provider.dart';
 import 'package:fit_flutter_fluent/services/scraper_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -97,6 +98,7 @@ class _SettingsState extends State<Settings> with PageMixin {
   final GlobalKey _windowTransparencyKey = GlobalKey();
   final GlobalKey _localeKey = GlobalKey();
   final GlobalKey _dataManagementKey = GlobalKey();
+  final GlobalKey _updateSettingsKey = GlobalKey();
 
   late final Map<String, GlobalKey> _sectionKeys;
 
@@ -120,6 +122,7 @@ class _SettingsState extends State<Settings> with PageMixin {
       'windowTransparency': _windowTransparencyKey,
       'locale': _localeKey,
       'dataManagement': _dataManagementKey,
+      'updateSettings': _updateSettingsKey,
     };
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -339,6 +342,7 @@ class _SettingsState extends State<Settings> with PageMixin {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final appTheme = context.watch<AppTheme>();
+    final updateProvider = context.watch<UpdateProvider>();
     const spacer = SizedBox(height: 10.0);
     const bigSpacer = SizedBox(height: 24.0);
 
@@ -536,8 +540,173 @@ class _SettingsState extends State<Settings> with PageMixin {
             ),
           ),
         ], addBiggerSpacerAfter: false),
-
         bigSpacer,
+        Text(
+          'Application Updates',
+          style: FluentTheme.of(context).typography.title,
+        ),
+        spacer,
+        const Divider(
+          style: DividerThemeData(horizontalMargin: EdgeInsets.zero),
+        ),
+        _buildSectionWrapper(_updateSettingsKey, [
+          Text(
+            'Update Check Frequency',
+            style: FluentTheme.of(context).typography.subtitle,
+          ),
+          spacer,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ComboBox<UpdateCheckFrequency>(
+              value: updateProvider.updateCheckFrequency,
+              items:
+                  UpdateCheckFrequency.values.map((freq) {
+                    String freqText = freq.toString().split('.').last;
+                    // Capitalize first letter and make "onStartup" more readable
+                    if (freqText == "onStartup") {
+                      freqText = "On Every Startup";
+                    } else {
+                      freqText =
+                          freqText[0].toUpperCase() + freqText.substring(1);
+                    }
+                    return ComboBoxItem(value: freq, child: Text(freqText));
+                  }).toList(),
+              onChanged: (freq) {
+                if (freq != null) {
+                  updateProvider.setUpdateCheckFrequency(freq);
+                }
+              },
+            ),
+          ),
+          spacer,
+          Text(
+            'Current App Version: ${updateProvider.currentAppVersion ?? "Loading..."}',
+          ),
+          if (updateProvider.latestReleaseInfo != null &&
+              updateProvider.updateAvailable)
+            Text(
+              'Latest Available Version: ${updateProvider.latestReleaseInfo!['tag_name']}',
+            )
+          else if (updateProvider.latestReleaseInfo != null &&
+              !updateProvider.updateAvailable &&
+              !updateProvider.isCheckingForUpdates)
+            Text(
+              // Only show if not checking and no update available
+              'You are on the latest version (${updateProvider.currentAppVersion ?? ""})',
+            )
+          else if (updateProvider.isCheckingForUpdates)
+            const Text('Latest Available Version: Checking...')
+          else if (updateProvider.errorMessage != null &&
+              updateProvider.errorMessage!.contains(
+                "latest version",
+              )) // Check for specific message
+            Text('Latest Available Version: ${updateProvider.errorMessage}')
+          else if (updateProvider.lastUpdateCheckTimestamp == 0 &&
+              !updateProvider.isCheckingForUpdates)
+            const Text('Latest Available Version: Not checked yet.')
+          else if (!updateProvider
+              .isCheckingForUpdates) // Generic fallback if no specific state matches
+            const Text('Latest Available Version: Check to see.'),
+
+          if (updateProvider.errorMessage != null &&
+              !updateProvider.errorMessage!.contains("latest version"))
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text('Status: ${updateProvider.errorMessage}'),
+            ),
+          spacer,
+          if (updateProvider.latestReleaseInfo != null &&
+              updateProvider.updateAvailable &&
+              updateProvider.latestReleaseInfo!['tag_name'] ==
+                  updateProvider.ignoredVersion)
+            Row(
+              children: [
+                const Text('You have ignored this update.'),
+                const SizedBox(width: 8),
+                Button(
+                  child: const Text('Unignore & Check Again'),
+                  onPressed: () {
+                    updateProvider.clearIgnoredVersion();
+                    // Trigger a new check, user initiated
+                    updateProvider.checkForUpdates(
+                      forceCheck: true,
+                      initiatedByUser: true,
+                    );
+                  },
+                ),
+              ],
+            ),
+          spacer,
+          FilledButton(
+            onPressed:
+                updateProvider.isCheckingForUpdates
+                    ? null
+                    : () => updateProvider.checkForUpdates(
+                      forceCheck: true,
+                      initiatedByUser: true,
+                    ),
+            child:
+                updateProvider.isCheckingForUpdates
+                    ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: ProgressRing(strokeWidth: 1.5),
+                        ),
+                        SizedBox(width: 8),
+                        Text('Checking...'),
+                      ],
+                    )
+                    : const Text('Check for Updates Now'),
+          ),
+          if (updateProvider.updateAvailable &&
+              updateProvider.latestReleaseInfo?['tag_name'] !=
+                  updateProvider.ignoredVersion) ...[
+            spacer,
+            Text(
+              'An update to version ${updateProvider.latestReleaseInfo!['tag_name']} is available.',
+              style: FluentTheme.of(context).typography.bodyStrong,
+            ),
+            spacer,
+            Row(
+              children: [
+                FilledButton(
+                  style: ButtonStyle(
+                    backgroundColor: ButtonState.all(Colors.green.dark),
+                  ),
+                  onPressed: () {
+                    updateProvider.downloadAndInstallUpdate(context);
+                  },
+                  child: const Text('Download and Install Update'),
+                ),
+                const SizedBox(width: 10),
+                HyperlinkButton(
+                  child: const Text('View Release Page'),
+                  onPressed: () => updateProvider.openReleasePage(),
+                ),
+              ],
+            ),
+            if (updateProvider.latestReleaseInfo?['release_notes'] != null &&
+                updateProvider
+                    .latestReleaseInfo!['release_notes']!
+                    .isNotEmpty) ...[
+              spacer,
+              Expander(
+                header: const Text('View Release Notes'),
+                content: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: SingleChildScrollView(
+                    child: Text(
+                      updateProvider.latestReleaseInfo!['release_notes']!,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ], addBiggerSpacerAfter: false),
         Text(
           'Data Management',
           style: FluentTheme.of(context).typography.title,

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:fit_flutter_fluent/providers/update_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fit_flutter_fluent/screens/download_manager_screen.dart';
@@ -44,6 +45,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await _appTheme.loadInitialSettings();
+  final updateProvider = UpdateProvider();
   await RepackService.instance.init();
   await _requestPermissions();
 
@@ -71,11 +73,12 @@ void main() async {
     await windowManager.setPreventClose(true);
     await windowManager.setSkipTaskbar(false);
   }
-  runApp(const MyApp());
+  runApp(MyApp(updateProvider: updateProvider));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final UpdateProvider updateProvider; 
+  const MyApp({super.key, required this.updateProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +86,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider.value(value: _appTheme),
         ChangeNotifierProvider(create: (_) => SearchProvider()),
+        ChangeNotifierProvider.value(value: updateProvider),
       ],
       child: Builder(
         builder: (context) {
@@ -168,6 +172,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with WindowListener {
   bool value = false;
+  bool _isUpdateInfoBarVisible = false;
 
   final viewKey = GlobalKey(debugLabel: 'Navigation View Key');
   final searchKey = GlobalKey(debugLabel: 'Search Bar Key');
@@ -251,6 +256,13 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   void initState() {
     windowManager.addListener(this);
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final updateProvider = Provider.of<UpdateProvider>(context, listen: false);
+      // Initial check for updates, not forced, not user-initiated
+      updateProvider.checkForUpdates(); 
+      updateProvider.addListener(_handleUpdateInfobar);
+    });
   }
 
   @override
@@ -258,7 +270,95 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     windowManager.removeListener(this);
     searchController.dispose();
     searchFocusNode.dispose();
+    try {
+      Provider.of<UpdateProvider>(context, listen: false).removeListener(_handleUpdateInfobar);
+    } catch (e) {
+      // Provider might already be disposed or not accessible
+      print("Could not remove UpdateProvider listener: $e");
+    }
     super.dispose();
+  }
+
+  void _handleUpdateInfobar() {
+    if (!mounted) return;
+    final updateProvider = Provider.of<UpdateProvider>(context, listen: false);
+
+    if (updateProvider.showUpdateInfobar && !_isUpdateInfoBarVisible) {
+      setState(() { _isUpdateInfoBarVisible = true; });
+      
+      final latestTagName = updateProvider.latestReleaseInfo?['tag_name'] ?? "Unknown";
+      final releaseNotes = updateProvider.latestReleaseInfo?['release_notes'] ?? "No release notes available.";
+
+      // Create a PageStorageBucket for the InfoBar's Expander
+      final PageStorageBucket infoBarBucket = PageStorageBucket(); // Each InfoBar instance gets its own bucket
+
+      displayInfoBar(
+        context,
+        builder: (infoBarContext, close) {
+          return PageStorage( // Wrap the InfoBar content with PageStorage
+            bucket: infoBarBucket, // Provide the bucket
+            child: InfoBar(
+              // isIconVisible: false,
+              title: Text('Update Available: $latestTagName'),
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('A new version of FitFlutter is available.'),
+                  const SizedBox(height: 8),
+                  Expander(
+                    header: const Text('View Release Notes'),
+                    content: ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 150, maxWidth: 400),
+                      child: SingleChildScrollView(child: Text(releaseNotes)),
+                    ),
+                  ),
+                ],
+              ),
+              action: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  HyperlinkButton(
+                    child: const Text('Release Page'),
+                    onPressed: () {
+                      updateProvider.openReleasePage();
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  Button(
+                    child: const Text('Later'),
+                    onPressed: () {
+                      updateProvider.ignoreCurrentUpdate();
+                      if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
+                      close();
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    child: const Text('Upgrade'),
+                    onPressed: () {
+                       if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
+                      close(); 
+                      updateProvider.downloadAndInstallUpdate(GoRouter.of(context).routerDelegate.navigatorKey.currentContext ?? context);
+                    },
+                  ),
+                ],
+              ),
+              severity: InfoBarSeverity.warning,
+              onClose: () {
+                if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
+                close();
+              },
+              isLong: true,
+            ),
+          );
+        },
+        alignment: Alignment.topRight,
+        duration: Duration(hours: 24), // No duration for persistent InfoBar
+      );
+    } else if (!updateProvider.showUpdateInfobar && _isUpdateInfoBarVisible) {
+       if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
+    }
   }
 
   int _calculateSelectedIndex(BuildContext context) {
@@ -274,6 +374,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           .toList()
           .indexWhere((element) => element.key == Key(location));
       if (indexFooter == -1) {
+        // Check for settings with section query parameter
         if (location.startsWith('/settings?section=')) {
           indexFooter = footerItems
               .where((element) => element.key != null)
@@ -287,7 +388,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 indexFooter;
           }
         }
-        return 0;
+        return 0; // Default to first item if no match
       }
       return originalItems
               .where((element) => element.key != null)
@@ -298,6 +399,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
       return indexOriginal;
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
