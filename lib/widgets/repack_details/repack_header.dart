@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'dart:async';
 import 'package:fit_flutter_fluent/services/dd_manager.dart';
 import 'package:fit_flutter_fluent/services/host_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RepackHeader extends StatefulWidget {
   final Repack repack;
@@ -104,18 +105,24 @@ class _RepackHeaderState extends State<RepackHeader> {
     );
   }
 
-  void showDownloadDialog() {
+    void showDownloadDialog() {
     final appTheme = Provider.of<AppTheme>(context, listen: false);
     final TextEditingController localDownloadPathController =
         TextEditingController(text: appTheme.downloadPath);
+
+    final Map<String, dynamic> dialogState = {
+      'method': _selectedDownloadMethod,
+      'mirror': _selectedMirror,
+    };
 
     showDialog(
       context: context,
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setStateDialog) {
-            String? currentDialogSelectedMethod = _selectedDownloadMethod;
-            Map<String, String>? currentDialogSelectedMirror = _selectedMirror;
+            String? currentDialogSelectedMethod = dialogState['method'] as String?;
+            Map<String, String>? currentDialogSelectedMirror =
+                dialogState['mirror'] as Map<String, String>?;
 
             List<Map<String, String>> currentMirrorsForDialog = [];
             if (currentDialogSelectedMethod != null &&
@@ -140,7 +147,7 @@ class _RepackHeaderState extends State<RepackHeader> {
                         child: InfoLabel(
                           label: 'Download Method:',
                           child: ComboBox<String>(
-                            value: currentDialogSelectedMethod,
+                            value: currentDialogSelectedMethod, 
                             isExpanded: true,
                             items:
                                 widget.repack.downloadLinks.keys
@@ -154,14 +161,12 @@ class _RepackHeaderState extends State<RepackHeader> {
                             onChanged: (String? newValue) {
                               if (newValue != null) {
                                 setStateDialog(() {
-                                  currentDialogSelectedMethod = newValue;
-                                  currentDialogSelectedMirror = null;
+                                  dialogState['method'] = newValue;
+                                  dialogState['mirror'] = null; 
                                   List<Map<String, String>>? mirrors =
-                                      widget
-                                          .repack
-                                          .downloadLinks[currentDialogSelectedMethod!];
+                                      widget.repack.downloadLinks[newValue];
                                   if (mirrors != null && mirrors.isNotEmpty) {
-                                    currentDialogSelectedMirror = mirrors.first;
+                                    dialogState['mirror'] = mirrors.first;
                                   }
                                 });
                               }
@@ -175,7 +180,7 @@ class _RepackHeaderState extends State<RepackHeader> {
                         child: InfoLabel(
                           label: 'Mirror:',
                           child: ComboBox<Map<String, String>>(
-                            value: currentDialogSelectedMirror,
+                            value: currentDialogSelectedMirror, 
                             isExpanded: true,
                             items:
                                 currentMirrorsForDialog.map((mirrorMap) {
@@ -188,7 +193,7 @@ class _RepackHeaderState extends State<RepackHeader> {
                             onChanged: (Map<String, String>? newValue) {
                               if (newValue != null) {
                                 setStateDialog(() {
-                                  currentDialogSelectedMirror = newValue;
+                                  dialogState['mirror'] = newValue;
                                 });
                               }
                             },
@@ -250,23 +255,29 @@ class _RepackHeaderState extends State<RepackHeader> {
                       return;
                     }
 
-                    _selectedDownloadMethod = currentDialogSelectedMethod;
-                    _selectedMirror = currentDialogSelectedMirror;
+                    _selectedDownloadMethod = dialogState['method'] as String?;
+                    _selectedMirror = dialogState['mirror'] as Map<String, String>?;
 
                     if (_selectedDownloadMethod != null &&
                         _selectedMirror != null &&
                         _selectedMirror!['url'] != null &&
                         _selectedMirror!['url']!.isNotEmpty) {
-                      Navigator.pop(dialogContext);
+                      Navigator.pop(dialogContext); 
 
-                      _showDownloadLinksProcessingDialog(
+                      if (_selectedMirror!['url']!.startsWith('magnet:')) {
+                        launchUrl(Uri.parse(_selectedMirror!['url']!));
+                      } else {
+                        _showDownloadLinksProcessingDialog(
                         widget.repack.title,
                         _selectedMirror!['url']!,
                         downloadPathForThisOperation,
                       );
+                      }
+
+                      
                     } else {
                       showDialog(
-                        context: context,
+                        context: context, 
                         builder:
                             (ctx) => ContentDialog(
                               title: const Text("Selection Incomplete"),
@@ -313,7 +324,7 @@ class _RepackHeaderState extends State<RepackHeader> {
                   borderRadius: BorderRadius.circular(8.0),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
