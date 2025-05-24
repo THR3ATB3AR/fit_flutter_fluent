@@ -562,7 +562,6 @@ class _SettingsState extends State<Settings> with PageMixin {
               items:
                   UpdateCheckFrequency.values.map((freq) {
                     String freqText = freq.toString().split('.').last;
-                    // Capitalize first letter and make "onStartup" more readable
                     if (freqText == "onStartup") {
                       freqText = "On Every Startup";
                     } else {
@@ -591,7 +590,6 @@ class _SettingsState extends State<Settings> with PageMixin {
               !updateProvider.updateAvailable &&
               !updateProvider.isCheckingForUpdates)
             Text(
-              // Only show if not checking and no update available
               'You are on the latest version (${updateProvider.currentAppVersion ?? ""})',
             )
           else if (updateProvider.isCheckingForUpdates)
@@ -599,13 +597,13 @@ class _SettingsState extends State<Settings> with PageMixin {
           else if (updateProvider.errorMessage != null &&
               updateProvider.errorMessage!.contains(
                 "latest version",
-              )) // Check for specific message
+              )) 
             Text('Latest Available Version: ${updateProvider.errorMessage}')
           else if (updateProvider.lastUpdateCheckTimestamp == 0 &&
               !updateProvider.isCheckingForUpdates)
             const Text('Latest Available Version: Not checked yet.')
           else if (!updateProvider
-              .isCheckingForUpdates) // Generic fallback if no specific state matches
+              .isCheckingForUpdates) 
             const Text('Latest Available Version: Check to see.'),
 
           if (updateProvider.errorMessage != null &&
@@ -627,7 +625,6 @@ class _SettingsState extends State<Settings> with PageMixin {
                   child: const Text('Unignore & Check Again'),
                   onPressed: () {
                     updateProvider.clearIgnoredVersion();
-                    // Trigger a new check, user initiated
                     updateProvider.checkForUpdates(
                       forceCheck: true,
                       initiatedByUser: true,

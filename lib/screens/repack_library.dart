@@ -197,25 +197,14 @@ class _RepackLibraryState extends State<RepackLibrary> {
         _updateSyncStatusText(
           "Scraping missing repack details...\nThis may take a while.",
         );
-        // Reset progress for the next scraping phase
         ScraperService.instance.loadingProgress.value = 0.0;
       }
-
-      // Assuming ScraperService.scrapeMissingRepacks internally updates
-      // ScraperService.instance.loadingProgress.value.
-      // If it doesn't, you would add a similar onProgress update here.
       await ScraperService.instance.scrapeMissingRepacks(
         onProgress: (current, total) {
           if (mounted) {
             _updateSyncStatusText(
               "Scraping details: $current/$total missing repacks",
             );
-            // If ScraperService.scrapeMissingRepacks does NOT update loadingProgress itself:
-            // if (total > 0) {
-            //   ScraperService.instance.loadingProgress.value = current.toDouble() / total.toDouble();
-            // } else {
-            //   ScraperService.instance.loadingProgress.value = 0.0;
-            // }
           }
         },
       );
@@ -258,18 +247,16 @@ class _RepackLibraryState extends State<RepackLibrary> {
       if (mounted) {
         setState(() {
           _isSyncingLibrary = false;
-          _syncStatusText = ""; // Clear status text
+          _syncStatusText = ""; 
         });
         ScraperService.instance.loadingProgress.value =
-            0.0; // Reset global progress fully at the end
-        // After sync, refresh data
+            0.0; 
         _fullRepackListFromService = List.from(_repackService.everyRepack);
         _performFilteringAndPagination();
       }
     }
   }
 
-  // _showSyncProgressDialog method is removed.
 
   @override
   void dispose() {
@@ -328,7 +315,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
                   if (value > 0 && value <= 1) {
                     return ProgressBar(value: value * 100);
                   }
-                  return const ProgressRing(); // Indeterminate
+                  return const ProgressRing(); 
                 },
               ),
               ValueListenableBuilder<double>(
@@ -350,14 +337,12 @@ class _RepackLibraryState extends State<RepackLibrary> {
     }
 
     Widget buildMainContentArea() {
-      // 1. Initial loading state for the whole page
       if (_isLoadingInitial &&
           _paginatedRepacks.isEmpty &&
           !_repackService.isDataLoadedInMemory) {
         return const Expanded(child: Center(child: ProgressRing()));
       }
 
-      // 2. "No repacks" state
       if (!_isLoadingInitial && _filteredRepacksForDisplay.isEmpty) {
         return Expanded(
           child: Center(
@@ -371,7 +356,6 @@ class _RepackLibraryState extends State<RepackLibrary> {
         );
       }
 
-      // 3. GridView state
       return Expanded(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -449,7 +433,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
         children: [
           if (syncProgressWidget != null) syncProgressWidget,
           buildMainContentArea(),
-          if (_isLoadingMore && !_isSyncingLibrary) // Show only if not syncing
+          if (_isLoadingMore && !_isSyncingLibrary) 
             const Padding(padding: EdgeInsets.all(16.0), child: ProgressRing()),
         ],
       ),

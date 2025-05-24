@@ -259,7 +259,6 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final updateProvider = Provider.of<UpdateProvider>(context, listen: false);
-      // Initial check for updates, not forced, not user-initiated
       updateProvider.checkForUpdates(); 
       updateProvider.addListener(_handleUpdateInfobar);
     });
@@ -273,7 +272,6 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     try {
       Provider.of<UpdateProvider>(context, listen: false).removeListener(_handleUpdateInfobar);
     } catch (e) {
-      // Provider might already be disposed or not accessible
       print("Could not remove UpdateProvider listener: $e");
     }
     super.dispose();
@@ -289,16 +287,14 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
       final latestTagName = updateProvider.latestReleaseInfo?['tag_name'] ?? "Unknown";
       final releaseNotes = updateProvider.latestReleaseInfo?['release_notes'] ?? "No release notes available.";
 
-      // Create a PageStorageBucket for the InfoBar's Expander
-      final PageStorageBucket infoBarBucket = PageStorageBucket(); // Each InfoBar instance gets its own bucket
+      final PageStorageBucket infoBarBucket = PageStorageBucket(); 
 
       displayInfoBar(
         context,
         builder: (infoBarContext, close) {
-          return PageStorage( // Wrap the InfoBar content with PageStorage
-            bucket: infoBarBucket, // Provide the bucket
+          return PageStorage( 
+            bucket: infoBarBucket, 
             child: InfoBar(
-              // isIconVisible: false,
               title: Text('Update Available: $latestTagName'),
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,7 +350,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           );
         },
         alignment: Alignment.topRight,
-        duration: Duration(hours: 24), // No duration for persistent InfoBar
+        duration: Duration(hours: 24), 
       );
     } else if (!updateProvider.showUpdateInfobar && _isUpdateInfoBarVisible) {
        if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
@@ -374,7 +370,6 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           .toList()
           .indexWhere((element) => element.key == Key(location));
       if (indexFooter == -1) {
-        // Check for settings with section query parameter
         if (location.startsWith('/settings?section=')) {
           indexFooter = footerItems
               .where((element) => element.key != null)
@@ -388,7 +383,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 indexFooter;
           }
         }
-        return 0; // Default to first item if no match
+        return 0; 
       }
       return originalItems
               .where((element) => element.key != null)

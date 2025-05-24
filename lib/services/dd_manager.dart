@@ -97,15 +97,13 @@ class DdManager {
     return downloadTasks;
   }
 
-  // Zmieniono nazwę dla jasności
   void removeDownloadTaskByUrl(String url) {
   String? titleToRemoveFrom;
-  String? updatedTitle; // To notify even if group not removed
+  String? updatedTitle; 
 
   downloadTasks.forEach((title, tasks) {
     int initialCount = tasks.length;
     tasks.removeWhere((taskMap) {
-      // Ensure taskMap has 'url' or 'task'
       String? taskUrl;
       if (taskMap['url'] != null) {
         taskUrl = taskMap['url'] as String;
@@ -114,7 +112,7 @@ class DdManager {
       }
       
       if (taskUrl != null && taskUrl == url) {
-        updatedTitle = title; // Found the task in this group
+        updatedTitle = title; 
         return true;
       }
       return false;
@@ -123,7 +121,6 @@ class DdManager {
     if (tasks.isEmpty) {
       titleToRemoveFrom = title;
     } else if (initialCount > tasks.length) {
-      // Task was removed, but group still exists
       updatedTitle = title;
     }
   });
@@ -138,12 +135,9 @@ class DdManager {
   }
 }
 
-// In DdManager.dart
-
 Future<void> removeDownloadGroup(String title) async {
   final sanitizedTitle = sanitizeFileName(title);
   if (downloadTasks.containsKey(sanitizedTitle)) {
-    // Create a copy of the list of task data to avoid modification issues during iteration
     final tasksInGroup = List<Map<String, dynamic>>.from(
       downloadTasks[sanitizedTitle]!,
     );
@@ -151,15 +145,14 @@ Future<void> removeDownloadGroup(String title) async {
     debugPrint("DdManager: Removing group '$sanitizedTitle'. Found ${tasksInGroup.length} tasks in DdManager's list.");
 
     for (var taskMap in tasksInGroup) {
-      final task = taskMap['task'] as DownloadTask?; // Allow task to be null initially
-      final url = taskMap['url'] as String?; // Get URL directly
+      final task = taskMap['task'] as DownloadTask?; 
+      final url = taskMap['url'] as String?; 
 
       if (task == null && url == null) {
         debugPrint("DdManager: Skipping task in group '$sanitizedTitle' - no task object or URL.");
         continue;
       }
       
-      // Prefer URL from taskMap if available, fallback to task object
       final taskUrl = url ?? task?.request.url;
 
       if (taskUrl == null) {
@@ -171,9 +164,6 @@ Future<void> removeDownloadGroup(String title) async {
         debugPrint("DdManager: Attempting to cancel task: $taskUrl for group '$sanitizedTitle' via plugin.");
         try {
           await downloadManager.cancelDownload(taskUrl);
-          // cancelDownload should trigger the plugin's internal cleanup,
-          // including removal from its _tasks map and calling _processQueue.
-          // No need to call downloadManager.removeDownload() here.
           debugPrint("DdManager: Plugin's cancelDownload called for $taskUrl.");
         } catch (e) {
           debugPrint("DdManager: Error calling plugin's cancelDownload for $taskUrl: $e");
@@ -185,13 +175,12 @@ Future<void> removeDownloadGroup(String title) async {
 
     downloadTasks.remove(sanitizedTitle);
     debugPrint("DdManager: Removed download group '$sanitizedTitle' from DdManager's internal list.");
-    _taskGroupUpdatedController.add(sanitizedTitle); // Notify UI to update
+    _taskGroupUpdatedController.add(sanitizedTitle); 
   } else {
     debugPrint("DdManager: Group '$sanitizedTitle' not found in DdManager's list for removal.");
   }
 }
 
-// Ensure you have a dispose method in DdManager for the StreamController
 void dispose() {
   _taskGroupUpdatedController.close();
 }

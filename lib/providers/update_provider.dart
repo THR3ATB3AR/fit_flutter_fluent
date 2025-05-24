@@ -1,4 +1,3 @@
-// lib/providers/update_provider.dart
 import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,7 +37,7 @@ class UpdateProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   String? _ignoredVersion;
-  String? get ignoredVersion => _ignoredVersion; // Make getter public for settings screen
+  String? get ignoredVersion => _ignoredVersion; 
 
   bool _showUpdateInfobar = false;
   bool get showUpdateInfobar => _showUpdateInfobar;
@@ -49,7 +48,7 @@ class UpdateProvider extends ChangeNotifier {
 
   Future<void> _init() async {
     await _loadSettings();
-    await _getAppVersion(); // Fetch app version on init
+    await _getAppVersion(); 
   }
 
   Future<void> _loadSettings() async {
@@ -58,11 +57,11 @@ class UpdateProvider extends ChangeNotifier {
     if (freqIndex != null && freqIndex >= 0 && freqIndex < UpdateCheckFrequency.values.length) {
       _updateCheckFrequency = UpdateCheckFrequency.values[freqIndex];
     } else {
-      _updateCheckFrequency = UpdateCheckFrequency.daily; // Default
+      _updateCheckFrequency = UpdateCheckFrequency.daily; 
     }
     _lastUpdateCheckTimestamp = _prefs!.getInt(_kLastUpdateCheckTimestamp) ?? 0;
     _ignoredVersion = _prefs!.getString(_kIgnoredVersion);
-    notifyListeners(); // Notify after loading, though constructor doesn't allow await before super
+    notifyListeners(); 
   }
 
   Future<void> _getAppVersion() async {
@@ -114,7 +113,6 @@ class UpdateProvider extends ChangeNotifier {
 
     if (!shouldCheck) {
       _isCheckingForUpdates = false;
-      // If an update was previously available and not ignored for current session, prepare to show infobar
       if (_updateAvailable && _latestReleaseInfo?['tag_name'] != _ignoredVersion) {
           _showUpdateInfobar = true;
       } else {
@@ -138,7 +136,7 @@ class UpdateProvider extends ChangeNotifier {
           _showUpdateInfobar = latestVersionTag != _ignoredVersion;
         } else {
           _showUpdateInfobar = false;
-           if (initiatedByUser) { // Only show "up to date" if user manually checked
+           if (initiatedByUser) { 
             _errorMessage = "You are already on the latest version.";
           }
         }
@@ -173,7 +171,6 @@ class UpdateProvider extends ChangeNotifier {
   Future<void> clearIgnoredVersion() async {
      _ignoredVersion = null;
      await _prefs?.remove(_kIgnoredVersion);
-     // After clearing, re-evaluate if an update infobar should be shown
      if (_updateAvailable && _latestReleaseInfo?['tag_name'] != _ignoredVersion) {
        _showUpdateInfobar = true;
      }
@@ -186,7 +183,7 @@ class UpdateProvider extends ChangeNotifier {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => ContentDialog(
-        constraints: const BoxConstraints(minWidth: 300, maxWidth: 400), // Auto size within reasonable bounds
+        constraints: const BoxConstraints(minWidth: 300, maxWidth: 400), 
         title: const Text('Update Confirmation'),
         content: Text(
           'Version ${_latestReleaseInfo!['tag_name']} is ready to be downloaded and installed.\n'
@@ -201,12 +198,11 @@ class UpdateProvider extends ChangeNotifier {
 
     if (confirmed != true) return;
 
-    // ignore: use_build_context_synchronously
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => const ContentDialog(
-        constraints: BoxConstraints(minWidth: 250, maxWidth: 350, maxHeight: 200), // Auto size for progress dialog
+        constraints: BoxConstraints(minWidth: 250, maxWidth: 350, maxHeight: 200), 
         title: Text('Downloading Update'),
         content: Center(child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -221,14 +217,13 @@ class UpdateProvider extends ChangeNotifier {
 
     try {
       final filePath = await _updaterService.downloadLatestRelease();
-      // ignore: use_build_context_synchronously
       if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
 
       await _updaterService.runDownloadedSetup(filePath);
       if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
         await windowManager.destroy();
       } else {
-        exit(0); // For mobile or other platforms where windowManager might not apply
+        exit(0); 
       }
     } catch (e) {
       // ignore: use_build_context_synchronously
@@ -251,7 +246,6 @@ class UpdateProvider extends ChangeNotifier {
   Future<void> openReleasePage() async {
     if (_latestReleaseInfo != null && _latestReleaseInfo!['tag_name'] != null) {
       final tagName = _latestReleaseInfo!['tag_name'];
-      // Use the releases/tag URL structure
       final url = Uri.parse('https://github.com/${UpdaterService.githubRepo}/releases/tag/$tagName');
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
