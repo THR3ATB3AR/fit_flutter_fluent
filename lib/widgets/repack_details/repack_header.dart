@@ -6,9 +6,9 @@ import 'package:fit_flutter_fluent/widgets/fluent_chip.dart';
 import 'package:fit_flutter_fluent/widgets/repack_details/download_links_dialog.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
-import 'dart:async'; 
-import 'package:fit_flutter_fluent/services/dd_manager.dart'; 
-import 'package:fit_flutter_fluent/services/host_service.dart'; 
+import 'dart:async';
+import 'package:fit_flutter_fluent/services/dd_manager.dart';
+import 'package:fit_flutter_fluent/services/host_service.dart';
 
 class RepackHeader extends StatefulWidget {
   final Repack repack;
@@ -217,11 +217,29 @@ class _RepackHeaderState extends State<RepackHeader> {
                     }),
                 FilledButton(
                   onPressed: () {
+                    final String downloadPathForThisOperation =
+                        localDownloadPathController.text.trim();
+
+                    if (downloadPathForThisOperation.isEmpty) {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => ContentDialog(
+                          title: const Text("Download Location Empty"),
+                          content: const Text(
+                              "Please select or enter a download location."),
+                          actions: [
+                            Button(
+                                child: const Text("OK"),
+                                onPressed: () => Navigator.pop(ctx))
+                          ],
+                        ),
+                      );
+                      return;
+                    }
+
                     _selectedDownloadMethod = currentDialogSelectedMethod;
                     _selectedMirror = currentDialogSelectedMirror;
 
-                    final String downloadPathForThisOperation =
-                        localDownloadPathController.text;
 
                     if (_selectedDownloadMethod != null &&
                         _selectedMirror != null &&
@@ -240,7 +258,7 @@ class _RepackHeaderState extends State<RepackHeader> {
                           builder: (ctx) => ContentDialog(
                                 title: const Text("Selection Incomplete"),
                                 content: const Text(
-                                    "Please select a download method, a mirror, and ensure the mirror has URLs."),
+                                    "Please select a download method and a mirror."),
                                 actions: [
                                   Button(
                                       child: const Text("OK"),
