@@ -17,7 +17,7 @@
 * **New And Popular Repacks:** See a list of the latest repacks added to the site and the most popular repacks.
 * **Auto Updates:** The application can automatically check for and download updates to ensure you always have the latest features and fixes.
 * **Torrent Support:** Download repacks using torrent files (requires a torrent client).
-* **Cross-Platform Support:** FitFlutterFluent aims to work seamlessly on Windows and Linux, with a Fluent-inspired design adapted for each platform where appropriate.
+* **Cross-Platform Support:** FitFlutterFluent aims to work seamlessly on Windows, Linux and Android, with a Fluent-inspired design adapted for each platform where appropriate.
 * **Caching Repacks:** Save scraped repacks to disk for faster loading.
 * **Auto Install Repacks:** Automatically install downloaded repacks to a specified directory, streamlining the setup process (requires 7-Zip to be installed).
 
