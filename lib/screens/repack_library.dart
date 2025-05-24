@@ -18,10 +18,13 @@ class RepackLibrary extends StatefulWidget {
 
 class _RepackLibraryState extends State<RepackLibrary> {
   final RepackService _repackService = RepackService.instance;
-  
-  List<Repack> _fullRepackListFromService = []; // Raw data from service (all repacks)
-  List<Repack> _filteredRepacksForDisplay = []; // Data after applying search filter
-  List<Repack> _paginatedRepacks = [];        // Paginated subset of _filteredRepacksForDisplay
+
+  List<Repack> _fullRepackListFromService =
+      []; // Raw data from service (all repacks)
+  List<Repack> _filteredRepacksForDisplay =
+      []; // Data after applying search filter
+  List<Repack> _paginatedRepacks =
+      []; // Paginated subset of _filteredRepacksForDisplay
 
   bool _isLoadingInitial = true;
   bool _isLoadingMore = false;
@@ -34,24 +37,26 @@ class _RepackLibraryState extends State<RepackLibrary> {
   @override
   void initState() {
     super.initState();
-    
+
     // Subscribe to RepackService updates
     _repackServiceSubscription = _repackService.repacksStream.listen((_) {
       if (!mounted) return;
       final newServiceData = _repackService.everyRepack;
-      bool dataChanged = !listEquals(_fullRepackListFromService, newServiceData);
-      
+      bool dataChanged =
+          !listEquals(_fullRepackListFromService, newServiceData);
+
       if (_repackService.isDataLoadedInMemory) {
         if (dataChanged) {
           _fullRepackListFromService = List.from(newServiceData);
           _performFilteringAndPagination();
-        } else if (_isLoadingInitial) { 
+        } else if (_isLoadingInitial) {
           // Data same, but was initial loading, so process
           _performFilteringAndPagination();
         }
-      } else { // Data not loaded or cleared
+      } else {
+        // Data not loaded or cleared
         _fullRepackListFromService = [];
-        _performFilteringAndPagination(); 
+        _performFilteringAndPagination();
       }
     });
 
@@ -73,13 +78,14 @@ class _RepackLibraryState extends State<RepackLibrary> {
     // This method is called when the widget is first built and when its
     // dependencies (like SearchProvider) change.
     final newSearchQuery = Provider.of<SearchProvider>(context).searchQuery;
-    
+
     // If search query changed OR it's the very first time processing (isLoadingInitial)
     if (_activeSearchQuery != newSearchQuery || _isLoadingInitial) {
       _activeSearchQuery = newSearchQuery;
       // Ensure full list is available if service has loaded it
-      if (_repackService.isDataLoadedInMemory && _fullRepackListFromService.isEmpty) {
-          _fullRepackListFromService = List.from(_repackService.everyRepack);
+      if (_repackService.isDataLoadedInMemory &&
+          _fullRepackListFromService.isEmpty) {
+        _fullRepackListFromService = List.from(_repackService.everyRepack);
       }
       _performFilteringAndPagination();
     }
@@ -89,44 +95,51 @@ class _RepackLibraryState extends State<RepackLibrary> {
     if (!mounted) return;
 
     // If service data isn't ready and we don't have a local copy
-    if (!_repackService.isDataLoadedInMemory && _fullRepackListFromService.isEmpty) {
-       setState(() {
-         // _isLoadingInitial remains true, show loading indicator
-         _filteredRepacksForDisplay = [];
-         _paginatedRepacks = [];
-       });
-       return;
+    if (!_repackService.isDataLoadedInMemory &&
+        _fullRepackListFromService.isEmpty) {
+      setState(() {
+        // _isLoadingInitial remains true, show loading indicator
+        _filteredRepacksForDisplay = [];
+        _paginatedRepacks = [];
+      });
+      return;
     }
 
     // Apply search filter
     if (_activeSearchQuery.isEmpty) {
       _filteredRepacksForDisplay = List.from(_fullRepackListFromService);
     } else {
-      _filteredRepacksForDisplay = _fullRepackListFromService.where((repack) {
-        return repack.title.toLowerCase().contains(_activeSearchQuery.toLowerCase());
-      }).toList();
+      _filteredRepacksForDisplay =
+          _fullRepackListFromService.where((repack) {
+            return repack.title.toLowerCase().contains(
+              _activeSearchQuery.toLowerCase(),
+            );
+          }).toList();
     }
 
     // Paginate the filtered list
     _paginatedRepacks = _filteredRepacksForDisplay.take(_itemsPerPage).toList();
-    
+
     bool wasInitialLoading = _isLoadingInitial;
 
     setState(() {
       if (wasInitialLoading) {
-        _isLoadingInitial = false; // Data processed, initial loading phase is over
+        _isLoadingInitial =
+            false; // Data processed, initial loading phase is over
       }
       // Reset scroll position when filter changes or initial load completes
       if (_scrollController.hasClients) {
-          _scrollController.jumpTo(0);
+        _scrollController.jumpTo(0);
       }
     });
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 400 &&
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 400 &&
         !_isLoadingMore &&
-        _paginatedRepacks.length < _filteredRepacksForDisplay.length) { // Compare with filtered list
+        _paginatedRepacks.length < _filteredRepacksForDisplay.length) {
+      // Compare with filtered list
       _loadMorePaginatedItems();
     }
   }
@@ -140,8 +153,12 @@ class _RepackLibraryState extends State<RepackLibrary> {
     // await Future.delayed(const Duration(milliseconds: 300));
 
     final currentLength = _paginatedRepacks.length;
-    final moreItems = _filteredRepacksForDisplay.skip(currentLength).take(_itemsPerPage).toList();
-    
+    final moreItems =
+        _filteredRepacksForDisplay
+            .skip(currentLength)
+            .take(_itemsPerPage)
+            .toList();
+
     if (mounted) {
       setState(() {
         _paginatedRepacks.addAll(moreItems);
@@ -163,9 +180,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
     // No need to watch SearchProvider directly in build if didChangeDependencies handles it.
 
     if (_isLoadingInitial && _paginatedRepacks.isEmpty) {
-      return const ScaffoldPage(
-        content: Center(child: ProgressRing()),
-      );
+      return const ScaffoldPage(content: Center(child: ProgressRing()));
     }
 
     if (_filteredRepacksForDisplay.isEmpty && !_isLoadingInitial) {
@@ -183,30 +198,38 @@ class _RepackLibraryState extends State<RepackLibrary> {
     }
 
     return ScaffoldPage(
-      header: const PageHeader(
-        title: Text('Repack Library'),
-      ),
+      header: const PageHeader(title: Text('Repack Library')),
       content: LayoutBuilder(
         builder: (context, constraints) {
           final double screenWidth = constraints.maxWidth;
           int crossAxisCount;
 
-          if (screenWidth < 600) crossAxisCount = 4;
-          else if (screenWidth < 900) crossAxisCount = 5;
-          else if (screenWidth < 1200) crossAxisCount = 6;
-          else if (screenWidth < 1500) crossAxisCount = 7;
-          else crossAxisCount = 8;
+          if (screenWidth < 600) {
+            crossAxisCount = 4;
+          } else if (screenWidth < 900) {
+            crossAxisCount = 5;
+          } else if (screenWidth < 1200) {
+            crossAxisCount = 6;
+          } else if (screenWidth < 1500) {
+            crossAxisCount = 7;
+          } else {
+            crossAxisCount = 8;
+          }
 
           const double cardInternalHorizontalMargin = 16.0;
           const double gridPadding = 8.0;
           const double gridItemSpacing = 0.0;
 
-          final double totalHorizontalPaddingAndSpacing = (gridPadding * 2) + (gridItemSpacing * (crossAxisCount - 1));
-          final double availableWidthForCards = screenWidth - totalHorizontalPaddingAndSpacing;
+          final double totalHorizontalPaddingAndSpacing =
+              (gridPadding * 2) + (gridItemSpacing * (crossAxisCount - 1));
+          final double availableWidthForCards =
+              screenWidth - totalHorizontalPaddingAndSpacing;
           final double cardWidth = availableWidthForCards / crossAxisCount;
-          final double repackItemHeight = (cardWidth - cardInternalHorizontalMargin) / 0.65;
+          final double repackItemHeight =
+              (cardWidth - cardInternalHorizontalMargin) / 0.65;
 
-          if (repackItemHeight <= 0 || cardWidth <= cardInternalHorizontalMargin) {
+          if (repackItemHeight <= 0 ||
+              cardWidth <= cardInternalHorizontalMargin) {
             return const Center(
               child: Text(
                 "The window is too narrow to display items correctly.\nPlease resize the window.",
@@ -214,7 +237,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
               ),
             );
           }
-          
+
           final double cellAspectRatio = cardWidth / repackItemHeight;
 
           return Column(
@@ -238,7 +261,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
                       },
                       child: RepackItem(
                         repack: repack,
-                        itemHeight: repackItemHeight, 
+                        itemHeight: repackItemHeight,
                       ),
                     );
                   },

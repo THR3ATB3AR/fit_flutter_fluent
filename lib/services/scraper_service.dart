@@ -63,7 +63,7 @@ class ScraperService {
     required Function(int, int) onProgress,
   }) async {
     List<Repack> repacks = [];
-    for (var entry in _repackService.allRepacksNames.entries.take(100)) {
+    for (var entry in _repackService.allRepacksNames.entries) {
       try {
         final repack = await scrapeRepackFromSearch(entry.value);
         repacks.add(repack);
