@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fit_flutter_fluent/screens/download_manager_screen.dart';
 import 'package:fit_flutter_fluent/screens/home.dart';
@@ -27,11 +29,23 @@ bool get isDesktop {
 
 final _appTheme = AppTheme();
 
+Future<void> _requestPermissions() async {
+    if (Platform.isAndroid) {
+      final status = await Permission.manageExternalStorage.request();
+      if (status.isGranted) {
+        print('Permission granted');
+      } else {
+        print('Permission denied');
+      }
+    }
+  }
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await _appTheme.loadInitialSettings();
   await RepackService.instance.init();
+  await _requestPermissions();
 
   if ([
     TargetPlatform.windows,
