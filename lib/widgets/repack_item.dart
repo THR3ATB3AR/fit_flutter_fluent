@@ -12,9 +12,7 @@ class RepackItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.all(8.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.0),
         child: CachedNetworkImage(

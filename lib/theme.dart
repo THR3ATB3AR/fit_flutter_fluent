@@ -177,7 +177,6 @@ class AppTheme extends ChangeNotifier {
     notifyListeners();
   }
 
-
   Future<void> _saveDownloadPath(String path) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kDownloadPath, path);
@@ -310,7 +309,6 @@ class SearchProvider extends ChangeNotifier {
     }
   }
 }
-
 
 AccentColor get systemAccentColor {
   if ((defaultTargetPlatform == TargetPlatform.windows ||

@@ -9,11 +9,12 @@ class RepackSlider extends StatefulWidget {
   final String title;
   final Function(Repack) onRepackTap;
 
-  const RepackSlider(
-      {super.key,
-      required this.repackListType,
-      required this.title,
-      required this.onRepackTap});
+  const RepackSlider({
+    super.key,
+    required this.repackListType,
+    required this.title,
+    required this.onRepackTap,
+  });
 
   @override
   State<RepackSlider> createState() => _RepackSliderState();
@@ -23,7 +24,7 @@ class _RepackSliderState extends State<RepackSlider> {
   final ScrollController _scrollController = ScrollController();
   final RepackService _repackService = RepackService.instance;
   // late StreamSubscription _repackSubscription;
-  // bool _dataLoaded = false; 
+  // bool _dataLoaded = false;
 
   @override
   void initState() {
@@ -39,12 +40,12 @@ class _RepackSliderState extends State<RepackSlider> {
     super.dispose();
   }
 
-//   Future<void> _loadData() async {
-//    if (await _repackService.checkTablesNotEmpty() && !_dataLoaded) { 
-//        await _repackService.loadRepacks();
-//       _dataLoaded = true; 
-//    }
-// }
+  //   Future<void> _loadData() async {
+  //    if (await _repackService.checkTablesNotEmpty() && !_dataLoaded) {
+  //        await _repackService.loadRepacks();
+  //       _dataLoaded = true;
+  //    }
+  // }
 
   void _scrollLeft() {
     _scrollController.animateTo(
@@ -72,10 +73,7 @@ class _RepackSliderState extends State<RepackSlider> {
             alignment: Alignment.centerLeft,
             child: Text(
               widget.title,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -92,25 +90,31 @@ class _RepackSliderState extends State<RepackSlider> {
                   repackList = _repackService.popularRepacks;
                   break;
               }
-          
-              if (snapshot.connectionState == ConnectionState.waiting&& !_repackService.isDataLoadedInMemory) {
-                return const Center(
-                    child:
-                        ProgressRing()); 
+
+              if (snapshot.connectionState == ConnectionState.waiting &&
+                  !_repackService.isDataLoadedInMemory) {
+                return const Center(child: ProgressRing());
               }
               if (repackList.isEmpty && _repackService.isDataLoadedInMemory) {
                 // Data loaded, but this specific list is empty
-                return Center(child: Text('No ${widget.title.toLowerCase()} repacks found.'));
-              } else if (repackList.isEmpty && !_repackService.isDataLoadedInMemory) {
+                return Center(
+                  child: Text(
+                    'No ${widget.title.toLowerCase()} repacks found.',
+                  ),
+                );
+              } else if (repackList.isEmpty &&
+                  !_repackService.isDataLoadedInMemory) {
                 // Still loading or failed to load
                 return const Center(child: ProgressRing());
               }
-          
+
               return LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
-                  final double itemHeight = constraints.maxHeight; // Wysokość dostępna dla ListView
-                  
-                  if (itemHeight <= 0) { // Zabezpieczenie przed niepoprawną wysokością
+                  final double itemHeight =
+                      constraints.maxHeight; // Wysokość dostępna dla ListView
+
+                  if (itemHeight <= 0) {
+                    // Zabezpieczenie przed niepoprawną wysokością
                     return const SizedBox.shrink(); // Nie renderuj nic, jeśli wysokość jest nieprawidłowa
                   }
 
@@ -130,7 +134,7 @@ class _RepackSliderState extends State<RepackSlider> {
                       );
                     },
                   );
-                }
+                },
               );
             },
           ),
@@ -140,28 +144,28 @@ class _RepackSliderState extends State<RepackSlider> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-                Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: SizedBox(
-                  width: 45,
-                  height: 45,
-                  child: IconButton(
-                  onPressed: _scrollLeft,
-                  icon: const Icon(FluentIcons.chevron_left_small),
-                  ),
-                ),
-                ),
               Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: SizedBox(
                   width: 45,
                   height: 45,
                   child: IconButton(
-                  onPressed: _scrollRight,
-                  icon: const Icon(FluentIcons.chevron_right_small),
+                    onPressed: _scrollLeft,
+                    icon: const Icon(FluentIcons.chevron_left_small),
                   ),
                 ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: SizedBox(
+                  width: 45,
+                  height: 45,
+                  child: IconButton(
+                    onPressed: _scrollRight,
+                    icon: const Icon(FluentIcons.chevron_right_small),
+                  ),
                 ),
+              ),
             ],
           ),
         ),
