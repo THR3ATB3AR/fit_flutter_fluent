@@ -428,7 +428,7 @@ class _SettingsState extends State<Settings> with PageMixin {
                   ThemeMode.values.map((mode) {
                     return ComboBoxItem(
                       value: mode,
-                      child: Text(mode.toString().split('.').last),
+                      child: Text(mode.toString().split('.').last.uppercaseFirst()),
                     );
                   }).toList(),
               onChanged: (mode) {
@@ -456,7 +456,7 @@ class _SettingsState extends State<Settings> with PageMixin {
                   PaneDisplayMode.values.map((mode) {
                     return ComboBoxItem(
                       value: mode,
-                      child: Text(mode.toString().split('.').last),
+                      child: Text(mode.toString().split('.').last.uppercaseFirst()),
                     );
                   }).toList(),
               onChanged: (mode) {
@@ -509,7 +509,7 @@ class _SettingsState extends State<Settings> with PageMixin {
                     currentWindowEffects.map((effect) {
                       return ComboBoxItem(
                         value: effect,
-                        child: Text(effect.toString().split('.').last),
+                        child: Text(effect.toString().split('.').last.uppercaseFirst()),
                       );
                     }).toList(),
                 onChanged: (effect) {
@@ -530,7 +530,7 @@ class _SettingsState extends State<Settings> with PageMixin {
               value: currentLocale,
               items:
                   supportedLocales.map((locale) {
-                    return ComboBoxItem(value: locale, child: Text('$locale'));
+                    return ComboBoxItem(value: locale, child: Text('$locale'.toUpperCase()));
                   }).toList(),
               onChanged: (locale) {
                 if (locale != null) {
