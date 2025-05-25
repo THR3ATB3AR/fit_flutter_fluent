@@ -87,7 +87,7 @@ jobs:
           echo "version_number=$VERSION_NUMBER" >> $GITHUB_OUTPUT
           echo "build_suffix=$BUILD_SUFFIX" >> $GITHUB_OUTPUT
 
-  build-windows:
+    build-windows:
     name: Build Windows Release
     runs-on: windows-latest
     needs: resolve-version
@@ -100,11 +100,18 @@ jobs:
       - name: Flutter Build Windows
         run: |
           flutter build windows --release --build-name=${{ needs.resolve-version.outputs.app_version }} 
+          # You might want to re-add --build-number here:
+          # flutter build windows --release --build-name=${{ needs.resolve-version.outputs.app_version }} --build-number=${{ needs.resolve-version.outputs.build_suffix }}
           echo "Built with version: ${{ needs.resolve-version.outputs.app_version }}+${{ needs.resolve-version.outputs.build_suffix }}"
       - name: Prepare Windows Artifact
         run: |
           mkdir dist
-          cp -r build/windows/runner/Release dist/fitflutterfluent
+          # Corrected path:
+          cp -r build/windows/x64/runner/Release dist/fitflutterfluent 
+          # For PowerShell, Copy-Item is more idiomatic:
+          # New-Item -ItemType Directory -Force -Path dist
+          # Copy-Item -Path build/windows/x64/runner/Release/* -Destination dist/fitflutterfluent -Recurse -Force
+        # shell: powershell # If using Copy-Item
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -133,10 +140,6 @@ jobs:
                                                 # OR, easier: copy from downloaded artifact to where .iss expects them.
       - name: Ensure Inno Setup source paths are correct after download
         run: |
-          # The artifact 'fitflutterfluent-windows-unpacked' contains the 'fitflutterfluent' folder.
-          # The .iss script expects files like 'A:\praca\fit_flutter_fluent\build\windows\x64\runner\Release\{#MyAppExeName}'
-          # We need to make the paths relative or copy.
-          # Let's copy the downloaded content to the expected 'build' structure relative to workspace.
           mkdir -p build/windows/x64/runner/Release
           cp -r fitflutterfluent-windows-unpacked/* build/windows/x64/runner/Release/
           # Also copy other files mentioned in .iss [Files] section if they are not part of flutter build
