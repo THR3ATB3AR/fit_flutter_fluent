@@ -22,50 +22,67 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Determine Version and Build Number
+            - name: Determine Version and Build Number
         id: determine_version
         run: |
           VERSION_NUMBER=""
           BUILD_SUFFIX="1" # Default build number/suffix
 
+          # Determine source of version (tag, input, or pubspec)
+          SOURCE_VERSION_STRING=""
           if [[ "${{ github.event_name }}" == "push" && "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
             TAG_NAME="${{ github.ref_name }}"
-            # Remove 'v' prefix if it exists
-            VERSION_NUMBER="${TAG_NAME#v}"
-            # If tag contains a build number (e.g., 1.2.3+4), split it
-            if [[ "$VERSION_NUMBER" == *"+"* ]]; then
-              BUILD_SUFFIX="${VERSION_NUMBER#*+}"
-              VERSION_NUMBER="${VERSION_NUMBER%+*}"
-            fi
-            echo "Using version from tag: $VERSION_NUMBER (Build: $BUILD_SUFFIX)"
+            SOURCE_VERSION_STRING="${TAG_NAME#v}" # Remove 'v' prefix if it exists
+            echo "Using version from tag: $TAG_NAME"
           elif [[ -n "${{ github.event.inputs.version }}" ]]; then
-            VERSION_NUMBER="${{ github.event.inputs.version }}"
-            if [[ "$VERSION_NUMBER" == *"+"* ]]; then
-              BUILD_SUFFIX="${VERSION_NUMBER#*+}"
-              VERSION_NUMBER="${VERSION_NUMBER%+*}"
-            fi
-            echo "Using version from manual input: $VERSION_NUMBER (Build: $BUILD_SUFFIX)"
+            SOURCE_VERSION_STRING="${{ github.event.inputs.version }}"
+            echo "Using version from manual input: $SOURCE_VERSION_STRING"
           else
-            # Fallback to pubspec.yaml
             echo "Reading version from pubspec.yaml"
-            VERSION_FULL=$(grep '^version: ' pubspec.yaml | sed 's/version: //')
-            if [[ "$VERSION_FULL" == *"+"* ]]; then
-              BUILD_SUFFIX="${VERSION_FULL#*+}"
-              VERSION_NUMBER="${VERSION_FULL%+*}"
-            else
-              VERSION_NUMBER="$VERSION_FULL"
-            fi
-            echo "Using version from pubspec.yaml: $VERSION_NUMBER (Build: $BUILD_SUFFIX)"
+            SOURCE_VERSION_STRING=$(grep '^version: ' pubspec.yaml | sed 's/version: //')
+            # Remove any leading/trailing whitespace from pubspec version just in case
+            SOURCE_VERSION_STRING=$(echo "$SOURCE_VERSION_STRING" | xargs) 
+            echo "Using version from pubspec.yaml: $SOURCE_VERSION_STRING"
           fi
 
+          # Parse VERSION_NUMBER and BUILD_SUFFIX from SOURCE_VERSION_STRING
+          if [[ "$SOURCE_VERSION_STRING" == *"+"* ]]; then
+            PROVISIONAL_BUILD_SUFFIX="${SOURCE_VERSION_STRING#*+}"
+            # Trim whitespace from provisional build suffix
+            PROVISIONAL_BUILD_SUFFIX=$(echo "$PROVISIONAL_BUILD_SUFFIX" | xargs)
+            if [[ -n "$PROVISIONAL_BUILD_SUFFIX" ]]; then # Only override default if something was after +
+                BUILD_SUFFIX="$PROVISIONAL_BUILD_SUFFIX"
+            fi
+            VERSION_NUMBER="${SOURCE_VERSION_STRING%+*}"
+          else
+            VERSION_NUMBER="$SOURCE_VERSION_STRING"
+            # BUILD_SUFFIX remains its default value of "1"
+          fi
+          
+          # Trim whitespace from VERSION_NUMBER as well
+          VERSION_NUMBER=$(echo "$VERSION_NUMBER" | xargs)
+
+          # Validate VERSION_NUMBER
           if [[ -z "$VERSION_NUMBER" ]]; then
-            echo "Error: Version number could not be determined."
+            echo "Error: Version number (app_version) could not be determined or is empty."
             exit 1
           fi
-          if [[ -z "$BUILD_SUFFIX" ]]; then
-            echo "Error: Build suffix could not be determined, defaulting to 1."
+          # Basic format check for version number (e.g., X.Y.Z)
+          if ! [[ "$VERSION_NUMBER" =~ ^[0-9]+\.[0-9]+\.[0-9]+([._-].+)?$ ]]; then
+             # Allow suffixes like -beta, .alpha for version_number itself if not part of build_suffix
+             if ! [[ "$VERSION_NUMBER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "Warning: VERSION_NUMBER ('$VERSION_NUMBER') doesn't strictly follow X.Y.Z. Ensure it's compatible with build tools."
+             fi
+          fi
+
+          # Validate and finalize BUILD_SUFFIX (must be a positive integer for Android versionCode)
+          if ! [[ "$BUILD_SUFFIX" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Warning: BUILD_SUFFIX ('$BUILD_SUFFIX') was empty, zero, non-numeric, or not a positive integer. Defaulting to 1."
             BUILD_SUFFIX="1"
           fi
+
+          echo "Determined app_version: $VERSION_NUMBER"
+          echo "Determined build_suffix (build_number): $BUILD_SUFFIX"
 
           echo "version_number=$VERSION_NUMBER" >> $GITHUB_OUTPUT
           echo "build_suffix=$BUILD_SUFFIX" >> $GITHUB_OUTPUT
