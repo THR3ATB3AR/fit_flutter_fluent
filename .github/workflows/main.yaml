@@ -3,8 +3,8 @@ name: Build FitFlutterFluent Releases
 on:
   push:
     tags:
-      - 'v*.*.*' 
-      - '*.*.*'  
+      - 'v*.*.*' # e.g. v1.0.0
+      - '*.*.*'  # e.g. 1.0.0 (tags without 'v' prefix)
   workflow_dispatch:
     inputs:
       version:
@@ -69,10 +69,10 @@ jobs:
           fi
           # Basic format check for version number (e.g., X.Y.Z)
           if ! [[ "$VERSION_NUMBER" =~ ^[0-9]+\.[0-9]+\.[0-9]+([._-].+)?$ ]]; then
-             # Allow suffixes like -beta, .alpha for version_number itself if not part of build_suffix
-             if ! [[ "$VERSION_NUMBER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            # Allow suffixes like -beta, .alpha for version_number itself if not part of build_suffix
+            if ! [[ "$VERSION_NUMBER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
                 echo "Warning: VERSION_NUMBER ('$VERSION_NUMBER') doesn't strictly follow X.Y.Z. Ensure it's compatible with build tools."
-             fi
+            fi
           fi
 
           # Validate and finalize BUILD_SUFFIX (must be a positive integer for Android versionCode)
