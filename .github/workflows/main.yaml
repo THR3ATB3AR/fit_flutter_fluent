@@ -88,35 +88,35 @@ jobs:
           echo "build_suffix=$BUILD_SUFFIX" >> $GITHUB_OUTPUT
 
   build-windows:
-  name: Build Windows Release
-  runs-on: windows-latest
-  needs: resolve-version
-  steps:
-    - uses: actions/checkout@v4
-    - uses: subosito/flutter-action@v2
-      with:
-        channel: stable
-    - run: flutter pub get
-    - name: Flutter Build Windows
-      run: |
-        flutter build windows --release --build-name=${{ needs.resolve-version.outputs.app_version }} 
-        # You might want to re-add --build-number here:
-        # flutter build windows --release --build-name=${{ needs.resolve-version.outputs.app_version }} --build-number=${{ needs.resolve-version.outputs.build_suffix }}
-        echo "Built with version: ${{ needs.resolve-version.outputs.app_version }}+${{ needs.resolve-version.outputs.build_suffix }}"
-    - name: Prepare Windows Artifact
-      run: |
-        mkdir dist
-        # Corrected path:
-        cp -r build/windows/x64/runner/Release dist/fitflutterfluent 
-        # For PowerShell, Copy-Item is more idiomatic:
-        # New-Item -ItemType Directory -Force -Path dist
-        # Copy-Item -Path build/windows/x64/runner/Release/* -Destination dist/fitflutterfluent -Recurse -Force
-      # shell: powershell # If using Copy-Item
-    - name: Upload Windows Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: fitflutterfluent-windows-unpacked
-        path: dist/fitflutterfluent
+    name: Build Windows Release
+    runs-on: windows-latest
+    needs: resolve-version
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - name: Flutter Build Windows
+        run: |
+          flutter build windows --release --build-name=${{ needs.resolve-version.outputs.app_version }} 
+          # You might want to re-add --build-number here:
+          # flutter build windows --release --build-name=${{ needs.resolve-version.outputs.app_version }} --build-number=${{ needs.resolve-version.outputs.build_suffix }}
+          echo "Built with version: ${{ needs.resolve-version.outputs.app_version }}+${{ needs.resolve-version.outputs.build_suffix }}"
+      - name: Prepare Windows Artifact
+        run: |
+          mkdir dist
+          # Corrected path:
+          cp -r build/windows/x64/runner/Release dist/fitflutterfluent 
+          # For PowerShell, Copy-Item is more idiomatic:
+          # New-Item -ItemType Directory -Force -Path dist
+          # Copy-Item -Path build/windows/x64/runner/Release/* -Destination dist/fitflutterfluent -Recurse -Force
+        # shell: powershell # If using Copy-Item
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitflutterfluent-windows-unpacked
+          path: dist/fitflutterfluent
 
   innosetup:
     name: Build Inno Setup Installer
