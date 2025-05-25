@@ -121,55 +121,68 @@ jobs:
   innosetup:
     name: Build Inno Setup Installer
     runs-on: windows-latest
-    needs: [build-windows, resolve-version] # Depends on windows build and resolved version
+    needs: [build-windows, resolve-version]
     env:
       APP_VERSION: ${{ needs.resolve-version.outputs.app_version }}
     steps:
-      - uses: actions/checkout@v4 # Checks out the repo (for the .iss script)
-      - uses: actions/download-artifact@v4
-        with:
-          name: fitflutterfluent-windows-unpacked # Name matches upload
-          path: build/windows/x64/runner/Release # Exact path structure in Inno script Sources
-                                                # Note: Original .iss uses build/windows/runner/Release for main exe
-                                                # but the artifact was named build/windows/runner/Release dist/fitflutterfluent
-                                                # Adjusting download path to match expected structure for ISCC.
-                                                # If the artifact is 'dist/fitflutterfluent', the .iss Source paths
-                                                # should be relative to that, or change artifact structure.
-                                                # For simplicity, let's assume the downloaded artifact creates
-                                                # the expected 'build/windows/x64/runner/Release' structure.
-                                                # OR, easier: copy from downloaded artifact to where .iss expects them.
-      - name: Ensure Inno Setup source paths are correct after download
-        run: |
-          mkdir -p build/windows/x64/runner/Release
-          cp -r fitflutterfluent-windows-unpacked/* build/windows/x64/runner/Release/
-          # Also copy other files mentioned in .iss [Files] section if they are not part of flutter build
-          # e.g., MediaPlayer.dll, MyMusic.mp3. Assuming they are in setup/ in repo:
-          mkdir -p setup
-          cp .github/workflows/MediaPlayer.dll setup/MediaPlayer.dll # Assuming it's co-located or adjust path
-          cp .github/workflows/MyMusic.mp3 setup/MyMusic.mp3     # Assuming it's co-located or adjust path
+      - uses: actions/checkout@v4 # Checks out the repo (for .iss script, MediaPlayer.dll, MyMusic.mp3 etc.)
 
-          # IMPORTANT: Modify your .iss script to use RELATIVE paths from the workspace root
-          # Example change in your .iss file (do this MANUALLY in your repo file):
-          # Source: "build\windows\x64\runner\Release\{#MyAppExeName}"
-          # OutputDir: "Output" (relative output directory)
-        shell: bash
+      - name: Download Windows Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: fitflutterfluent-windows-unpacked # Name of the artifact uploaded in build-windows
+          path: build/windows/x64/runner/Release  # Flutter's typical output path, files go here directly
+
+      - name: Prepare Additional Files for Inno Setup
+        run: |
+          # The main app files are already in build/windows/x64/runner/Release due to download-artifact.
+          # We only need to ensure other files (MediaPlayer.dll, MyMusic.mp3) are where .iss expects them.
+          # Assuming your .iss script uses paths relative to the repo root for these, like 'setup/MediaPlayer.dll'
+          
+          # Ensure the 'setup' directory exists if your .iss refers to it.
+          # If MediaPlayer.dll and MyMusic.mp3 are already in your repo at paths like
+          # '.github/workflows/MediaPlayer.dll', and your .iss script refers to them as
+          # Source: ".github\workflows\MediaPlayer.dll" then you might not need to copy them at all,
+          # as actions/checkout@v4 already brought them.
+
+          # If your .iss script expects them in a 'setup' folder at the root:
+          mkdir -p setup 
+          # Make sure these source paths for cp are correct relative to your repo structure
+          # For example, if they are stored alongside the workflow file:
+          cp .github/workflows/MediaPlayer.dll setup/MediaPlayer.dll 
+          cp .github/workflows/MyMusic.mp3 setup/MyMusic.mp3     
+          
+          # If they are already in a 'setup' folder in your repo, and .iss refers to 'setup\MediaPlayer.dll',
+          # then no 'cp' commands are needed here for these files.
+
+          echo "Listing contents of expected Inno Setup source directory:"
+          ls -R build/windows/x64/runner/Release # Verify app files are here
+          echo "Listing contents of setup directory (if used):"
+          ls -R setup # Verify helper files are here
+        shell: bash # Using bash for mkdir -p and ls
 
       - name: Install Inno Setup
         run: |
           choco install innosetup --no-progress
       - name: Build Installer
         run: |
+          # Ensure your .iss script uses relative paths, e.g.:
+          # [Files]
+          # Source: "build\windows\x64\runner\Release\{#MyAppExeName}"; DestDir: "{app}"
+          # Source: "build\windows\x64\runner\Release\flutter_windows.dll"; DestDir: "{app}"
+          # ... etc for all files from the build output
+          # Source: "setup\MediaPlayer.dll"; Flags: dontcopy 
+          # Source: "setup\MyMusic.mp3"; Flags: dontcopy 
+          #
+          # OutputDir in .iss should be relative, e.g., OutputDir=Output
           iscc /DMyAppVersion="${{ env.APP_VERSION }}" .github/workflows/setupmaker.iss
-          # This will output to 'Output' dir (if OutputDir=Output in .iss)
-          # with filename like fit-flutter-setup-win64-X.Y.Z.exe
       - name: List Installer Output
-        run: ls -R Output # Check what was generated (use dir for powershell/cmd)
+        run: ls -R Output # Check what was generated
         shell: bash
       - name: Upload InnoSetup Installer
         uses: actions/upload-artifact@v4
         with:
           name: fitflutterfluent-windows-setup
-          # Path should match the OutputDir and OutputBaseFilename in your .iss
           path: Output/fit-flutter-setup-win64-${{ env.APP_VERSION }}.exe
 
   build-linux:
