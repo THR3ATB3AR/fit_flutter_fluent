@@ -131,26 +131,8 @@ jobs:
 
       - name: Prepare Additional Files for Inno Setup
         run: |
-          # The main app files are already in build/windows/x64/runner/Release due to download-artifact.
-          # We only need to ensure other files (MediaPlayer.dll, MyMusic.mp3) are where .iss expects them.
-          # Assuming your .iss script uses paths relative to the repo root for these, like 'setup/MediaPlayer.dll'
+          mkdir -p setup  
           
-          # Ensure the 'setup' directory exists if your .iss refers to it.
-          # If MediaPlayer.dll and MyMusic.mp3 are already in your repo at paths like
-          # '.github/workflows/MediaPlayer.dll', and your .iss script refers to them as
-          # Source: ".github\workflows\MediaPlayer.dll" then you might not need to copy them at all,
-          # as actions/checkout@v4 already brought them.
-
-          # If your .iss script expects them in a 'setup' folder at the root:
-          mkdir -p setup 
-          # Make sure these source paths for cp are correct relative to your repo structure
-          # For example, if they are stored alongside the workflow file:
-          cp setup/MediaPlayer.dll setup/MediaPlayer.dll 
-          cp setup/MyMusic.mp3 setup/MyMusic.mp3     
-          
-          # If they are already in a 'setup' folder in your repo, and .iss refers to 'setup\MediaPlayer.dll',
-          # then no 'cp' commands are needed here for these files.
-
           echo "Listing contents of expected Inno Setup source directory:"
           ls -R build/windows/x64/runner/Release # Verify app files are here
           echo "Listing contents of setup directory (if used):"
@@ -162,15 +144,6 @@ jobs:
           choco install innosetup --no-progress
       - name: Build Installer
         run: |
-          # Ensure your .iss script uses relative paths, e.g.:
-          # [Files]
-          # Source: "build\windows\x64\runner\Release\{#MyAppExeName}"; DestDir: "{app}"
-          # Source: "build\windows\x64\runner\Release\flutter_windows.dll"; DestDir: "{app}"
-          # ... etc for all files from the build output
-          # Source: "setup\MediaPlayer.dll"; Flags: dontcopy 
-          # Source: "setup\MyMusic.mp3"; Flags: dontcopy 
-          #
-          # OutputDir in .iss should be relative, e.g., OutputDir=Output
           iscc /D MyAppVersion="${{ env.APP_VERSION }}" .github/workflows/setupmaker.iss
       - name: List Installer Output
         run: ls -R Output # Check what was generated
