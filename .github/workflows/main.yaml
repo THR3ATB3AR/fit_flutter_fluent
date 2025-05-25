@@ -145,8 +145,8 @@ jobs:
           mkdir -p setup 
           # Make sure these source paths for cp are correct relative to your repo structure
           # For example, if they are stored alongside the workflow file:
-          cp .github/workflows/MediaPlayer.dll setup/MediaPlayer.dll 
-          cp .github/workflows/MyMusic.mp3 setup/MyMusic.mp3     
+          cp setup/MediaPlayer.dll setup/MediaPlayer.dll 
+          cp setup/MyMusic.mp3 setup/MyMusic.mp3     
           
           # If they are already in a 'setup' folder in your repo, and .iss refers to 'setup\MediaPlayer.dll',
           # then no 'cp' commands are needed here for these files.
@@ -171,7 +171,7 @@ jobs:
           # Source: "setup\MyMusic.mp3"; Flags: dontcopy 
           #
           # OutputDir in .iss should be relative, e.g., OutputDir=Output
-          iscc /DMyAppVersion="${{ env.APP_VERSION }}" .github/workflows/setupmaker.iss
+          iscc /D MyAppVersion="${{ env.APP_VERSION }}" .github/workflows/setupmaker.iss
       - name: List Installer Output
         run: ls -R Output # Check what was generated
         shell: bash
