@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-            - name: Determine Version and Build Number
+      - name: Determine Version and Build Number
         id: determine_version
         run: |
           VERSION_NUMBER=""
