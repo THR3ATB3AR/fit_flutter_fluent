@@ -99,7 +99,7 @@ jobs:
       - run: flutter pub get
       - name: Flutter Build Windows
         run: |
-          flutter build windows --release --build-name=${{ needs.resolve-version.outputs.app_version }} --build-number=${{ needs.resolve-version.outputs.build_suffix }}
+          flutter build windows --release --build-name=${{ needs.resolve-version.outputs.app_version }} 
           echo "Built with version: ${{ needs.resolve-version.outputs.app_version }}+${{ needs.resolve-version.outputs.build_suffix }}"
       - name: Prepare Windows Artifact
         run: |
@@ -183,7 +183,7 @@ jobs:
       - run: flutter pub get
       - name: Flutter Build Linux
         run: |
-          flutter build linux --release --build-name=${{ needs.resolve-version.outputs.app_version }} --build-number=${{ needs.resolve-version.outputs.build_suffix }}
+          flutter build linux --release --build-name=${{ needs.resolve-version.outputs.app_version }} 
       - name: Prepare Linux Artifact
         run: |
           mkdir -p dist/fitflutterfluent
@@ -207,7 +207,7 @@ jobs:
       - run: flutter pub get
       - name: Flutter Build Android
         run: |
-          flutter build apk --release --build-name=${{ needs.resolve-version.outputs.app_version }} --build-number=${{ needs.resolve-version.outputs.build_suffix }}
+          flutter build apk --release --build-name=${{ needs.resolve-version.outputs.app_version }}
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
