@@ -24,7 +24,7 @@ DisableProgramGroupPage=yes
 PrivilegesRequiredOverridesAllowed=commandline
 OutputDir=Output
 OutputBaseFilename=fit-flutter-setup-win64-{#MyAppVersion}
-SetupIconFile=setup\ffsetuplogo.ico
+SetupIconFile="setup\ffsetuplogo.ico"
 SolidCompression=yes
 WizardStyle=modern
 
