@@ -156,31 +156,6 @@ jobs:
           name: fitflutterfluent-linux
           path: dist/fitflutterfluent-linux-${{ needs.resolve-version.outputs.app_version }}.tar.gz
 
-  build-linux-arm:
-    name: Build Linux Arm Release
-    runs-on: ubuntu-24.04-arm
-    needs: resolve-version
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-      - run: sudo apt-get update
-      - run: sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
-      - run: flutter pub get
-      - name: Flutter Build Linux
-        run: |
-          flutter build linux --release --build-name=${{ needs.resolve-version.outputs.app_version }} 
-      - name: Prepare Linux Artifact
-        run: |
-          mkdir -p dist/fitflutterfluent
-          cp -r build/linux/x64/release/bundle/* dist/fitflutterfluent/
-          cd dist && tar -czf fitflutterfluent-linux-arm-${{ needs.resolve-version.outputs.app_version }}.tar.gz fitflutterfluent
-      - name: Upload Linux Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: fitflutterfluent-linux
-          path: dist/fitflutterfluent-linux-arm-${{ needs.resolve-version.outputs.app_version }}.tar.gz
 
   build-android:
     name: Build Android APK
@@ -224,7 +199,6 @@ jobs:
           if [ -d "fitflutterfluent-windows-unpacked" ]; then echo "--- fitflutterfluent-windows-unpacked ---"; ls -lA fitflutterfluent-windows-unpacked/; fi
           if [ -d "fitflutterfluent-windows-setup" ]; then echo "--- fitflutterfluent-windows-setup ---"; ls -lA fitflutterfluent-windows-setup/; fi
           if [ -d "fitflutterfluent-linux" ]; then echo "--- fitflutterfluent-linux ---"; ls -lA fitflutterfluent-linux/; fi
-          if [ -d "fitflutterfluent-linux-arm" ]; then echo "--- fitflutterfluent-linux-arm ---"; ls -lA fitflutterfluent-linux-arm/; fi
           if [ -d "fitflutterfluent-android" ]; then echo "--- fitflutterfluent-android ---"; ls -lA fitflutterfluent-android/; fi
 
       - name: Zip Windows unpacked build
@@ -248,5 +222,4 @@ jobs:
             fitflutterfluent-windows-${{ needs.resolve-version.outputs.app_version }}.zip
             fitflutterfluent-windows-setup/fit-flutter-setup-win64-${{ needs.resolve-version.outputs.app_version }}.exe
             fitflutterfluent-linux/fitflutterfluent-linux-${{ needs.resolve-version.outputs.app_version }}.tar.gz
-            fitflutterfluent-linux/fitflutterfluent-linux-arm-${{ needs.resolve-version.outputs.app_version }}.tar.gz
             fitflutterfluent-android/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
