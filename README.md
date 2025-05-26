@@ -28,12 +28,12 @@ This section outlines the tasks for the ongoing rewrite to implement Microsoft F
 * [X] **Core UI Framework:**
   * [X] Integrate Fluent Design UI libraries/packages (e.g., `fluent_ui` for Windows, or custom Fluent-inspired widgets).
   * [X] Establish base Fluent theme (colors, typography, acrylic/mica materials where applicable).
-* [ ] **Component Redesign & Implementation:**
+* [X] **Component Redesign & Implementation:**
   * [X] Redesign and implement main navigation (NavigationView, TabView, etc.) using Fluent controls.
   * [X] Rewrite list views (repack library, downloads) with Fluent styling (e.g., ListView, GridView with Fluent item templates).
   * [X] Rewrite scraping methods.
   * [X] Update buttons, input fields, dialogs, and other interactive elements to Fluent Design.
-  * [ ] Implement Fluent iconography throughout the application.
+  * [X] Implement Fluent iconography throughout the application.
   * [X] Refactor settings screen with Fluent controls (ToggleSwitch, ComboBox, etc.).
 * [ ] **Feature Parity with Fluent UI:**
   * [ ] Ensure all existing features from FitFlutter are functional within the new Fluent UI.
@@ -52,20 +52,17 @@ This section outlines the tasks for the ongoing rewrite to implement Microsoft F
   * [ ] Gather user feedback on the new Fluent design.
   * [ ] Address any UI/UX bugs or inconsistencies.
 * [ ] **Documentation & Screenshots:**
-  * [ ] Update README screenshots with the new Fluent UI.
+  * [X] Update README screenshots with the new Fluent UI.
   * [ ] Document any new Fluent-specific features or settings.
 
 ## 📸 Screenshots
 
 *(Screenshots will be updated once the Fluent Design rewrite is further along)*
 
-<!--
-![Alt text](images/readme/1.png?raw=true "Home Page")
-![Alt text](images/readme/2.png?raw=true "Repack Library")
-![Alt text](images/readme/3.png?raw=true "Repack Screenshots")
-![Alt text](images/readme/4.png?raw=true "Download Manager")
-![Alt text](images/readme/5.png?raw=true "Settings")
--->
+![Alt text](assets/readme/1.png?raw=true "Home Page")
+![Alt text](assets/readme/2.png?raw=true "Repack Details")
+![Alt text](assets/readme/3.png?raw=true "Repack Library")
+![Alt text](assets/readme/4.png?raw=true "Download Manager")
 
 ## 🚀 Roadmap & Future Enhancements
 
@@ -77,22 +74,16 @@ I am open for contributions and suggestions!
 
 This section lists known issues that have been reported. While these issues have been observed, they may not affect all users or all devices. We are working to resolve them. *(This section will be updated as the rewrite progresses)*
 
-* **Null Check Errors (from original FitFlutter):** If you encounter a Null Exception or a similar "null check" error, deleting the application's settings file *might* resolve the issue. This behavior will be re-evaluated during the rewrite.
-  * **Windows:** Delete the settings file located at `%APPDATA%\com.example\fit_flutter_fluent\FitFlutterFluent` (Path may change).
-  * **Android:** Clear the application's data through your device's settings menu (usually found under "Apps" or "Application Manager").
-* **Aero Theme (from original FitFlutter):** The aero theme caused lag on window drag in Windows 11. This will be re-assessed with the Fluent Design implementation.
 * **Limited Testing:** The application (especially the new Fluent UI) will initially undergo limited testing. We are actively seeking broader testing to identify and address issues.
 
 ## 📦 Installation
-
-*(Installation instructions will be reviewed and updated once initial builds of FitFlutterFluent are available.)*
 
 ### Windows
 
 To install and run the latest setup of FitFlutterFluent, follow these steps:
 
 1. **Download the Latest Release:**
-   * Visit the [Releases](https://github.com/THR3ATB3AR/fit_flutter/releases/latest) page on GitHub. `<!-- TODO: Update if repo name changes -->`
+   * Visit the [Releases](https://github.com/THR3ATB3AR/fit_flutter_fluent/releases/latest) page on GitHub.
    * Download the latest release for your operating system.
 2. **Run Setup:**
    * Install the app to a directory of your choice.
@@ -101,13 +92,14 @@ To install and run the latest setup of FitFlutterFluent, follow these steps:
 
 1. **Download the tar.gz File:**
 
-   * Visit the [Releases](https://github.com/THR3ATB3AR/fit_flutter/releases/latest) page on GitHub. `<!-- TODO: Update if repo name changes -->`
+   * Visit the [Releases](https://github.com/THR3ATB3AR/fit_flutter_fluent/releases/latest) page on GitHub.
    * Download the latest `fitflutterfluent.tar.gz` file for Linux.
 2. **Extract the tar.gz File:**
 
    ```bash
    tar -xzf fitflutterfluent.tar.gz -C /path/to/install/directory
    ```
+
 3. **Run the Application:**
 
    ```bash
@@ -126,14 +118,16 @@ To install and run the latest setup of FitFlutterFluent, follow these steps:
 2. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/THR3ATB3AR/fit_flutter.git fit_flutter_fluent <!-- TODO: Update if repo name changes, or clone to a new directory name -->
+   git clone https://github.com/THR3ATB3AR/fit_flutter_fluent.git fit_flutter_fluent 
    cd fit_flutter_fluent
    ```
+
 3. **Get Dependencies:**
 
    ```bash
    flutter pub get
    ```
+
 4. **Run the App:**
 
    ```bash
