@@ -2,7 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "FitFlutterFluent"
-#define MyAppVersion "0.0.1"
+#ifndef MyAppVersion
+  #error "Build Error: MyAppVersion must be defined on the Inno Setup command line using /DMyAppVersion=x.y.z"
+#endif
 #define MyAppPublisher "THR3ATB3AR"
 #define MyAppURL "https://github.com/THR3ATB3AR/fit_flutter_fluent"
 #define MyAppExeName "fit_flutter_fluent.exe"
