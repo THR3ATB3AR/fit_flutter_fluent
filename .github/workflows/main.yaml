@@ -14,21 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       app_version: ${{ steps.determine_version.outputs.version_number }}
-      build_number: ${{ steps.determine_version.outputs.build_suffix }} # Or a fixed build number
+      build_number: ${{ steps.determine_version.outputs.build_suffix }}
     steps:
       - uses: actions/checkout@v4
-
       - name: Determine Version and Build Number
         id: determine_version
         run: |
           VERSION_NUMBER=""
-          BUILD_SUFFIX="1" # Default build number/suffix
+          BUILD_SUFFIX="1" 
 
-          # Determine source of version (tag, input, or pubspec)
           SOURCE_VERSION_STRING=""
           if [[ "${{ github.event_name }}" == "push" && "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
             TAG_NAME="${{ github.ref_name }}"
-            SOURCE_VERSION_STRING="${TAG_NAME#v}" # Remove 'v' prefix if it exists
+            SOURCE_VERSION_STRING="${TAG_NAME#v}" 
             echo "Using version from tag: $TAG_NAME"
           elif [[ -n "${{ github.event.inputs.version }}" ]]; then
             SOURCE_VERSION_STRING="${{ github.event.inputs.version }}"
@@ -36,42 +34,33 @@ jobs:
           else
             echo "Reading version from pubspec.yaml"
             SOURCE_VERSION_STRING=$(grep '^version: ' pubspec.yaml | sed 's/version: //')
-            # Remove any leading/trailing whitespace from pubspec version just in case
             SOURCE_VERSION_STRING=$(echo "$SOURCE_VERSION_STRING" | xargs) 
             echo "Using version from pubspec.yaml: $SOURCE_VERSION_STRING"
           fi
 
-          # Parse VERSION_NUMBER and BUILD_SUFFIX from SOURCE_VERSION_STRING
           if [[ "$SOURCE_VERSION_STRING" == *"+"* ]]; then
             PROVISIONAL_BUILD_SUFFIX="${SOURCE_VERSION_STRING#*+}"
-            # Trim whitespace from provisional build suffix
             PROVISIONAL_BUILD_SUFFIX=$(echo "$PROVISIONAL_BUILD_SUFFIX" | xargs)
-            if [[ -n "$PROVISIONAL_BUILD_SUFFIX" ]]; then # Only override default if something was after +
+            if [[ -n "$PROVISIONAL_BUILD_SUFFIX" ]]; then
                 BUILD_SUFFIX="$PROVISIONAL_BUILD_SUFFIX"
             fi
             VERSION_NUMBER="${SOURCE_VERSION_STRING%+*}"
           else
             VERSION_NUMBER="$SOURCE_VERSION_STRING"
-            # BUILD_SUFFIX remains its default value of "1"
           fi
           
-          # Trim whitespace from VERSION_NUMBER as well
           VERSION_NUMBER=$(echo "$VERSION_NUMBER" | xargs)
 
-          # Validate VERSION_NUMBER
           if [[ -z "$VERSION_NUMBER" ]]; then
             echo "Error: Version number (app_version) could not be determined or is empty."
             exit 1
           fi
-          # Basic format check for version number (e.g., X.Y.Z)
           if ! [[ "$VERSION_NUMBER" =~ ^[0-9]+\.[0-9]+\.[0-9]+([._-].+)?$ ]]; then
-            # Allow suffixes like -beta, .alpha for version_number itself if not part of build_suffix
             if ! [[ "$VERSION_NUMBER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
                 echo "Warning: VERSION_NUMBER ('$VERSION_NUMBER') doesn't strictly follow X.Y.Z. Ensure it's compatible with build tools."
             fi
           fi
 
-          # Validate and finalize BUILD_SUFFIX (must be a positive integer for Android versionCode)
           if ! [[ "$BUILD_SUFFIX" =~ ^[1-9][0-9]*$ ]]; then
             echo "Warning: BUILD_SUFFIX ('$BUILD_SUFFIX') was empty, zero, non-numeric, or not a positive integer. Defaulting to 1."
             BUILD_SUFFIX="1"
@@ -96,18 +85,11 @@ jobs:
       - name: Flutter Build Windows
         run: |
           flutter build windows --release --build-name=${{ needs.resolve-version.outputs.app_version }} 
-          # You might want to re-add --build-number here:
-          # flutter build windows --release --build-name=${{ needs.resolve-version.outputs.app_version }} --build-number=${{ needs.resolve-version.outputs.build_suffix }}
-          echo "Built with version: ${{ needs.resolve-version.outputs.app_version }}+${{ needs.resolve-version.outputs.build_suffix }}"
+          echo "Built with version: ${{ needs.resolve-version.outputs.app_version }}"
       - name: Prepare Windows Artifact
         run: |
           mkdir dist
-          # Corrected path:
           cp -r build/windows/x64/runner/Release dist/fitflutterfluent 
-          # For PowerShell, Copy-Item is more idiomatic:
-          # New-Item -ItemType Directory -Force -Path dist
-          # Copy-Item -Path build/windows/x64/runner/Release/* -Destination dist/fitflutterfluent -Recurse -Force
-        # shell: powershell # If using Copy-Item
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -121,32 +103,26 @@ jobs:
     env:
       APP_VERSION: ${{ needs.resolve-version.outputs.app_version }}
     steps:
-      - uses: actions/checkout@v4 # Checks out the repo (for .iss script, MediaPlayer.dll, MyMusic.mp3 etc.)
-
+      - uses: actions/checkout@v4
       - name: Download Windows Build Artifact
         uses: actions/download-artifact@v4
         with:
-          name: fitflutterfluent-windows-unpacked # Name of the artifact uploaded in build-windows
-          path: build/windows/x64/runner/Release  # Flutter's typical output path, files go here directly
-
+          name: fitflutterfluent-windows-unpacked
+          path: build/windows/x64/runner/Release
       - name: Prepare Additional Files for Inno Setup
         run: |
           mkdir -p setup  
-          
           echo "Listing contents of expected Inno Setup source directory:"
-          ls -R build/windows/x64/runner/Release # Verify app files are here
+          ls -R build/windows/x64/runner/Release 
           echo "Listing contents of setup directory (if used):"
-          ls -R setup # Verify helper files are here
-        shell: bash # Using bash for mkdir -p and ls
-
+          ls -R setup 
+        shell: bash
       - name: Install Inno Setup
-        run: |
-          choco install innosetup --no-progress
+        run: choco install innosetup --no-progress
       - name: Build Installer
-        run: |
-          iscc /DMyAppVersion="${{ env.APP_VERSION }}" setupmaker.iss
+        run: iscc /DMyAppVersion="${{ env.APP_VERSION }}" setupmaker.iss
       - name: List Installer Output
-        run: ls -R Output # Check what was generated
+        run: ls -R Output 
         shell: bash
       - name: Upload InnoSetup Installer
         uses: actions/upload-artifact@v4
@@ -193,39 +169,56 @@ jobs:
       - name: Flutter Build Android
         run: |
           flutter build apk --release --build-name=${{ needs.resolve-version.outputs.app_version }}
+      - name: Rename Android APK
+        run: |
+          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
+          echo "Renamed APK to fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk"
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fitflutterfluent-android
-          path: build/app/outputs/flutter-apk/app-release.apk # Name will be generic, content has version
+          name: fitflutterfluent-android # This name determines the sub-directory when downloaded
+          path: build/app/outputs/flutter-apk/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
 
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     needs: [resolve-version, build-windows, innosetup, build-linux, build-android]
-    # Only run for tags or manual dispatch
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     permissions:
-      contents: write # Important for creating releases and tags
+      contents: write
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
-        # Artifacts will be in subdirectories named after the artifact name
 
       - name: List downloaded files # For debugging
-        run: ls -R
+        run: |
+          echo "--- Listing root of workspace ---"
+          ls -lA
+          echo "--- Listing contents of downloaded artifact directories ---"
+          if [ -d "fitflutterfluent-windows-unpacked" ]; then echo "--- fitflutterfluent-windows-unpacked ---"; ls -lA fitflutterfluent-windows-unpacked/; fi
+          if [ -d "fitflutterfluent-windows-setup" ]; then echo "--- fitflutterfluent-windows-setup ---"; ls -lA fitflutterfluent-windows-setup/; fi
+          if [ -d "fitflutterfluent-linux" ]; then echo "--- fitflutterfluent-linux ---"; ls -lA fitflutterfluent-linux/; fi
+          if [ -d "fitflutterfluent-android" ]; then echo "--- fitflutterfluent-android ---"; ls -lA fitflutterfluent-android/; fi
+
+      - name: Zip Windows unpacked build
+        run: |
+          WINDOWS_UNPACKED_ZIP_NAME="fitflutterfluent-windows-${{ needs.resolve-version.outputs.app_version }}.zip"
+          echo "Zipping contents of fitflutterfluent-windows-unpacked into $WINDOWS_UNPACKED_ZIP_NAME"
+          cd fitflutterfluent-windows-unpacked
+          zip -r ../${WINDOWS_UNPACKED_ZIP_NAME} .
+          cd ..
+          echo "Created ${WINDOWS_UNPACKED_ZIP_NAME}"
+          ls -l 
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          # If it's a tag event, use the tag name.
-          # If it's a workflow_dispatch, create a new tag based on the resolved app version.
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', needs.resolve-version.outputs.app_version) }}
           name: Release ${{ needs.resolve-version.outputs.app_version }}
-          draft: true # Set to false to publish immediately
-          generate_release_notes: true # Optional: auto-generate release notes
+          draft: false 
+          generate_release_notes: true
           files: |
-            fitflutterfluent-windows-unpacked/**
+            fitflutterfluent-windows-${{ needs.resolve-version.outputs.app_version }}.zip
             fitflutterfluent-windows-setup/fit-flutter-setup-win64-${{ needs.resolve-version.outputs.app_version }}.exe
             fitflutterfluent-linux/fitflutterfluent-linux-${{ needs.resolve-version.outputs.app_version }}.tar.gz
-            fitflutterfluent-android/app-release.apk
+            fitflutterfluent-android/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
