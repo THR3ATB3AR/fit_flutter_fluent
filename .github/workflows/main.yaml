@@ -144,7 +144,7 @@ jobs:
           choco install innosetup --no-progress
       - name: Build Installer
         run: |
-          iscc /DMyAppVersion="${{ env.APP_VERSION }}" .github/workflows/setupmaker.iss
+          iscc /DMyAppVersion="${{ env.APP_VERSION }}" setupmaker.iss
       - name: List Installer Output
         run: ls -R Output # Check what was generated
         shell: bash
