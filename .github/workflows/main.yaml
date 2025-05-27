@@ -313,7 +313,7 @@ jobs:
           APPIMAGE_ARCH_LABEL_FOR_TOOL="${{ steps.prepare_appdir.outputs.appimage_arch_label }}" # e.g. x86_64 or aarch64
 
           # AppImage filename format: appname-version-arch.AppImage
-          APPIMAGE_FILENAME="${APP_FILE_BASENAME}-${APP_VERSION}-${APPIMAGE_ARCH_LABEL_FOR_TOOL}.AppImage"
+          APPIMAGE_FILENAME="fit-flutter-fluent-${APP_VERSION}-${APPIMAGE_ARCH_LABEL_FOR_TOOL}.AppImage"
           
           # Set ARCH env var as appimagetool might use it
           ARCH="$APPIMAGE_ARCH_LABEL_FOR_TOOL" ./appimagetool.AppImage "$APPDIR_PATH" "$APPIMAGE_FILENAME"
@@ -327,7 +327,7 @@ jobs:
           
           ABSOLUTE_APPIMAGE_PATH="$(pwd)/$FINAL_APPIMAGE_DIR/$APPIMAGE_FILENAME"
           echo "appimage_path=$ABSOLUTE_APPIMAGE_PATH" >> $GITHUB_OUTPUT
-          echo "appimage_upload_name=fitflutterfluent-appimage-linux-${{ matrix.arch_name }}" >> $GITHUB_OUTPUT
+          echo "appimage_upload_name=fit-flutter-fluent-appimage-linux-$APPIMAGE_ARCH_LABEL_FOR_TOO" >> $GITHUB_OUTPUT
           echo "appimage_filename_for_release=$APPIMAGE_FILENAME" >> $GITHUB_OUTPUT # Exact filename for release step
 
       - name: Upload Linux AppImage Artifact (${{ matrix.arch_name }})
@@ -377,81 +377,36 @@ jobs:
           echo "--- Listing root of workspace ---"
           ls -lA
           echo "--- Listing contents of downloaded artifact directories ---"
-          for dir in *; do
-            if [ -d "$dir" ]; then
-              echo "--- Contents of $dir ---"
-              ls -lA "$dir/"
-            fi
-          done
-        shell: bash
+          if [ -d "fitflutterfluent-windows-unpacked" ]; then echo "--- fitflutterfluent-windows-unpacked ---"; ls -lA fitflutterfluent-windows-unpacked/; fi
+          if [ -d "fitflutterfluent-windows-setup" ]; then echo "--- fitflutterfluent-windows-setup ---"; ls -lA fitflutterfluent-windows-setup/; fi
+          if [ -d "fitflutterfluent-linux-x64" ]; then echo "--- fitflutterfluent-linux-x64 ---"; ls -lA fitflutterfluent-linux-x64/; fi
+          if [ -d "fitflutterfluent-linux-arm64" ]; then echo "--- fitflutterfluent-linux-arm64 ---"; ls -lA fitflutterfluent-linux-arm64/; fi
+          if [ -d "fit-flutter-fluent-appimage-linux-x86_64" ]; then echo "--- fitflutterfluent-appimage-linux-x86_64 ---"; ls -lA fitflutterfluent-appimage-linux-x86_64/; fi
+          if [ -d "fit-flutter-fluent-appimage-linux-aarch64" ]; then echo "--- fitflutterfluent-appimage-linux-aarch64 ---"; ls -lA fitflutterfluent-appimage-linux-aarch64/; fi
+          if [ -d "fitflutterfluent-android" ]; then echo "--- fitflutterfluent-android ---"; ls -lA fitflutterfluent-android/; fi
 
       - name: Zip Windows unpacked build
         run: |
           WINDOWS_UNPACKED_ZIP_NAME="fitflutterfluent-windows-${{ needs.resolve-version.outputs.app_version }}.zip"
-          if [ -d "fitflutterfluent-windows-unpacked" ]; then
-            echo "Zipping contents of fitflutterfluent-windows-unpacked into $WINDOWS_UNPACKED_ZIP_NAME"
-            cd fitflutterfluent-windows-unpacked
-            zip -r ../${WINDOWS_UNPACKED_ZIP_NAME} .
-            cd ..
-            echo "Created ${WINDOWS_UNPACKED_ZIP_NAME}"
-          else
-            echo "Warning: fitflutterfluent-windows-unpacked directory not found. Skipping zip."
-          fi
-          ls -l
-
-      - name: Prepare Release Assets
-        id: prepare_release_assets
-        env:
-          APP_VERSION: ${{ needs.resolve-version.outputs.app_version }}
-        run: |
-          # It's more robust to find files based on expected artifact directory structure
-          # and known parts of filenames rather than reconstructing full names,
-          # especially if pubspec.yaml isn't checked out here.
-
-          FILE_LIST=""
-          
-          # Windows
-          if [ -f "fitflutterfluent-windows-${APP_VERSION}.zip" ]; then
-            FILE_LIST+="fitflutterfluent-windows-${APP_VERSION}.zip\n"
-          fi
-          if [ -f "fitflutterfluent-windows-setup/fit-flutter-setup-win64-${APP_VERSION}.exe" ]; then
-            FILE_LIST+="fitflutterfluent-windows-setup/fit-flutter-setup-win64-${APP_VERSION}.exe\n"
-          fi
-
-          # Linux Tarballs - using find to be more flexible with exact names if needed
-          find fitflutterfluent-linux-tarball-x64 -name "fitflutterfluent-linux-x64-${APP_VERSION}.tar.gz" -print0 2>/dev/null | xargs -0 -I {} printf "%s\n" "{}" >> temp_file_list.txt
-          find fitflutterfluent-linux-tarball-arm64 -name "fitflutterfluent-linux-arm64-${APP_VERSION}.tar.gz" -print0 2>/dev/null | xargs -0 -I {} printf "%s\n" "{}" >> temp_file_list.txt
-          
-          # Linux AppImages - using find
-          # The AppImage filenames are like: {app_file_basename}-{APP_VERSION}-{arch_label}.AppImage
-          # Example: fit-flutter-fluent-1.0.0-x86_64.AppImage
-          # We'll use a wildcard for the app_file_basename part if we don't want to hardcode "fit-flutter-fluent"
-          find fitflutterfluent-appimage-linux-x64 -name "*-${APP_VERSION}-x86_64.AppImage" -print0 2>/dev/null | xargs -0 -I {} printf "%s\n" "{}" >> temp_file_list.txt
-          find fitflutterfluent-appimage-linux-arm64 -name "*-${APP_VERSION}-aarch64.AppImage" -print0 2>/dev/null | xargs -0 -I {} printf "%s\n" "{}" >> temp_file_list.txt
-          
-          # Android
-          if [ -f "fitflutterfluent-android/fitflutterfluent-android-${APP_VERSION}.apk" ]; then
-            cat <<< "fitflutterfluent-android/fitflutterfluent-android-${APP_VERSION}.apk" >> temp_file_list.txt
-          fi
-          
-          # Consolidate list
-          if [ -f temp_file_list.txt ]; then
-            FILE_LIST+=$(cat temp_file_list.txt)
-          fi
-
-          echo "Collected files for release:"
-          echo -e "$FILE_LIST"
-          echo "assets<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$FILE_LIST" | sed '/^\s*$/d' >> $GITHUB_OUTPUT # Remove empty lines
-          echo "EOF" >> $GITHUB_OUTPUT
-        shell: bash
-
+          echo "Zipping contents of fitflutterfluent-windows-unpacked into $WINDOWS_UNPACKED_ZIP_NAME"
+          cd fitflutterfluent-windows-unpacked
+          zip -r ../${WINDOWS_UNPACKED_ZIP_NAME} .
+          cd ..
+          echo "Created ${WINDOWS_UNPACKED_ZIP_NAME}"
+          ls -l 
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', needs.resolve-version.outputs.app_version) }}
           name: Release ${{ needs.resolve-version.outputs.app_version }}
-          draft: true
+          draft: false 
           generate_release_notes: true
-          files: ${{ steps.prepare_release_assets.outputs.assets }}
+          files: |
+            fitflutterfluent-windows-${{ needs.resolve-version.outputs.app_version }}.zip
+            fitflutterfluent-windows-setup/fit-flutter-setup-win64-${{ needs.resolve-version.outputs.app_version }}.exe
+            fitflutterfluent-linux-x64/fitflutterfluent-linux-x64-${{ needs.resolve-version.outputs.app_version }}.tar.gz
+            fitflutterfluent-linux-arm64/fitflutterfluent-linux-arm64-${{ needs.resolve-version.outputs.app_version }}.tar.gz
+            fitflutterfluent-appimage-linux-x86_64/fit-flutter-fluent-${{ needs.resolve-version.outputs.app_version }}-x86_64.AppImage
+            fitflutterfluent-appimage-linux-aarch64/fit-flutter-fluent-${{ needs.resolve-version.outputs.app_version }}-aarch64.AppImage
+            fitflutterfluent-android/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
