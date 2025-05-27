@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fit_flutter_fluent/services/updater_service.dart'; 
-import 'package:window_manager/window_manager.dart'; 
+import 'package:fit_flutter_fluent/services/updater_service.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 enum UpdateCheckFrequency { manual, onStartup, daily, weekly }
@@ -50,8 +50,7 @@ class UpdateProvider extends ChangeNotifier {
   Future<void> _init() async {
     await _loadSettings();
     await _getAppVersion();
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    }
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {}
   }
 
   Future<void> _loadSettings() async {
@@ -276,26 +275,61 @@ class UpdateProvider extends ChangeNotifier {
         if (await windowManager.isFocused()) {
           await windowManager.destroy();
         }
-      } else if (Platform.isLinux || Platform.isMacOS) {
+      } else if (Platform.isMacOS) {
         exit(0);
       }
     } catch (e) {
-      if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
-      if (context.mounted) {
-        showDialog(
-          context: context,
-          builder:
-              (ctx) => ContentDialog(
-                title: const Text('Update Failed'),
-                content: Text('Error during update: $e'),
-                actions: [
-                  Button(
-                    child: const Text('OK'),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ],
-              ),
-        );
+      if (context.mounted)
+        Navigator.of(
+          context,
+          rootNavigator: true,
+        ).pop(); // Zamknij dialog "Downloading"
+
+      if (e is AppImageUpdateRequiresRestartException) {
+        // Pokaż dialog o konieczności restartu
+        if (context.mounted) {
+          await showDialog(
+            context: context,
+            barrierDismissible: false, // Użytkownik musi kliknąć OK
+            builder:
+                (ctx) => ContentDialog(
+                  title: const Text('Update Complete'),
+                  content: Text(e.message),
+                  actions: [
+                    FilledButton(
+                      child: const Text('Restart Now'),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        // Restart aplikacji
+                        // Na Linuksie, po prostu exit(0) powinien wystarczyć,
+                        // aby system uruchomił nowy AppImage przy następnym kliknięciu.
+                        // Dla bardziej zaawansowanego restartu (np. ponowne uruchomienie z tymi samymi argumentami)
+                        // potrzebny byłby skrypt pomocniczy.
+                        exit(0);
+                      },
+                    ),
+                  ],
+                ),
+          );
+        }
+      } else {
+        // Obsługa innych błędów
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            builder:
+                (ctx) => ContentDialog(
+                  title: const Text('Update Failed'),
+                  content: Text('Error during update: $e'),
+                  actions: [
+                    Button(
+                      child: const Text('OK'),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+          );
+        }
       }
       print('Error downloading/installing update: $e');
     }

@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:fluent_ui/fluent_ui.dart'; 
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:open_filex/open_filex.dart'; 
+import 'package:open_filex/open_filex.dart';
 
 class UpdaterService {
   static const String githubRepo = 'THR3ATB3AR/fit_flutter_fluent';
@@ -75,27 +75,31 @@ class UpdaterService {
   }
 
   Future<String> _getLinuxArchSuffixForAsset() async {
-    if (!Platform.isLinux) return ''; 
+    if (!Platform.isLinux) return '';
 
     try {
       final result = await Process.run('uname', ['-m']);
       if (result.exitCode == 0) {
         final arch = (result.stdout as String).trim().toLowerCase();
         if (arch == 'x86_64' || arch == 'amd64') {
-          return 'x64';
+          return 'x86_64';
         } else if (arch == 'aarch64') {
-          return 'arm64';
+          return 'aarch64';
         } else {
-          debugPrint('Unsupported Linux architecture: $arch. Cannot determine asset.');
+          debugPrint(
+            'Unsupported Linux architecture: $arch. Cannot determine asset.',
+          );
           throw Exception('Unsupported Linux architecture for update: $arch');
         }
       } else {
         debugPrint('Failed to determine Linux architecture: ${result.stderr}');
-        throw Exception('Failed to determine Linux architecture (uname -m failed).');
+        throw Exception(
+          'Failed to determine Linux architecture (uname -m failed).',
+        );
       }
     } catch (e) {
       debugPrint('Error determining Linux architecture: $e');
-      rethrow; 
+      rethrow;
     }
   }
 
@@ -110,57 +114,64 @@ class UpdaterService {
     Map<String, dynamic>? assetData;
 
     try {
-      String? searchPatternStart; 
-      String searchPatternEnd;   
+      String? searchPatternStart;
+      String searchPatternEnd;
 
       if (Platform.isWindows) {
         searchPatternEnd = '.exe';
       } else if (Platform.isAndroid) {
         searchPatternEnd = '.apk';
       } else if (Platform.isMacOS) {
-        searchPatternEnd = '.dmg'; 
+        searchPatternEnd = '.dmg';
       } else if (Platform.isLinux) {
-        final archSuffix = await _getLinuxArchSuffixForAsset(); 
-        searchPatternStart = 'fitflutterfluent-linux-$archSuffix-';
-        searchPatternEnd = '.tar.gz';
+        final archSuffix = await _getLinuxArchSuffixForAsset();
+        String releaseVersion = (jsonResponse['tag_name'] as String)
+            .replaceFirst('v', '');
+
+        searchPatternStart = 'fit-flutter-fluent-$releaseVersion-$archSuffix';
+        searchPatternEnd = '.appimage';
       } else {
         throw UnsupportedError('Unsupported platform for update.');
       }
 
-      assetData = assets.firstWhere(
-        (asset) {
-          final assetName = (asset['name'] as String?)?.toLowerCase();
-          if (assetName == null) return false;
+      assetData = assets.firstWhere((asset) {
+        final assetName = (asset['name'] as String?)?.toLowerCase();
+        if (assetName == null) return false;
 
-          if (Platform.isLinux && searchPatternStart != null) {
-            return assetName.startsWith(searchPatternStart) && assetName.endsWith(searchPatternEnd);
-          } else {
-            return assetName.endsWith(searchPatternEnd);
-          }
-        },
-        orElse: () => null,
-      );
+        if (Platform.isLinux && searchPatternStart != null) {
+          return assetName ==
+              (searchPatternStart + searchPatternEnd).toLowerCase();
+        } else {
+          return assetName.endsWith(searchPatternEnd);
+        }
+      }, orElse: () => null);
 
       if (assetData == null) {
         String expectedFormat = searchPatternEnd;
         if (Platform.isLinux && searchPatternStart != null) {
-            expectedFormat = "$searchPatternStart<version>$searchPatternEnd";
+          expectedFormat = "$searchPatternStart$searchPatternEnd";
         }
-        debugPrint("Could not find suitable asset. Expected format: $expectedFormat. Available assets: ${assets.map((a) => a['name'])}");
-        throw Exception('Suitable asset not found. Expected format like: $expectedFormat');
+        debugPrint(
+          "Could not find suitable asset. Expected format: $expectedFormat. Available assets: ${assets.map((a) => a['name'])}",
+        );
+        throw Exception(
+          'Suitable asset not found. Expected format like: $expectedFormat',
+        );
       }
-
-    } catch (e) { 
+    } catch (e) {
       debugPrint("Error identifying asset: $e");
-      throw Exception('Failed to identify a suitable release asset: ${e.toString()}');
+      throw Exception(
+        'Failed to identify a suitable release asset: ${e.toString()}',
+      );
     }
-
 
     final downloadUrl = assetData['browser_download_url'] as String?;
     final fileName = assetData['name'] as String?;
 
     if (downloadUrl == null || fileName == null) {
-      throw Exception('Asset download URL or name is missing from identified asset data.');
+      throw Exception(
+        'Asset download URL or name is missing from identified asset data.',
+      );
     }
 
     final directory = await getTemporaryDirectory();
@@ -180,7 +191,9 @@ class UpdaterService {
         debugPrint('Downloaded latest release to $filePath');
         return filePath;
       } else {
-        throw Exception('Failed to download release asset (Status ${streamedResponse.statusCode})');
+        throw Exception(
+          'Failed to download release asset (Status ${streamedResponse.statusCode})',
+        );
       }
     } finally {
       client.close();
@@ -234,7 +247,83 @@ class UpdaterService {
         debugPrint('Failed to open APK for installation: $e');
         throw Exception('Failed to start APK installation: $e');
       }
-    } else if (Platform.isLinux || Platform.isMacOS) {
+    } else if (Platform.isLinux) {
+    try {
+      debugPrint('Starting AppImage update process for Linux.');
+      debugPrint('New AppImage downloaded to: $filePath');
+
+      final currentAppImagePath = Platform.resolvedExecutable;
+      debugPrint('Current running AppImage path: $currentAppImagePath');
+
+      if (!currentAppImagePath.toLowerCase().endsWith('.appimage') && Platform.environment['APPIMAGE'] == null) {
+          debugPrint('Application does not seem to be running as an AppImage. Cannot auto-update this way.');
+          debugPrint('Opening download location for manual update: ${File(filePath).parent.path}');
+          await OpenFilex.open(File(filePath).parent.path);
+          throw Exception('Not running as AppImage. Please update manually from: ${File(filePath).parent.path}');
+      }
+
+
+      debugPrint('Setting execute permissions for: $filePath');
+      final chmodResult = await Process.run('chmod', ['+x', filePath]);
+      if (chmodResult.exitCode != 0) {
+        debugPrint('Failed to set execute permissions: ${chmodResult.stderr}');
+        throw Exception('Failed to set execute permissions for the new AppImage.');
+      }
+
+      // 3. Zastąp stary plik AppImage nowym
+      // To jest najtrudniejsza część, bo nie można nadpisać pliku, który jest aktualnie wykonywany.
+      // Typowe strategie:
+      //    a) Przenieś stary plik do .old, skopiuj nowy na miejsce starego, po restarcie usuń .old
+      //    b) Użyj zewnętrznego skryptu/narzędzia, które zrobi podmianę po zamknięciu aplikacji.
+      //    c) Dla AppImage, popularne jest narzędzie `AppImageUpdate`, które robi to "na żywo" (delta updates).
+      //       Jeśli nie używasz AppImageUpdate, musisz zaimplementować prostszą logikę.
+
+      // Prosta strategia (a): przenieś stary, skopiuj nowy, poproś o restart.
+      final oldAppImageBackupPath = '$currentAppImagePath.old';
+
+      // Usuń stary backup, jeśli istnieje
+      if (await File(oldAppImageBackupPath).exists()) {
+        await File(oldAppImageBackupPath).delete();
+      }
+
+      debugPrint('Renaming current AppImage from $currentAppImagePath to $oldAppImageBackupPath');
+      await File(currentAppImagePath).rename(oldAppImageBackupPath);
+
+      debugPrint('Copying new AppImage from $filePath to $currentAppImagePath');
+      await File(filePath).copy(currentAppImagePath);
+
+
+      // 4. Poinformuj użytkownika i poproś o restart (lub spróbuj zrestartować programowo)
+      debugPrint('AppImage update applied. Application needs to restart.');
+
+      // Tutaj możesz pokazać dialog użytkownikowi, że aktualizacja jest gotowa
+      // i aplikacja zostanie zrestartowana.
+      // W UpdateProvider.dart:
+      //   showDialog(... "Update complete, restarting application" ...)
+      //   exit(0); // Zamknie bieżącą instancję
+
+      // Dla celów tej funkcji, rzucimy wyjątek, który może być obsłużony wyżej
+      // aby pokazać odpowiedni komunikat i zrestartować aplikację.
+      throw AppImageUpdateRequiresRestartException(
+        'Update applied. Please restart the application to use the new version. The old version has been backed up as $oldAppImageBackupPath (can be deleted after successful restart).',
+      );
+
+    } catch (e) {
+      debugPrint('Failed to install AppImage update: $e');
+      // Jeśli coś poszło nie tak, spróbuj przywrócić stary plik, jeśli istnieje
+      final oldAppImageBackupPath = '${Platform.resolvedExecutable}.old';
+      if (await File(oldAppImageBackupPath).exists() && !await File(Platform.resolvedExecutable).exists()) {
+          try {
+              await File(oldAppImageBackupPath).rename(Platform.resolvedExecutable);
+              debugPrint('Restored old AppImage from backup due to error.');
+          } catch (restoreError) {
+              debugPrint('Failed to restore old AppImage from backup: $restoreError');
+          }
+      }
+      rethrow; // Rzuć dalej wyjątek, aby został obsłużony
+    }
+  }
+    else if (Platform.isMacOS) {
       debugPrint(
         'Automatic update installation is not implemented for ${Platform.operatingSystem}. Please install manually: $filePath',
       );
@@ -249,4 +338,11 @@ class UpdaterService {
       );
     }
   }
+}
+
+class AppImageUpdateRequiresRestartException implements Exception {
+  final String message;
+  AppImageUpdateRequiresRestartException(this.message);
+  @override
+  String toString() => 'AppImageUpdateRequiresRestartException: $message';
 }
