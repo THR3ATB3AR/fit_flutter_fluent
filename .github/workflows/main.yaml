@@ -284,7 +284,7 @@ jobs:
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', needs.resolve-version.outputs.app_version) }}
           name: Release ${{ needs.resolve-version.outputs.app_version }}
-          draft: false 
+          draft: true 
           generate_release_notes: true
           files: |
             fitflutterfluent-windows-${{ needs.resolve-version.outputs.app_version }}.zip
