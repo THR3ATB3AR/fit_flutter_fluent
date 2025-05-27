@@ -453,10 +453,12 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
             ),
           );
         }(),
-        actions: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [const WindowButtons()],
-        ),
+        actions: isDesktop
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [const WindowButtons()],
+              )
+            : null,
       ),
       paneBodyBuilder: (item, child) {
         final name =
