@@ -300,11 +300,6 @@ class UpdateProvider extends ChangeNotifier {
                       child: const Text('Restart Now'),
                       onPressed: () {
                         Navigator.pop(ctx);
-                        // Restart aplikacji
-                        // Na Linuksie, po prostu exit(0) powinien wystarczyć,
-                        // aby system uruchomił nowy AppImage przy następnym kliknięciu.
-                        // Dla bardziej zaawansowanego restartu (np. ponowne uruchomienie z tymi samymi argumentami)
-                        // potrzebny byłby skrypt pomocniczy.
                         exit(0);
                       },
                     ),
