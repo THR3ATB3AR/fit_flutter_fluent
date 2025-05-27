@@ -74,8 +74,8 @@ Planned future enhancements include:
 * [X] Automatic updates for the Linux version.
 * [X] Automatic updates for the Android version.
 * [X] Fixing icon and background display issues on Android Version.
-* [ ] Adding functionality to refresh details of the repack.
-* [ ] Adding options to open webpage of repack.
+* [X] Adding functionality to refresh details of the repack.
+* [X] Adding options to open webpage of repack.
 * [ ] Show close prevention dialog only when downloading.
 * [X] Removing Windows-specific UI elements from the Android interface.
 * [ ] Implementing app localization.

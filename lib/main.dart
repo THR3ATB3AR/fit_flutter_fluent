@@ -77,7 +77,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final UpdateProvider updateProvider; 
+  final UpdateProvider updateProvider;
   const MyApp({super.key, required this.updateProvider});
 
   @override
@@ -258,8 +258,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final updateProvider = Provider.of<UpdateProvider>(context, listen: false);
-      updateProvider.checkForUpdates(); 
+      final updateProvider = Provider.of<UpdateProvider>(
+        context,
+        listen: false,
+      );
+      updateProvider.checkForUpdates();
       updateProvider.addListener(_handleUpdateInfobar);
     });
   }
@@ -270,7 +273,10 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     searchController.dispose();
     searchFocusNode.dispose();
     try {
-      Provider.of<UpdateProvider>(context, listen: false).removeListener(_handleUpdateInfobar);
+      Provider.of<UpdateProvider>(
+        context,
+        listen: false,
+      ).removeListener(_handleUpdateInfobar);
     } catch (e) {
       print("Could not remove UpdateProvider listener: $e");
     }
@@ -282,18 +288,23 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     final updateProvider = Provider.of<UpdateProvider>(context, listen: false);
 
     if (updateProvider.showUpdateInfobar && !_isUpdateInfoBarVisible) {
-      setState(() { _isUpdateInfoBarVisible = true; });
-      
-      final latestTagName = updateProvider.latestReleaseInfo?['tag_name'] ?? "Unknown";
-      final releaseNotes = updateProvider.latestReleaseInfo?['release_notes'] ?? "No release notes available.";
+      setState(() {
+        _isUpdateInfoBarVisible = true;
+      });
 
-      final PageStorageBucket infoBarBucket = PageStorageBucket(); 
+      final latestTagName =
+          updateProvider.latestReleaseInfo?['tag_name'] ?? "Unknown";
+      final releaseNotes =
+          updateProvider.latestReleaseInfo?['release_notes'] ??
+          "No release notes available.";
+
+      final PageStorageBucket infoBarBucket = PageStorageBucket();
 
       displayInfoBar(
         context,
         builder: (infoBarContext, close) {
-          return PageStorage( 
-            bucket: infoBarBucket, 
+          return PageStorage(
+            bucket: infoBarBucket,
             child: InfoBar(
               title: Text('Update Available: $latestTagName'),
               content: Column(
@@ -305,7 +316,10 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                   Expander(
                     header: const Text('View Release Notes'),
                     content: ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 150, maxWidth: 400),
+                      constraints: const BoxConstraints(
+                        maxHeight: 150,
+                        maxWidth: 400,
+                      ),
                       child: SingleChildScrollView(child: Text(releaseNotes)),
                     ),
                   ),
@@ -325,7 +339,10 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                     child: const Text('Later'),
                     onPressed: () {
                       updateProvider.ignoreCurrentUpdate();
-                      if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
+                      if (mounted)
+                        setState(() {
+                          _isUpdateInfoBarVisible = false;
+                        });
                       close();
                     },
                   ),
@@ -333,16 +350,27 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                   FilledButton(
                     child: const Text('Upgrade'),
                     onPressed: () {
-                       if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
-                      close(); 
-                      updateProvider.downloadAndInstallUpdate(GoRouter.of(context).routerDelegate.navigatorKey.currentContext ?? context);
+                      if (mounted)
+                        setState(() {
+                          _isUpdateInfoBarVisible = false;
+                        });
+                      close();
+                      updateProvider.downloadAndInstallUpdate(
+                        GoRouter.of(
+                              context,
+                            ).routerDelegate.navigatorKey.currentContext ??
+                            context,
+                      );
                     },
                   ),
                 ],
               ),
               severity: InfoBarSeverity.warning,
               onClose: () {
-                if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
+                if (mounted)
+                  setState(() {
+                    _isUpdateInfoBarVisible = false;
+                  });
                 close();
               },
               isLong: true,
@@ -350,10 +378,13 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           );
         },
         alignment: Alignment.topRight,
-        duration: Duration(hours: 24), 
+        duration: Duration(hours: 24),
       );
     } else if (!updateProvider.showUpdateInfobar && _isUpdateInfoBarVisible) {
-       if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
+      if (mounted)
+        setState(() {
+          _isUpdateInfoBarVisible = false;
+        });
     }
   }
 
@@ -383,7 +414,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 indexFooter;
           }
         }
-        return 0; 
+        return 0;
       }
       return originalItems
               .where((element) => element.key != null)
@@ -394,7 +425,6 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
       return indexOriginal;
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -453,12 +483,13 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
             ),
           );
         }(),
-        actions: isDesktop
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [const WindowButtons()],
-              )
-            : null,
+        actions:
+            isDesktop
+                ? Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [const WindowButtons()],
+                )
+                : null,
       ),
       paneBodyBuilder: (item, child) {
         final name =
