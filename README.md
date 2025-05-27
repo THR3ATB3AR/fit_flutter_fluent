@@ -51,7 +51,7 @@ This section outlines the tasks for the ongoing rewrite to implement Microsoft F
   * [ ] Thoroughly test all UI elements and interactions.
   * [ ] Gather user feedback on the new Fluent design.
   * [ ] Address any UI/UX bugs or inconsistencies.
-* [ ] **Documentation & Screenshots:**
+* [X] **Documentation & Screenshots:**
   * [X] Update README screenshots with the new Fluent UI.
   * [X] Document any new Fluent-specific features or settings.
 
@@ -78,6 +78,7 @@ Planned future enhancements include:
 * [X] Adding options to open webpage of repack.
 * [X] Show close prevention dialog only when downloading.
 * [X] Removing Windows-specific UI elements from the Android interface.
+* [ ] Implementing AppImage builds for Linux distribution.
 * [ ] Implementing app localization.
 * [ ] Adding automatic installation of repacks.
 * [ ] Adding filtering capabilities for repacks.
