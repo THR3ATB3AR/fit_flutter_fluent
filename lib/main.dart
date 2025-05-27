@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:fit_flutter_fluent/providers/update_provider.dart';
+import 'package:fit_flutter_fluent/services/dd_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fit_flutter_fluent/screens/download_manager_screen.dart';
@@ -48,6 +49,7 @@ void main() async {
   final updateProvider = UpdateProvider();
   await RepackService.instance.init();
   await _requestPermissions();
+  final ddManager = DdManager.instance;
 
   if ([
     TargetPlatform.windows,
@@ -70,8 +72,16 @@ void main() async {
       windowButtonVisibility: false,
     );
     await windowManager.setMinimumSize(const Size(670, 690));
-    await windowManager.setPreventClose(true);
+    await windowManager.setPreventClose(false);
     await windowManager.setSkipTaskbar(false);
+
+    ddManager.isAnyTaskDownloading.addListener(() {
+      final bool isDownloading = ddManager.isAnyTaskDownloading.value;
+      debugPrint(
+        "Main: Active download state changed to: $isDownloading. Setting preventClose.",
+      );
+      windowManager.setPreventClose(isDownloading);
+    });
   }
   runApp(MyApp(updateProvider: updateProvider));
 }
@@ -339,10 +349,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                     child: const Text('Later'),
                     onPressed: () {
                       updateProvider.ignoreCurrentUpdate();
-                      if (mounted)
+                      if (mounted) {
                         setState(() {
                           _isUpdateInfoBarVisible = false;
                         });
+                      }
                       close();
                     },
                   ),
@@ -350,10 +361,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                   FilledButton(
                     child: const Text('Upgrade'),
                     onPressed: () {
-                      if (mounted)
+                      if (mounted) {
                         setState(() {
                           _isUpdateInfoBarVisible = false;
                         });
+                      }
                       close();
                       updateProvider.downloadAndInstallUpdate(
                         GoRouter.of(
@@ -367,10 +379,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
               ),
               severity: InfoBarSeverity.warning,
               onClose: () {
-                if (mounted)
+                if (mounted) {
                   setState(() {
                     _isUpdateInfoBarVisible = false;
                   });
+                }
                 close();
               },
               isLong: true,
@@ -381,10 +394,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
         duration: Duration(hours: 24),
       );
     } else if (!updateProvider.showUpdateInfobar && _isUpdateInfoBarVisible) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _isUpdateInfoBarVisible = false;
         });
+      }
     }
   }
 
@@ -556,29 +570,34 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     bool isPreventClose = await windowManager.isPreventClose();
     if (isPreventClose && mounted) {
       showDialog(
-        context: context,
-        builder: (_) {
-          return ContentDialog(
-            title: const Text('Confirm close'),
-            content: const Text('Are you sure you want to close this window?'),
-            actions: [
-              FilledButton(
-                child: const Text('Yes'),
-                onPressed: () {
-                  Navigator.pop(context);
-                  windowManager.destroy();
-                },
-              ),
-              Button(
-                child: const Text('No'),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          );
-        },
-      );
+      context: context,
+      builder: (_) {
+        return ContentDialog(
+          title: const Text('Downloads in Progress'), 
+          content: const Text(
+            'Closing the application will cancel all active downloads. '
+            'Are you sure you want to close?',
+          ),
+          actions: [
+            FilledButton(
+              child: const Text('Yes, Close & Cancel'), 
+              onPressed: () async { 
+                Navigator.pop(context); 
+                debugPrint("User chose to close; cancelling downloads.");
+                
+                windowManager.destroy(); 
+              },
+            ),
+            Button(
+              child: const Text('Keep Downloading'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
     }
   }
 }

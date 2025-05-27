@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:fit_flutter_fluent/data/download_info.dart'; 
-import 'package:flutter_download_manager/flutter_download_manager.dart';
-import 'package:flutter/foundation.dart'; 
-
+import 'package:fit_flutter_fluent/data/download_info.dart';
+import 'package:flutter_download_manager/flutter_download_manager.dart'
+    show DownloadManager, DownloadTask, DownloadStatus;
+import 'package:flutter/foundation.dart';
 
 class DdManager {
   final DownloadManager downloadManager = DownloadManager();
@@ -11,11 +11,62 @@ class DdManager {
       StreamController<String>.broadcast();
   Stream<String> get onTaskGroupUpdated => _taskGroupUpdatedController.stream;
 
-  DdManager._privateConstructor() ;
+  DdManager._privateConstructor();
 
   Map<String, List<Map<String, dynamic>>> downloadTasks = {};
   static final DdManager _instance = DdManager._privateConstructor();
   static DdManager get instance => _instance;
+
+  final ValueNotifier<bool> isAnyTaskDownloading = ValueNotifier(false);
+  final Map<String, VoidCallback> _statusListeners = {};
+
+  void _checkActiveDownloads() {
+    bool anyActive = false;
+    for (var taskList in downloadTasks.values) {
+      for (var taskMap in taskList) {
+        final task = taskMap['task'] as DownloadTask?;
+        if (task != null) {
+          final status = task.status.value;
+          if (status == DownloadStatus.downloading ||
+              status == DownloadStatus.paused ||
+              status == DownloadStatus.queued) {
+            anyActive = true;
+            break;
+          }
+        }
+      }
+      if (anyActive) break;
+    }
+    if (isAnyTaskDownloading.value != anyActive) {
+      isAnyTaskDownloading.value = anyActive;
+      debugPrint("DdManager: isAnyTaskDownloading changed to $anyActive");
+    }
+  }
+
+  void _addStatusListener(DownloadTask task) {
+    final url = task.request.url;
+    if (_statusListeners.containsKey(url)) {
+      task.status.removeListener(_statusListeners[url]!);
+    }
+    VoidCallback listener = () => _checkActiveDownloads();
+    _statusListeners[url] = listener;
+    task.status.addListener(listener);
+  }
+
+  void _removeStatusListener(String url) {
+    final listener = _statusListeners.remove(url);
+    if (listener != null) {
+      final task = downloadManager.getDownload(url);
+      if (task != null) {
+        task.status.removeListener(listener);
+        debugPrint("DdManager: Removed status listener for $url");
+      } else {
+        debugPrint(
+          "DdManager: Task $url not found in plugin manager while removing listener.",
+        );
+      }
+    }
+  }
 
   String sanitizeFileName(String fileName) {
     final RegExp regExp = RegExp(r'[<>:"/\\|?*]');
@@ -54,6 +105,8 @@ class DdManager {
       return;
     }
 
+    _addStatusListener(task); 
+
     if (!downloadTasks.containsKey(sanitizedTitle)) {
       downloadTasks[sanitizedTitle] = [];
     }
@@ -68,8 +121,9 @@ class DdManager {
         'url': ddInfo.downloadLink,
         'task': task,
       });
-      _taskGroupUpdatedController.add(sanitizedTitle); 
+      _taskGroupUpdatedController.add(sanitizedTitle);
     }
+    _checkActiveDownloads(); 
   }
 
   DownloadTask? getDownloadTask(DownloadInfo ddInfo) {
@@ -82,7 +136,9 @@ class DdManager {
 
   Future<void> cancelDownload(String url) async {
     await downloadManager.cancelDownload(url);
-    removeDownloadTaskByUrl(url);
+    removeDownloadTaskByUrl(
+      url,
+    );
   }
 
   Future<void> pauseDownload(String url) async {
@@ -98,92 +154,91 @@ class DdManager {
   }
 
   void removeDownloadTaskByUrl(String url) {
-  String? titleToRemoveFrom;
-  String? updatedTitle; 
+    String? titleToRemoveFrom;
+    String? updatedTitle;
 
-  downloadTasks.forEach((title, tasks) {
-    int initialCount = tasks.length;
-    tasks.removeWhere((taskMap) {
-      String? taskUrl;
-      if (taskMap['url'] != null) {
-        taskUrl = taskMap['url'] as String;
-      } else if (taskMap['task'] != null && taskMap['task'] is DownloadTask) {
-        taskUrl = (taskMap['task'] as DownloadTask).request.url;
+    downloadTasks.forEach((title, tasks) {
+      int initialCount = tasks.length;
+      tasks.removeWhere((taskMap) {
+        String? taskUrl;
+        if (taskMap['url'] != null) {
+          taskUrl = taskMap['url'] as String;
+        } else if (taskMap['task'] != null && taskMap['task'] is DownloadTask) {
+          taskUrl = (taskMap['task'] as DownloadTask).request.url;
+        }
+
+        if (taskUrl != null && taskUrl == url) {
+          _removeStatusListener(url);
+          updatedTitle = title;
+          return true;
+        }
+        return false;
+      });
+
+      if (tasks.isEmpty) {
+        titleToRemoveFrom = title;
+      } else if (initialCount > tasks.length) {
+        updatedTitle = title;
       }
-      
-      if (taskUrl != null && taskUrl == url) {
-        updatedTitle = title; 
-        return true;
-      }
-      return false;
     });
 
-    if (tasks.isEmpty) {
-      titleToRemoveFrom = title;
-    } else if (initialCount > tasks.length) {
-      updatedTitle = title;
+    if (titleToRemoveFrom != null) {
+      downloadTasks.remove(titleToRemoveFrom);
+      _taskGroupUpdatedController.add(titleToRemoveFrom!);
+      debugPrint("Group $titleToRemoveFrom became empty and was removed.");
+    } else if (updatedTitle != null) {
+      _taskGroupUpdatedController.add(updatedTitle!);
+      debugPrint("Task removed from group $updatedTitle.");
     }
-  });
-
-  if (titleToRemoveFrom != null) {
-    downloadTasks.remove(titleToRemoveFrom);
-    _taskGroupUpdatedController.add(titleToRemoveFrom!); 
-    debugPrint("Group $titleToRemoveFrom became empty and was removed.");
-  } else if (updatedTitle != null) {
-    _taskGroupUpdatedController.add(updatedTitle!);
-     debugPrint("Task removed from group $updatedTitle.");
+    _checkActiveDownloads();
   }
-}
 
-Future<void> removeDownloadGroup(String title) async {
-  final sanitizedTitle = sanitizeFileName(title);
-  if (downloadTasks.containsKey(sanitizedTitle)) {
-    final tasksInGroup = List<Map<String, dynamic>>.from(
-      downloadTasks[sanitizedTitle]!,
-    );
+  Future<void> removeDownloadGroup(String title) async {
+    final sanitizedTitle = sanitizeFileName(title);
+    if (downloadTasks.containsKey(sanitizedTitle)) {
+      final tasksInGroup = List<Map<String, dynamic>>.from(
+        downloadTasks[sanitizedTitle]!,
+      );
 
-    debugPrint("DdManager: Removing group '$sanitizedTitle'. Found ${tasksInGroup.length} tasks in DdManager's list.");
+      for (var taskMap in tasksInGroup) {
+        final task = taskMap['task'] as DownloadTask?;
+        final url = taskMap['url'] as String?;
+        final taskUrl = url ?? task?.request.url;
 
-    for (var taskMap in tasksInGroup) {
-      final task = taskMap['task'] as DownloadTask?; 
-      final url = taskMap['url'] as String?; 
+        if (taskUrl == null) continue;
 
-      if (task == null && url == null) {
-        debugPrint("DdManager: Skipping task in group '$sanitizedTitle' - no task object or URL.");
-        continue;
-      }
-      
-      final taskUrl = url ?? task?.request.url;
+        _removeStatusListener(taskUrl); 
 
-      if (taskUrl == null) {
-        debugPrint("DdManager: Skipping task in group '$sanitizedTitle' - could not determine URL.");
-        continue;
-      }
-
-      if (downloadManager.getDownload(taskUrl) != null) {
-        debugPrint("DdManager: Attempting to cancel task: $taskUrl for group '$sanitizedTitle' via plugin.");
-        try {
-          await downloadManager.cancelDownload(taskUrl);
-          debugPrint("DdManager: Plugin's cancelDownload called for $taskUrl.");
-        } catch (e) {
-          debugPrint("DdManager: Error calling plugin's cancelDownload for $taskUrl: $e");
+        if (downloadManager.getDownload(taskUrl) != null) {
+          try {
+            await downloadManager.cancelDownload(taskUrl);
+          } catch (e) {
+            debugPrint(
+              "DdManager: Error calling plugin's cancelDownload for $taskUrl: $e",
+            );
+          }
         }
-      } else {
-        debugPrint("DdManager: Task $taskUrl for group '$sanitizedTitle' already removed or not found in plugin manager.");
       }
+
+      downloadTasks.remove(sanitizedTitle);
+      _taskGroupUpdatedController.add(sanitizedTitle);
+      _checkActiveDownloads(); 
+    } else {
     }
-
-    downloadTasks.remove(sanitizedTitle);
-    debugPrint("DdManager: Removed download group '$sanitizedTitle' from DdManager's internal list.");
-    _taskGroupUpdatedController.add(sanitizedTitle); 
-  } else {
-    debugPrint("DdManager: Group '$sanitizedTitle' not found in DdManager's list for removal.");
   }
-}
 
-void dispose() {
-  _taskGroupUpdatedController.close();
-}
+  void dispose() {
+    _taskGroupUpdatedController.close();
+    _statusListeners.forEach((url, listener) {
+      final task = downloadManager.getDownload(url);
+      if (task != null) {
+        task.status.removeListener(listener);
+      }
+    });
+    _statusListeners.clear();
+    isAnyTaskDownloading.dispose(); 
+    debugPrint("DdManager: Disposed.");
+  }
 
   void debugPrintDownloadTasks() {
     downloadTasks.forEach((title, tasks) {
@@ -199,20 +254,17 @@ void dispose() {
   void setMaxConcurrentDownloads(int maxDownloads) {
     downloadManager.maxConcurrentTasks = maxDownloads;
   }
+
   ValueNotifier<double>? getBatchProgressForTitle(String title) {
     final sanitizedTitle = sanitizeFileName(title);
     if (!downloadTasks.containsKey(sanitizedTitle) ||
         downloadTasks[sanitizedTitle]!.isEmpty) {
       return null;
     }
-
     final tasksForTitle = downloadTasks[sanitizedTitle]!;
     final List<String> urls =
         tasksForTitle.map((taskMap) => taskMap['url'] as String).toList();
-
-    if (urls.isEmpty) {
-      return ValueNotifier<double>(1.0);
-    }
+    if (urls.isEmpty) return ValueNotifier<double>(1.0);
     return downloadManager.getBatchDownloadProgress(urls);
   }
 
@@ -222,14 +274,10 @@ void dispose() {
         downloadTasks[sanitizedTitle]!.isEmpty) {
       return null;
     }
-
     final tasksForTitle = downloadTasks[sanitizedTitle]!;
     final List<String> urls =
         tasksForTitle.map((taskMap) => taskMap['url'] as String).toList();
-
-    if (urls.isEmpty) {
-      return Future.value();
-    }
+    if (urls.isEmpty) return Future.value();
     return downloadManager.whenBatchDownloadsComplete(urls);
   }
 }

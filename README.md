@@ -76,7 +76,7 @@ Planned future enhancements include:
 * [X] Fixing icon and background display issues on Android Version.
 * [X] Adding functionality to refresh details of the repack.
 * [X] Adding options to open webpage of repack.
-* [ ] Show close prevention dialog only when downloading.
+* [X] Show close prevention dialog only when downloading.
 * [X] Removing Windows-specific UI elements from the Android interface.
 * [ ] Implementing app localization.
 * [ ] Adding automatic installation of repacks.
