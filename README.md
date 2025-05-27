@@ -68,6 +68,19 @@ This section outlines the tasks for the ongoing rewrite to implement Microsoft F
 
 FitFlutterFluent is continuously evolving! The primary focus is currently on completing the Microsoft Fluent Design rewrite. Future enhancements will build upon this new foundation.
 
+Planned future enhancements include:
+
+* [ ]  Automatic updates for the Android version.
+* [ ]  Fixing icon and background display issues on Android Version.
+* [ ]  Adding functionality to refresh details of the repack.
+* [ ]  Adding options to open webpage of repack.
+* [ ]  Removing Windows-specific UI elements from the Android interface.
+* [ ]  Implementing app localization (support for multiple languages).
+* [ ]  Adding automatic installation of repacks.
+* [ ]  Adding filtering capabilities for repacks (e.g., by game genre).
+* [ ]  Developing a feature to manage installed games.
+* [ ]  Support for Data Nodes downloads.
+
 I am open for contributions and suggestions!
 
 ## 🐛 Known Issues
