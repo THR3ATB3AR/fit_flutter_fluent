@@ -263,14 +263,14 @@ jobs:
 
           echo "Creating .desktop file: $APPDIR_NAME/$APP_FILE_BASENAME.desktop"
           cat <<EOF > "$APPDIR_NAME/$APP_FILE_BASENAME.desktop"
-[Desktop Entry]
-Name=$PUBSPEC_APP_NAME
-Comment=$APP_DESCRIPTION
-Exec=$APP_EXECUTABLE_IN_BUNDLE
-Icon=$APP_FILE_BASENAME
-Type=Application
-Categories=Utility;
-EOF
+          [Desktop Entry]
+          Name=$PUBSPEC_APP_NAME
+          Comment=$APP_DESCRIPTION
+          Exec=$APP_EXECUTABLE_IN_BUNDLE
+          Icon=$APP_FILE_BASENAME
+          Type=Application
+          Categories=Utility;
+          EOF
           cp "$APPDIR_NAME/$APP_FILE_BASENAME.desktop" "$APPDIR_NAME/usr/share/applications/"
 
           echo "Copying icon..."
