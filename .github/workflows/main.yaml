@@ -131,31 +131,58 @@ jobs:
           path: Output/fit-flutter-setup-win64-${{ env.APP_VERSION }}.exe
 
   build-linux:
-    name: Build Linux Release
+    name: Build Linux Release (${{ matrix.arch }})
     runs-on: ubuntu-latest
     needs: resolve-version
+    strategy:
+      matrix:
+        arch: [x64, arm64]
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-      - run: sudo apt-get update
-      - run: sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+      - name: Install Linux Build Dependencies for ${{ matrix.arch }}
+        run: |
+          sudo apt-get update # Initial update
+          # Common tools for both architectures
+          sudo apt-get install -y --no-install-recommends clang cmake ninja-build pkg-config
+
+          if [[ "${{ matrix.arch }}" == "arm64" ]]; then
+            sudo dpkg --add-architecture arm64
+            sudo apt-get update # Update after adding new architecture
+            # ARM64 specific cross-compiler and GTK dev files
+            sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu libgtk-3-dev:arm64
+          else # For x64
+            # x64 specific GTK dev files
+            sudo apt-get install -y --no-install-recommends libgtk-3-dev
+          fi
       - run: flutter pub get
-      - name: Flutter Build Linux
+      - name: Flutter Build Linux (${{ matrix.arch }})
         run: |
-          flutter build linux --release --build-name=${{ needs.resolve-version.outputs.app_version }} 
-      - name: Prepare Linux Artifact
+          if [[ "${{ matrix.arch }}" == "arm64" ]]; then
+            flutter build linux --release --target-platform linux-arm64 --build-name=${{ needs.resolve-version.outputs.app_version }}
+          else
+            flutter build linux --release --build-name=${{ needs.resolve-version.outputs.app_version }} # Defaults to x64
+          fi
+      - name: Prepare Linux Artifact (${{ matrix.arch }})
         run: |
-          mkdir -p dist/fitflutterfluent
-          cp -r build/linux/x64/release/bundle/* dist/fitflutterfluent/
-          cd dist && tar -czf fitflutterfluent-linux-${{ needs.resolve-version.outputs.app_version }}.tar.gz fitflutterfluent
-      - name: Upload Linux Artifact
+          FLUTTER_BUILD_OUTPUT_PATH="build/linux/${{ matrix.arch }}/release/bundle"
+          ARTIFACT_DIR_NAME="fitflutterfluent-linux-${{ matrix.arch }}"
+          TARBALL_NAME="fitflutterfluent-linux-${{ matrix.arch }}-${{ needs.resolve-version.outputs.app_version }}.tar.gz"
+
+          mkdir -p dist/${ARTIFACT_DIR_NAME}
+          cp -r ${FLUTTER_BUILD_OUTPUT_PATH}/* dist/${ARTIFACT_DIR_NAME}/
+          
+          cd dist
+          tar -czf ${TARBALL_NAME} ${ARTIFACT_DIR_NAME}
+          cd ..
+          echo "Created ${TARBALL_NAME}"
+      - name: Upload Linux Artifact (${{ matrix.arch }})
         uses: actions/upload-artifact@v4
         with:
-          name: fitflutterfluent-linux
-          path: dist/fitflutterfluent-linux-${{ needs.resolve-version.outputs.app_version }}.tar.gz
-
+          name: fitflutterfluent-linux-${{ matrix.arch }} # Artifact name now includes arch
+          path: dist/fitflutterfluent-linux-${{ matrix.arch }}-${{ needs.resolve-version.outputs.app_version }}.tar.gz
 
   build-android:
     name: Build Android APK
@@ -177,7 +204,7 @@ jobs:
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fitflutterfluent-android # This name determines the sub-directory when downloaded
+          name: fitflutterfluent-android 
           path: build/app/outputs/flutter-apk/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
 
   release:
@@ -190,6 +217,8 @@ jobs:
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+        # This will download all artifacts into directories named after the artifact name.
+        # e.g., fitflutterfluent-linux-x64/, fitflutterfluent-linux-arm64/, etc.
 
       - name: List downloaded files # For debugging
         run: |
@@ -198,7 +227,8 @@ jobs:
           echo "--- Listing contents of downloaded artifact directories ---"
           if [ -d "fitflutterfluent-windows-unpacked" ]; then echo "--- fitflutterfluent-windows-unpacked ---"; ls -lA fitflutterfluent-windows-unpacked/; fi
           if [ -d "fitflutterfluent-windows-setup" ]; then echo "--- fitflutterfluent-windows-setup ---"; ls -lA fitflutterfluent-windows-setup/; fi
-          if [ -d "fitflutterfluent-linux" ]; then echo "--- fitflutterfluent-linux ---"; ls -lA fitflutterfluent-linux/; fi
+          if [ -d "fitflutterfluent-linux-x64" ]; then echo "--- fitflutterfluent-linux-x64 ---"; ls -lA fitflutterfluent-linux-x64/; fi
+          if [ -d "fitflutterfluent-linux-arm64" ]; then echo "--- fitflutterfluent-linux-arm64 ---"; ls -lA fitflutterfluent-linux-arm64/; fi
           if [ -d "fitflutterfluent-android" ]; then echo "--- fitflutterfluent-android ---"; ls -lA fitflutterfluent-android/; fi
 
       - name: Zip Windows unpacked build
@@ -221,5 +251,6 @@ jobs:
           files: |
             fitflutterfluent-windows-${{ needs.resolve-version.outputs.app_version }}.zip
             fitflutterfluent-windows-setup/fit-flutter-setup-win64-${{ needs.resolve-version.outputs.app_version }}.exe
-            fitflutterfluent-linux/fitflutterfluent-linux-${{ needs.resolve-version.outputs.app_version }}.tar.gz
+            fitflutterfluent-linux-x64/fitflutterfluent-linux-x64-${{ needs.resolve-version.outputs.app_version }}.tar.gz
+            fitflutterfluent-linux-arm64/fitflutterfluent-linux-arm64-${{ needs.resolve-version.outputs.app_version }}.tar.gz
             fitflutterfluent-android/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
