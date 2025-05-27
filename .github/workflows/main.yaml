@@ -327,7 +327,7 @@ jobs:
           
           ABSOLUTE_APPIMAGE_PATH="$(pwd)/$FINAL_APPIMAGE_DIR/$APPIMAGE_FILENAME"
           echo "appimage_path=$ABSOLUTE_APPIMAGE_PATH" >> $GITHUB_OUTPUT
-          echo "appimage_upload_name=fit-flutter-fluent-appimage-linux-$APPIMAGE_ARCH_LABEL_FOR_TOO" >> $GITHUB_OUTPUT
+          echo "appimage_upload_name=fit-flutter-fluent-appimage-linux-$APPIMAGE_ARCH_LABEL_FOR_TOOL" >> $GITHUB_OUTPUT
           echo "appimage_filename_for_release=$APPIMAGE_FILENAME" >> $GITHUB_OUTPUT # Exact filename for release step
 
       - name: Upload Linux AppImage Artifact (${{ matrix.arch_name }})
