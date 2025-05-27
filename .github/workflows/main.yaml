@@ -407,6 +407,6 @@ jobs:
             fitflutterfluent-windows-setup/fit-flutter-setup-win64-${{ needs.resolve-version.outputs.app_version }}.exe
             fitflutterfluent-linux-x64/fitflutterfluent-linux-x64-${{ needs.resolve-version.outputs.app_version }}.tar.gz
             fitflutterfluent-linux-arm64/fitflutterfluent-linux-arm64-${{ needs.resolve-version.outputs.app_version }}.tar.gz
-            fitflutterfluent-appimage-linux-x86_64/fit-flutter-fluent-${{ needs.resolve-version.outputs.app_version }}-x86_64.AppImage
-            fitflutterfluent-appimage-linux-aarch64/fit-flutter-fluent-${{ needs.resolve-version.outputs.app_version }}-aarch64.AppImage
+            fit-flutter-fluent-appimage-linux-x86_64/fit-flutter-fluent-${{ needs.resolve-version.outputs.app_version }}-x86_64.AppImage
+            fit-flutter-fluent-appimage-linux-aarch64/fit-flutter-fluent-${{ needs.resolve-version.outputs.app_version }}-aarch64.AppImage
             fitflutterfluent-android/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
