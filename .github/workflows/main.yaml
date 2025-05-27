@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Manual version (e.g., 1.2.3). If empty and not a tag, uses pubspec.yaml.'
+        description: "Manual version (e.g., 1.2.3). If empty and not a tag, uses pubspec.yaml."
         required: false
-        default: ''
+        default: ""
 
 jobs:
   resolve-version:
@@ -21,7 +21,7 @@ jobs:
         id: determine_version
         run: |
           VERSION_NUMBER=""
-          BUILD_SUFFIX="1" 
+          BUILD_SUFFIX="" # Will hold the final build number
 
           SOURCE_VERSION_STRING=""
           if [[ "${{ github.event_name }}" == "push" && "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
@@ -38,39 +38,74 @@ jobs:
             echo "Using version from pubspec.yaml: $SOURCE_VERSION_STRING"
           fi
 
+          # --- Enhanced Version and Build Suffix Parsing ---
+          PARSED_BUILD_SUFFIX_FROM_SOURCE=""
+
           if [[ "$SOURCE_VERSION_STRING" == *"+"* ]]; then
+            PROVISIONAL_VERSION_NUMBER="${SOURCE_VERSION_STRING%+*}"
             PROVISIONAL_BUILD_SUFFIX="${SOURCE_VERSION_STRING#*+}"
+            
+            VERSION_NUMBER=$(echo "$PROVISIONAL_VERSION_NUMBER" | xargs)
             PROVISIONAL_BUILD_SUFFIX=$(echo "$PROVISIONAL_BUILD_SUFFIX" | xargs)
-            if [[ -n "$PROVISIONAL_BUILD_SUFFIX" ]]; then
-                BUILD_SUFFIX="$PROVISIONAL_BUILD_SUFFIX"
+
+            if [[ "$PROVISIONAL_BUILD_SUFFIX" =~ ^[1-9][0-9]*$ ]]; then
+              PARSED_BUILD_SUFFIX_FROM_SOURCE="$PROVISIONAL_BUILD_SUFFIX"
+              echo "Parsed version_number '$VERSION_NUMBER' and valid build_suffix '$PARSED_BUILD_SUFFIX_FROM_SOURCE' from source '$SOURCE_VERSION_STRING'."
+            else
+              echo "Warning: Suffix after '+' in '$SOURCE_VERSION_STRING' ('$PROVISIONAL_BUILD_SUFFIX') is not a positive integer. It will be ignored for build_number. Version number is '$VERSION_NUMBER'."
+              # PARSED_BUILD_SUFFIX_FROM_SOURCE remains empty, will trigger fallback for build_number.
             fi
-            VERSION_NUMBER="${SOURCE_VERSION_STRING%+*}"
           else
             VERSION_NUMBER="$SOURCE_VERSION_STRING"
+            VERSION_NUMBER=$(echo "$VERSION_NUMBER" | xargs)
+            # PARSED_BUILD_SUFFIX_FROM_SOURCE remains empty
           fi
-          
-          VERSION_NUMBER=$(echo "$VERSION_NUMBER" | xargs)
 
+          # Validate VERSION_NUMBER (app_version)
           if [[ -z "$VERSION_NUMBER" ]]; then
             echo "Error: Version number (app_version) could not be determined or is empty."
             exit 1
           fi
           if ! [[ "$VERSION_NUMBER" =~ ^[0-9]+\.[0-9]+\.[0-9]+([._-].+)?$ ]]; then
             if ! [[ "$VERSION_NUMBER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-                echo "Warning: VERSION_NUMBER ('$VERSION_NUMBER') doesn't strictly follow X.Y.Z. Ensure it's compatible with build tools."
+                echo "Warning: VERSION_NUMBER ('$VERSION_NUMBER') doesn't strictly follow X.Y.Z or X.Y.Z.suffix. Ensure it's compatible with build tools."
             fi
           fi
 
-          if ! [[ "$BUILD_SUFFIX" =~ ^[1-9][0-9]*$ ]]; then
-            echo "Warning: BUILD_SUFFIX ('$BUILD_SUFFIX') was empty, zero, non-numeric, or not a positive integer. Defaulting to 1."
-            BUILD_SUFFIX="1"
+          # Determine final BUILD_SUFFIX (build_number)
+          if [[ -n "$PARSED_BUILD_SUFFIX_FROM_SOURCE" ]]; then
+            # If a valid build suffix was parsed from the source (tag, input, pubspec)
+            BUILD_SUFFIX="$PARSED_BUILD_SUFFIX_FROM_SOURCE"
+            echo "Using explicitly provided build_suffix: $BUILD_SUFFIX"
+          else
+            # No valid +NUMBER was found in the source string, or no + was present. Fallback logic:
+            if [[ "${{ github.event_name }}" == "push" && "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
+              # For a tag like v1.2.3 (no +B), default build_suffix to 1.
+              BUILD_SUFFIX="1"
+              echo "Event is a tag push without '+suffix'. Defaulting build_suffix to '1'."
+            elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.version }}" && ! ( "${{ github.event.inputs.version }}" == *"+"* ) ]]; then
+              # For manual dispatch where input version is like "1.2.3" (no +suffix)
+              BUILD_SUFFIX="${{ github.run_number }}"
+              echo "Event is workflow_dispatch with manual version without '+suffix'. Using github.run_number ('$BUILD_SUFFIX') as build_suffix."
+            else
+              # Default for other cases (e.g. reading from pubspec.yaml without +suffix, or a non-tag push, or dispatch with empty version)
+              BUILD_SUFFIX="${{ github.run_number }}"
+              echo "No explicit build_suffix provided or not a simple tag. Using github.run_number ('$BUILD_SUFFIX') as build_suffix."
+            fi
           fi
 
+          # Final validation: ensure BUILD_SUFFIX is a positive integer.
+          if ! [[ "$BUILD_SUFFIX" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Error: BUILD_SUFFIX ('$BUILD_SUFFIX') could not be resolved to a positive integer. This indicates a logic flaw or unexpected input. Defaulting to 1 to prevent catastrophic failure."
+            BUILD_SUFFIX="1" # Safety net
+          fi
+          # --- End of Enhanced Logic ---
+
           echo "Determined app_version: $VERSION_NUMBER"
-          echo "Determined build_suffix (build_number): $BUILD_SUFFIX"
+          echo "Determined build_number: $BUILD_SUFFIX"
 
           echo "version_number=$VERSION_NUMBER" >> $GITHUB_OUTPUT
-          echo "build_suffix=$BUILD_SUFFIX" >> $GITHUB_OUTPUT
+          echo "build_suffix=$BUILD_SUFFIX" >> $GITHUB_OUTPUT # This output is used as build_number
 
   build-windows:
     name: Build Windows Release
@@ -85,12 +120,12 @@ jobs:
       - run: flutter pub get
       - name: Flutter Build Windows
         run: |
-          flutter build windows --release --build-name=${{ needs.resolve-version.outputs.app_version }} 
+          flutter build windows --release --build-name=${{ needs.resolve-version.outputs.app_version }} -- build-number=${{ needs.resolve-version.outputs.build_number }}
           echo "Built with version: ${{ needs.resolve-version.outputs.app_version }}"
       - name: Prepare Windows Artifact
         run: |
           mkdir dist
-          cp -r build/windows/x64/runner/Release dist/fitflutterfluent 
+          cp -r build/windows/x64/runner/Release dist/fitflutterfluent
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -116,14 +151,14 @@ jobs:
           echo "Listing contents of expected Inno Setup source directory:"
           ls -R build/windows/x64/runner/Release 
           echo "Listing contents of setup directory (if used):"
-          ls -R setup 
+          ls -R setup
         shell: bash
       - name: Install Inno Setup
         run: choco install innosetup --no-progress
       - name: Build Installer
         run: iscc /DMyAppVersion="${{ env.APP_VERSION }}" setupmaker.iss
       - name: List Installer Output
-        run: ls -R Output 
+        run: ls -R Output
         shell: bash
       - name: Upload InnoSetup Installer
         uses: actions/upload-artifact@v4
@@ -172,7 +207,7 @@ jobs:
           grep '^version: ' pubspec.yaml
 
           yq -i ".version = \"${APP_VERSION}+${BUILD_NUMBER}\"" pubspec.yaml
-          
+
 
           echo "Updated pubspec.yaml version to:"
           grep '^version: ' pubspec.yaml
@@ -190,7 +225,6 @@ jobs:
           echo "Version in built pubspec.yaml (used by package_info_plus on Linux):"
           cat build/linux/${{ matrix.flutter_arch }}/release/bundle/data/flutter_assets/pubspec.yaml | grep '^version: ' || echo "pubspec.yaml not found in bundle assets or version not present"
 
-
       - name: Prepare Linux Artifact (${{ matrix.arch_name }})
         id: prepare_artifact
         run: |
@@ -200,7 +234,7 @@ jobs:
 
           # The tarball name should reflect the CI version
           TARBALL_FILENAME="fitflutterfluent-linux-$ARCH_LABEL-$APP_VERSION.tar.gz"
-          
+
           FINAL_TARBALL_DIR="dist_tarballs" 
           mkdir -p "$FINAL_TARBALL_DIR"
 
@@ -209,10 +243,10 @@ jobs:
 
           echo "Copying from $FLUTTER_BUILD_OUTPUT_PATH/* to $CONTENT_STAGING_DIR/fitflutterfluent/"
           cp -r $FLUTTER_BUILD_OUTPUT_PATH/* "$CONTENT_STAGING_DIR/fitflutterfluent/"
-          
+
           echo "Creating $FINAL_TARBALL_DIR/$TARBALL_FILENAME from content in $CONTENT_STAGING_DIR/fitflutterfluent"
           tar -czf "$FINAL_TARBALL_DIR/$TARBALL_FILENAME" -C "$CONTENT_STAGING_DIR" fitflutterfluent
-          
+
           ABSOLUTE_TARBALL_PATH="$(pwd)/$FINAL_TARBALL_DIR/$TARBALL_FILENAME"
           echo "Final tarball path: $ABSOLUTE_TARBALL_PATH"
           echo "tarball_path=$ABSOLUTE_TARBALL_PATH" >> $GITHUB_OUTPUT
@@ -229,7 +263,7 @@ jobs:
         run: |
           FLUTTER_BUILD_OUTPUT_PATH="build/linux/${{ matrix.flutter_arch }}/release/bundle"
           APPDIR_NAME="FitFlutterFluent.AppDir" # Conventionally PascalCase for AppDir
-          
+
           PUBSPEC_APP_NAME=$(yq e '.name' pubspec.yaml) # e.g., fit_flutter_fluent
           APP_FILE_BASENAME=$(echo "$PUBSPEC_APP_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/_/-/g') # e.g., fit-flutter-fluent
           APP_DESCRIPTION=$(yq e '.description' pubspec.yaml)
@@ -275,7 +309,7 @@ jobs:
 
           echo "Copying icon..."
           ICON_SOURCE_PATH="assets/icon.png"
-          
+
           if [ -f "$ICON_SOURCE_PATH" ]; then
             ICON_EXTENSION="${ICON_SOURCE_PATH##*.}"
             cp "$ICON_SOURCE_PATH" "$APPDIR_NAME/$APP_FILE_BASENAME.$ICON_EXTENSION" 
@@ -292,10 +326,10 @@ jobs:
             mkdir -p "$APPDIR_NAME/usr/share/icons/hicolor/256x256/apps"
             cp "$APPDIR_NAME/$APP_FILE_BASENAME.png" "$APPDIR_NAME/usr/share/icons/hicolor/256x256/apps/$APP_FILE_BASENAME.png"
           fi
-          
+
           ln -sf "$APP_EXECUTABLE_IN_BUNDLE" "$APPDIR_NAME/AppRun"
           chmod +x "$APPDIR_NAME/AppRun"
-          
+
           echo "appdir_path=$(pwd)/$APPDIR_NAME" >> $GITHUB_OUTPUT
           echo "app_file_basename=$APP_FILE_BASENAME" >> $GITHUB_OUTPUT
           echo "appimage_arch_label=${{ matrix.appimage_tool_arch }}" >> $GITHUB_OUTPUT
@@ -314,20 +348,20 @@ jobs:
 
           # AppImage filename format: appname-version-arch.AppImage
           APPIMAGE_FILENAME="fit-flutter-fluent-${APP_VERSION}-${APPIMAGE_ARCH_LABEL_FOR_TOOL}.AppImage"
-          
+
           # Set ARCH env var as appimagetool might use it
           ARCH="$APPIMAGE_ARCH_LABEL_FOR_TOOL" ./appimagetool.AppImage "$APPDIR_PATH" "$APPIMAGE_FILENAME"
 
           echo "AppImage created: $APPIMAGE_FILENAME"
           ls -lh "$APPIMAGE_FILENAME"
-          
+
           FINAL_APPIMAGE_DIR="dist_appimages"
           mkdir -p "$FINAL_APPIMAGE_DIR"
           mv "$APPIMAGE_FILENAME" "$FINAL_APPIMAGE_DIR/"
-          
+
           ABSOLUTE_APPIMAGE_PATH="$(pwd)/$FINAL_APPIMAGE_DIR/$APPIMAGE_FILENAME"
           echo "appimage_path=$ABSOLUTE_APPIMAGE_PATH" >> $GITHUB_OUTPUT
-          echo "appimage_upload_name=fit-flutter-fluent-appimage-linux-$APPIMAGE_ARCH_LABEL_FOR_TOO" >> $GITHUB_OUTPUT
+          echo "appimage_upload_name=fit-flutter-fluent-appimage-linux-$APPIMAGE_ARCH_LABEL_FOR_TOOL" >> $GITHUB_OUTPUT
           echo "appimage_filename_for_release=$APPIMAGE_FILENAME" >> $GITHUB_OUTPUT # Exact filename for release step
 
       - name: Upload Linux AppImage Artifact (${{ matrix.arch_name }})
@@ -336,35 +370,54 @@ jobs:
           name: ${{ steps.build_appimage.outputs.appimage_upload_name }}
           path: ${{ steps.build_appimage.outputs.appimage_path }}
 
-
   build-android:
     name: Build Android APK
     runs-on: ubuntu-latest
     needs: resolve-version
+    env: 
+      APP_VERSION: ${{ needs.resolve-version.outputs.app_version }}
+      BUILD_NUMBER: ${{ needs.resolve-version.outputs.build_number }}
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: 3.32.0
+      - name: Update pubspec.yaml for Android build
+        run: |
+          echo "Original pubspec.yaml version:"
+          grep '^version: ' pubspec.yaml
+          yq -i ".version = \"${{ env.APP_VERSION }}+${{ env.BUILD_NUMBER }}\"" pubspec.yaml
+          echo "Updated pubspec.yaml version to: $(grep '^version: ' pubspec.yaml)"
+        shell: bash
+
       - run: flutter pub get
+
       - name: Flutter Build Android
         run: |
-          flutter build apk --release --build-name=${{ needs.resolve-version.outputs.app_version }}
+          flutter build apk --release \
+            --build-name=${{ env.APP_VERSION }} \
+            --build-number=${{ env.BUILD_NUMBER }}
+          echo "Built Android APK with versionName: ${{ env.APP_VERSION }}, versionCode: ${{ env.BUILD_NUMBER }}"
+
       - name: Rename Android APK
         run: |
-          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
-          echo "Renamed APK to fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk"
+          # The filename typically includes the versionName (APP_VERSION). 
+          # The versionCode (BUILD_NUMBER) is embedded within the APK's AndroidManifest.xml.
+          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/fitflutterfluent-android-${{ env.APP_VERSION }}.apk
+          echo "Renamed APK to fitflutterfluent-android-${{ env.APP_VERSION }}.apk"
+
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fitflutterfluent-android 
-          path: build/app/outputs/flutter-apk/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
+          name: fitflutterfluent-android
+          path: build/app/outputs/flutter-apk/fitflutterfluent-android-${{ env.APP_VERSION }}.apk
 
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [resolve-version, build-windows, innosetup, build-linux, build-android]
+    needs:
+      [resolve-version, build-windows, innosetup, build-linux, build-android]
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
@@ -381,8 +434,8 @@ jobs:
           if [ -d "fitflutterfluent-windows-setup" ]; then echo "--- fitflutterfluent-windows-setup ---"; ls -lA fitflutterfluent-windows-setup/; fi
           if [ -d "fitflutterfluent-linux-x64" ]; then echo "--- fitflutterfluent-linux-x64 ---"; ls -lA fitflutterfluent-linux-x64/; fi
           if [ -d "fitflutterfluent-linux-arm64" ]; then echo "--- fitflutterfluent-linux-arm64 ---"; ls -lA fitflutterfluent-linux-arm64/; fi
-          if [ -d "fit-flutter-fluent-appimage-linux-x86_64" ]; then echo "--- fitflutterfluent-appimage-linux-x86_64 ---"; ls -lA fitflutterfluent-appimage-linux-x86_64/; fi
-          if [ -d "fit-flutter-fluent-appimage-linux-aarch64" ]; then echo "--- fitflutterfluent-appimage-linux-aarch64 ---"; ls -lA fitflutterfluent-appimage-linux-aarch64/; fi
+          if [ -d "fit-flutter-fluent-appimage-linux-x86_64" ]; then echo "--- fit-flutter-fluent-appimage-linux-x86_64 ---"; ls -lA fit-flutter-fluent-appimage-linux-x86_64/; fi
+          if [ -d "fit-flutter-fluent-appimage-linux-aarch64" ]; then echo "--- fit-flutter-fluent-appimage-linux-aarch64 ---"; ls -lA fit-flutter-fluent-appimage-linux-aarch64/; fi
           if [ -d "fitflutterfluent-android" ]; then echo "--- fitflutterfluent-android ---"; ls -lA fitflutterfluent-android/; fi
 
       - name: Zip Windows unpacked build
@@ -393,20 +446,20 @@ jobs:
           zip -r ../${WINDOWS_UNPACKED_ZIP_NAME} .
           cd ..
           echo "Created ${WINDOWS_UNPACKED_ZIP_NAME}"
-          ls -l 
+          ls -l
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', needs.resolve-version.outputs.app_version) }}
           name: Release ${{ needs.resolve-version.outputs.app_version }}
-          draft: false 
+          draft: false
           generate_release_notes: true
           files: |
             fitflutterfluent-windows-${{ needs.resolve-version.outputs.app_version }}.zip
             fitflutterfluent-windows-setup/fit-flutter-setup-win64-${{ needs.resolve-version.outputs.app_version }}.exe
             fitflutterfluent-linux-x64/fitflutterfluent-linux-x64-${{ needs.resolve-version.outputs.app_version }}.tar.gz
             fitflutterfluent-linux-arm64/fitflutterfluent-linux-arm64-${{ needs.resolve-version.outputs.app_version }}.tar.gz
-            fitflutterfluent-appimage-linux-x86_64/fit-flutter-fluent-${{ needs.resolve-version.outputs.app_version }}-x86_64.AppImage
-            fitflutterfluent-appimage-linux-aarch64/fit-flutter-fluent-${{ needs.resolve-version.outputs.app_version }}-aarch64.AppImage
+            fit-flutter-fluent-appimage-linux-x86_64/fit-flutter-fluent-${{ needs.resolve-version.outputs.app_version }}-x86_64.AppImage
+            fit-flutter-fluent-appimage-linux-aarch64/fit-flutter-fluent-${{ needs.resolve-version.outputs.app_version }}-aarch64.AppImage
             fitflutterfluent-android/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
