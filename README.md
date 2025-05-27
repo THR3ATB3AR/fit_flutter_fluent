@@ -70,7 +70,8 @@ FitFlutterFluent is continuously evolving! The primary focus is currently on com
 
 Planned future enhancements include:
 
-* [ ] Add support for Linux ARM builds.
+* [X] Add support for Linux ARM builds.
+* [ ] Automatic updates for the Linux version.
 * [ ] Automatic updates for the Android version.
 * [ ] Fixing icon and background display issues on Android Version.
 * [ ] Adding functionality to refresh details of the repack.
