@@ -140,12 +140,14 @@ jobs:
           - os_runner: ubuntu-latest
             arch_name: x64
             flutter_arch: x64
-          - os_runner: ubuntu-22.04-arm # Your specified ARM runner label
+            appimage_tool_arch: x86_64
+          - os_runner: ubuntu-22.04-arm
             arch_name: arm64
             flutter_arch: arm64
+            appimage_tool_arch: aarch64
     runs-on: ${{ matrix.os_runner }}
     needs: resolve-version
-    env: # Define env vars for easier use in steps
+    env:
       APP_VERSION: ${{ needs.resolve-version.outputs.app_version }}
       BUILD_NUMBER: ${{ needs.resolve-version.outputs.build_number }}
     steps:
@@ -177,7 +179,7 @@ jobs:
         shell: bash
 
       - name: Flutter Pub Get (after pubspec modification)
-        run: flutter pub get # Crucial to run after modifying pubspec.yaml
+        run: flutter pub get
 
       - name: Flutter Build Linux (${{ matrix.arch_name }})
         run: |
@@ -222,6 +224,118 @@ jobs:
           name: ${{ steps.prepare_artifact.outputs.artifact_upload_name }}
           path: ${{ steps.prepare_artifact.outputs.tarball_path }}
 
+      - name: Prepare AppDir for AppImage (${{ matrix.arch_name }})
+        id: prepare_appdir
+        run: |
+          FLUTTER_BUILD_OUTPUT_PATH="build/linux/${{ matrix.flutter_arch }}/release/bundle"
+          APPDIR_NAME="FitFlutterFluent.AppDir" # Conventionally PascalCase for AppDir
+          
+          PUBSPEC_APP_NAME=$(yq e '.name' pubspec.yaml) # e.g., fit_flutter_fluent
+          APP_FILE_BASENAME=$(echo "$PUBSPEC_APP_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/_/-/g') # e.g., fit-flutter-fluent
+          APP_DESCRIPTION=$(yq e '.description' pubspec.yaml)
+          APP_EXECUTABLE_IN_BUNDLE="$PUBSPEC_APP_NAME"
+
+          echo "Pubspec App Name: $PUBSPEC_APP_NAME"
+          echo "App File Basename (for .desktop, icon names): $APP_FILE_BASENAME"
+          echo "App Description: $APP_DESCRIPTION"
+          echo "Expected executable in bundle: $APP_EXECUTABLE_IN_BUNDLE"
+
+          mkdir -p "$APPDIR_NAME/usr/bin"
+          mkdir -p "$APPDIR_NAME/usr/share/icons/hicolor/scalable/apps" # For .svg or high-res .png
+          mkdir -p "$APPDIR_NAME/usr/share/applications"
+
+          echo "Copying application files from $FLUTTER_BUILD_OUTPUT_PATH to $APPDIR_NAME/"
+          cp -a "$FLUTTER_BUILD_OUTPUT_PATH"/* "$APPDIR_NAME/"
+
+          if [ ! -f "$APPDIR_NAME/$APP_EXECUTABLE_IN_BUNDLE" ]; then
+              echo "Error: Expected executable '$APPDIR_NAME/$APP_EXECUTABLE_IN_BUNDLE' not found!"
+              echo "Contents of $APPDIR_NAME:"
+              ls -lA "$APPDIR_NAME"
+              ACTUAL_EXECUTABLE_FOUND=$(find "$APPDIR_NAME" -maxdepth 1 -type f -executable -not -name "*.so" -print -quit)
+              if [ -n "$ACTUAL_EXECUTABLE_FOUND" ]; then
+                APP_EXECUTABLE_IN_BUNDLE=$(basename "$ACTUAL_EXECUTABLE_FOUND")
+                echo "Using fallback executable found: $APP_EXECUTABLE_IN_BUNDLE"
+              else
+                echo "No suitable executable found in $APPDIR_NAME. Exiting."
+                exit 1
+              fi
+          fi
+
+          echo "Creating .desktop file: $APPDIR_NAME/$APP_FILE_BASENAME.desktop"
+          cat <<EOF > "$APPDIR_NAME/$APP_FILE_BASENAME.desktop"
+[Desktop Entry]
+Name=$PUBSPEC_APP_NAME
+Comment=$APP_DESCRIPTION
+Exec=$APP_EXECUTABLE_IN_BUNDLE
+Icon=$APP_FILE_BASENAME
+Type=Application
+Categories=Utility;
+EOF
+          cp "$APPDIR_NAME/$APP_FILE_BASENAME.desktop" "$APPDIR_NAME/usr/share/applications/"
+
+          echo "Copying icon..."
+          ICON_SOURCE_PATH="assets/icon.png"
+          
+          if [ -f "$ICON_SOURCE_PATH" ]; then
+            ICON_EXTENSION="${ICON_SOURCE_PATH##*.}"
+            cp "$ICON_SOURCE_PATH" "$APPDIR_NAME/$APP_FILE_BASENAME.$ICON_EXTENSION" 
+            if [ "$ICON_EXTENSION" == "svg" ]; then
+                cp "$ICON_SOURCE_PATH" "$APPDIR_NAME/usr/share/icons/hicolor/scalable/apps/$APP_FILE_BASENAME.svg"
+            else
+                mkdir -p "$APPDIR_NAME/usr/share/icons/hicolor/256x256/apps"
+                cp "$ICON_SOURCE_PATH" "$APPDIR_NAME/usr/share/icons/hicolor/256x256/apps/$APP_FILE_BASENAME.$ICON_EXTENSION"
+            fi
+            echo "Icon copied from $ICON_SOURCE_PATH."
+          else
+            echo "Warning: Icon file not found at '$ICON_SOURCE_PATH'. Creating a dummy icon."
+            convert -size 256x256 xc:dodgerblue -pointsize 20 -fill white -gravity center -draw "text 0,0 '$PUBSPEC_APP_NAME'" "$APPDIR_NAME/$APP_FILE_BASENAME.png"
+            mkdir -p "$APPDIR_NAME/usr/share/icons/hicolor/256x256/apps"
+            cp "$APPDIR_NAME/$APP_FILE_BASENAME.png" "$APPDIR_NAME/usr/share/icons/hicolor/256x256/apps/$APP_FILE_BASENAME.png"
+          fi
+          
+          ln -sf "$APP_EXECUTABLE_IN_BUNDLE" "$APPDIR_NAME/AppRun"
+          chmod +x "$APPDIR_NAME/AppRun"
+          
+          echo "appdir_path=$(pwd)/$APPDIR_NAME" >> $GITHUB_OUTPUT
+          echo "app_file_basename=$APP_FILE_BASENAME" >> $GITHUB_OUTPUT
+          echo "appimage_arch_label=${{ matrix.appimage_tool_arch }}" >> $GITHUB_OUTPUT
+
+      - name: Download AppImageTool (${{ matrix.arch_name }})
+        run: |
+          wget -q "https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-${{ matrix.appimage_tool_arch }}.AppImage" -O appimagetool.AppImage
+          chmod +x appimagetool.AppImage
+
+      - name: Build AppImage (${{ matrix.arch_name }})
+        id: build_appimage
+        run: |
+          APPDIR_PATH="${{ steps.prepare_appdir.outputs.appdir_path }}"
+          APP_FILE_BASENAME="${{ steps.prepare_appdir.outputs.app_file_basename }}"
+          APPIMAGE_ARCH_LABEL_FOR_TOOL="${{ steps.prepare_appdir.outputs.appimage_arch_label }}" # e.g. x86_64 or aarch64
+
+          # AppImage filename format: appname-version-arch.AppImage
+          APPIMAGE_FILENAME="${APP_FILE_BASENAME}-${APP_VERSION}-${APPIMAGE_ARCH_LABEL_FOR_TOOL}.AppImage"
+          
+          # Set ARCH env var as appimagetool might use it
+          ARCH="$APPIMAGE_ARCH_LABEL_FOR_TOOL" ./appimagetool.AppImage "$APPDIR_PATH" "$APPIMAGE_FILENAME"
+
+          echo "AppImage created: $APPIMAGE_FILENAME"
+          ls -lh "$APPIMAGE_FILENAME"
+          
+          FINAL_APPIMAGE_DIR="dist_appimages"
+          mkdir -p "$FINAL_APPIMAGE_DIR"
+          mv "$APPIMAGE_FILENAME" "$FINAL_APPIMAGE_DIR/"
+          
+          ABSOLUTE_APPIMAGE_PATH="$(pwd)/$FINAL_APPIMAGE_DIR/$APPIMAGE_FILENAME"
+          echo "appimage_path=$ABSOLUTE_APPIMAGE_PATH" >> $GITHUB_OUTPUT
+          echo "appimage_upload_name=fitflutterfluent-appimage-linux-${{ matrix.arch_name }}" >> $GITHUB_OUTPUT
+          echo "appimage_filename_for_release=$APPIMAGE_FILENAME" >> $GITHUB_OUTPUT # Exact filename for release step
+
+      - name: Upload Linux AppImage Artifact (${{ matrix.arch_name }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build_appimage.outputs.appimage_upload_name }}
+          path: ${{ steps.build_appimage.outputs.appimage_path }}
+
 
   build-android:
     name: Build Android APK
@@ -244,7 +358,7 @@ jobs:
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fitflutterfluent-android # This name determines the sub-directory when downloaded
+          name: fitflutterfluent-android 
           path: build/app/outputs/flutter-apk/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
 
   release:
@@ -258,37 +372,86 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
 
-      - name: List downloaded files # For debugging
+      - name: List downloaded files
         run: |
           echo "--- Listing root of workspace ---"
           ls -lA
           echo "--- Listing contents of downloaded artifact directories ---"
-          if [ -d "fitflutterfluent-windows-unpacked" ]; then echo "--- fitflutterfluent-windows-unpacked ---"; ls -lA fitflutterfluent-windows-unpacked/; fi
-          if [ -d "fitflutterfluent-windows-setup" ]; then echo "--- fitflutterfluent-windows-setup ---"; ls -lA fitflutterfluent-windows-setup/; fi
-          if [ -d "fitflutterfluent-linux-x64" ]; then echo "--- fitflutterfluent-linux-x64 ---"; ls -lA fitflutterfluent-linux-x64/; fi
-          if [ -d "fitflutterfluent-linux-arm64" ]; then echo "--- fitflutterfluent-linux-arm64 ---"; ls -lA fitflutterfluent-linux-arm64/; fi
-          if [ -d "fitflutterfluent-android" ]; then echo "--- fitflutterfluent-android ---"; ls -lA fitflutterfluent-android/; fi
+          for dir in *; do
+            if [ -d "$dir" ]; then
+              echo "--- Contents of $dir ---"
+              ls -lA "$dir/"
+            fi
+          done
+        shell: bash
 
       - name: Zip Windows unpacked build
         run: |
           WINDOWS_UNPACKED_ZIP_NAME="fitflutterfluent-windows-${{ needs.resolve-version.outputs.app_version }}.zip"
-          echo "Zipping contents of fitflutterfluent-windows-unpacked into $WINDOWS_UNPACKED_ZIP_NAME"
-          cd fitflutterfluent-windows-unpacked
-          zip -r ../${WINDOWS_UNPACKED_ZIP_NAME} .
-          cd ..
-          echo "Created ${WINDOWS_UNPACKED_ZIP_NAME}"
-          ls -l 
+          if [ -d "fitflutterfluent-windows-unpacked" ]; then
+            echo "Zipping contents of fitflutterfluent-windows-unpacked into $WINDOWS_UNPACKED_ZIP_NAME"
+            cd fitflutterfluent-windows-unpacked
+            zip -r ../${WINDOWS_UNPACKED_ZIP_NAME} .
+            cd ..
+            echo "Created ${WINDOWS_UNPACKED_ZIP_NAME}"
+          else
+            echo "Warning: fitflutterfluent-windows-unpacked directory not found. Skipping zip."
+          fi
+          ls -l
+
+      - name: Prepare Release Assets
+        id: prepare_release_assets
+        env:
+          APP_VERSION: ${{ needs.resolve-version.outputs.app_version }}
+        run: |
+          # It's more robust to find files based on expected artifact directory structure
+          # and known parts of filenames rather than reconstructing full names,
+          # especially if pubspec.yaml isn't checked out here.
+
+          FILE_LIST=""
+          
+          # Windows
+          if [ -f "fitflutterfluent-windows-${APP_VERSION}.zip" ]; then
+            FILE_LIST+="fitflutterfluent-windows-${APP_VERSION}.zip\n"
+          fi
+          if [ -f "fitflutterfluent-windows-setup/fit-flutter-setup-win64-${APP_VERSION}.exe" ]; then
+            FILE_LIST+="fitflutterfluent-windows-setup/fit-flutter-setup-win64-${APP_VERSION}.exe\n"
+          fi
+
+          # Linux Tarballs - using find to be more flexible with exact names if needed
+          find fitflutterfluent-linux-tarball-x64 -name "fitflutterfluent-linux-x64-${APP_VERSION}.tar.gz" -print0 2>/dev/null | xargs -0 -I {} printf "%s\n" "{}" >> temp_file_list.txt
+          find fitflutterfluent-linux-tarball-arm64 -name "fitflutterfluent-linux-arm64-${APP_VERSION}.tar.gz" -print0 2>/dev/null | xargs -0 -I {} printf "%s\n" "{}" >> temp_file_list.txt
+          
+          # Linux AppImages - using find
+          # The AppImage filenames are like: {app_file_basename}-{APP_VERSION}-{arch_label}.AppImage
+          # Example: fit-flutter-fluent-1.0.0-x86_64.AppImage
+          # We'll use a wildcard for the app_file_basename part if we don't want to hardcode "fit-flutter-fluent"
+          find fitflutterfluent-appimage-linux-x64 -name "*-${APP_VERSION}-x86_64.AppImage" -print0 2>/dev/null | xargs -0 -I {} printf "%s\n" "{}" >> temp_file_list.txt
+          find fitflutterfluent-appimage-linux-arm64 -name "*-${APP_VERSION}-aarch64.AppImage" -print0 2>/dev/null | xargs -0 -I {} printf "%s\n" "{}" >> temp_file_list.txt
+          
+          # Android
+          if [ -f "fitflutterfluent-android/fitflutterfluent-android-${APP_VERSION}.apk" ]; then
+            cat <<< "fitflutterfluent-android/fitflutterfluent-android-${APP_VERSION}.apk" >> temp_file_list.txt
+          fi
+          
+          # Consolidate list
+          if [ -f temp_file_list.txt ]; then
+            FILE_LIST+=$(cat temp_file_list.txt)
+          fi
+
+          echo "Collected files for release:"
+          echo -e "$FILE_LIST"
+          echo "assets<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$FILE_LIST" | sed '/^\s*$/d' >> $GITHUB_OUTPUT # Remove empty lines
+          echo "EOF" >> $GITHUB_OUTPUT
+        shell: bash
+
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', needs.resolve-version.outputs.app_version) }}
           name: Release ${{ needs.resolve-version.outputs.app_version }}
-          draft: false 
+          draft: true
           generate_release_notes: true
-          files: |
-            fitflutterfluent-windows-${{ needs.resolve-version.outputs.app_version }}.zip
-            fitflutterfluent-windows-setup/fit-flutter-setup-win64-${{ needs.resolve-version.outputs.app_version }}.exe
-            fitflutterfluent-linux-x64/fitflutterfluent-linux-x64-${{ needs.resolve-version.outputs.app_version }}.tar.gz
-            fitflutterfluent-linux-arm64/fitflutterfluent-linux-arm64-${{ needs.resolve-version.outputs.app_version }}.tar.gz
-            fitflutterfluent-android/fitflutterfluent-android-${{ needs.resolve-version.outputs.app_version }}.apk
+          files: ${{ steps.prepare_release_assets.outputs.assets }}
