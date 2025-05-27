@@ -53,7 +53,7 @@ This section outlines the tasks for the ongoing rewrite to implement Microsoft F
   * [ ] Address any UI/UX bugs or inconsistencies.
 * [ ] **Documentation & Screenshots:**
   * [X] Update README screenshots with the new Fluent UI.
-  * [ ] Document any new Fluent-specific features or settings.
+  * [X] Document any new Fluent-specific features or settings.
 
 ## 📸 Screenshots
 
@@ -71,12 +71,13 @@ FitFlutterFluent is continuously evolving! The primary focus is currently on com
 Planned future enhancements include:
 
 * [X] Add support for Linux ARM builds.
-* [ ] Automatic updates for the Linux version.
-* [ ] Automatic updates for the Android version.
-* [ ] Fixing icon and background display issues on Android Version.
+* [X] Automatic updates for the Linux version.
+* [X] Automatic updates for the Android version.
+* [X] Fixing icon and background display issues on Android Version.
 * [ ] Adding functionality to refresh details of the repack.
 * [ ] Adding options to open webpage of repack.
-* [ ] Removing Windows-specific UI elements from the Android interface.
+* [ ] Show close prevention dialog only when downloading.
+* [X] Removing Windows-specific UI elements from the Android interface.
 * [ ] Implementing app localization.
 * [ ] Adding automatic installation of repacks.
 * [ ] Adding filtering capabilities for repacks.
