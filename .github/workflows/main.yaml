@@ -381,8 +381,8 @@ jobs:
           if [ -d "fitflutterfluent-windows-setup" ]; then echo "--- fitflutterfluent-windows-setup ---"; ls -lA fitflutterfluent-windows-setup/; fi
           if [ -d "fitflutterfluent-linux-x64" ]; then echo "--- fitflutterfluent-linux-x64 ---"; ls -lA fitflutterfluent-linux-x64/; fi
           if [ -d "fitflutterfluent-linux-arm64" ]; then echo "--- fitflutterfluent-linux-arm64 ---"; ls -lA fitflutterfluent-linux-arm64/; fi
-          if [ -d "fit-flutter-fluent-appimage-linux-x86_64" ]; then echo "--- fitflutterfluent-appimage-linux-x86_64 ---"; ls -lA fitflutterfluent-appimage-linux-x86_64/; fi
-          if [ -d "fit-flutter-fluent-appimage-linux-aarch64" ]; then echo "--- fitflutterfluent-appimage-linux-aarch64 ---"; ls -lA fitflutterfluent-appimage-linux-aarch64/; fi
+          if [ -d "fit-flutter-fluent-appimage-linux-x86_64" ]; then echo "--- fit-flutter-fluent-appimage-linux-x86_64 ---"; ls -lA fit-flutter-fluent-appimage-linux-x86_64/; fi
+          if [ -d "fit-flutter-fluent-appimage-linux-aarch64" ]; then echo "--- fit-flutter-fluent-appimage-linux-aarch64 ---"; ls -lA fit-flutter-fluent-appimage-linux-aarch64/; fi
           if [ -d "fitflutterfluent-android" ]; then echo "--- fitflutterfluent-android ---"; ls -lA fitflutterfluent-android/; fi
 
       - name: Zip Windows unpacked build
