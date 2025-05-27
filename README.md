@@ -51,9 +51,9 @@ This section outlines the tasks for the ongoing rewrite to implement Microsoft F
   * [ ] Thoroughly test all UI elements and interactions.
   * [ ] Gather user feedback on the new Fluent design.
   * [ ] Address any UI/UX bugs or inconsistencies.
-* [ ] **Documentation & Screenshots:**
+* [X] **Documentation & Screenshots:**
   * [X] Update README screenshots with the new Fluent UI.
-  * [ ] Document any new Fluent-specific features or settings.
+  * [X] Document any new Fluent-specific features or settings.
 
 ## 📸 Screenshots
 
@@ -70,16 +70,20 @@ FitFlutterFluent is continuously evolving! The primary focus is currently on com
 
 Planned future enhancements include:
 
-* [ ]  Automatic updates for the Android version.
-* [ ]  Fixing icon and background display issues on Android Version.
-* [ ]  Adding functionality to refresh details of the repack.
-* [ ]  Adding options to open webpage of repack.
-* [ ]  Removing Windows-specific UI elements from the Android interface.
-* [ ]  Implementing app localization (support for multiple languages).
-* [ ]  Adding automatic installation of repacks.
-* [ ]  Adding filtering capabilities for repacks (e.g., by game genre).
-* [ ]  Developing a feature to manage installed games.
-* [ ]  Support for Data Nodes downloads.
+* [X] Add support for Linux ARM builds.
+* [X] Automatic updates for the Linux version.
+* [X] Automatic updates for the Android version.
+* [X] Fixing icon and background display issues on Android Version.
+* [X] Adding functionality to refresh details of the repack.
+* [X] Adding options to open webpage of repack.
+* [X] Show close prevention dialog only when downloading.
+* [X] Removing Windows-specific UI elements from the Android interface.
+* [ ] Implementing AppImage builds for Linux distribution.
+* [ ] Implementing app localization.
+* [ ] Adding automatic installation of repacks.
+* [ ] Adding filtering capabilities for repacks.
+* [ ] Developing a feature to manage installed games.
+* [ ] Support for Data Nodes downloads.
 
 I am open for contributions and suggestions!
 
@@ -112,7 +116,6 @@ To install and run the latest setup of FitFlutterFluent, follow these steps:
    ```bash
    tar -xzf fitflutterfluent.tar.gz -C /path/to/install/directory
    ```
-
 3. **Run the Application:**
 
    ```bash
@@ -134,13 +137,11 @@ To install and run the latest setup of FitFlutterFluent, follow these steps:
    git clone https://github.com/THR3ATB3AR/fit_flutter_fluent.git fit_flutter_fluent 
    cd fit_flutter_fluent
    ```
-
 3. **Get Dependencies:**
 
    ```bash
    flutter pub get
    ```
-
 4. **Run the App:**
 
    ```bash

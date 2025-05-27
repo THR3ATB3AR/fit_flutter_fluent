@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:fit_flutter_fluent/providers/update_provider.dart';
+import 'package:fit_flutter_fluent/services/dd_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fit_flutter_fluent/screens/download_manager_screen.dart';
@@ -48,6 +49,7 @@ void main() async {
   final updateProvider = UpdateProvider();
   await RepackService.instance.init();
   await _requestPermissions();
+  final ddManager = DdManager.instance;
 
   if ([
     TargetPlatform.windows,
@@ -70,14 +72,22 @@ void main() async {
       windowButtonVisibility: false,
     );
     await windowManager.setMinimumSize(const Size(670, 690));
-    await windowManager.setPreventClose(true);
+    await windowManager.setPreventClose(false);
     await windowManager.setSkipTaskbar(false);
+
+    ddManager.isAnyTaskDownloading.addListener(() {
+      final bool isDownloading = ddManager.isAnyTaskDownloading.value;
+      debugPrint(
+        "Main: Active download state changed to: $isDownloading. Setting preventClose.",
+      );
+      windowManager.setPreventClose(isDownloading);
+    });
   }
   runApp(MyApp(updateProvider: updateProvider));
 }
 
 class MyApp extends StatelessWidget {
-  final UpdateProvider updateProvider; 
+  final UpdateProvider updateProvider;
   const MyApp({super.key, required this.updateProvider});
 
   @override
@@ -258,8 +268,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final updateProvider = Provider.of<UpdateProvider>(context, listen: false);
-      updateProvider.checkForUpdates(); 
+      final updateProvider = Provider.of<UpdateProvider>(
+        context,
+        listen: false,
+      );
+      updateProvider.checkForUpdates();
       updateProvider.addListener(_handleUpdateInfobar);
     });
   }
@@ -270,7 +283,10 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     searchController.dispose();
     searchFocusNode.dispose();
     try {
-      Provider.of<UpdateProvider>(context, listen: false).removeListener(_handleUpdateInfobar);
+      Provider.of<UpdateProvider>(
+        context,
+        listen: false,
+      ).removeListener(_handleUpdateInfobar);
     } catch (e) {
       print("Could not remove UpdateProvider listener: $e");
     }
@@ -282,18 +298,23 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     final updateProvider = Provider.of<UpdateProvider>(context, listen: false);
 
     if (updateProvider.showUpdateInfobar && !_isUpdateInfoBarVisible) {
-      setState(() { _isUpdateInfoBarVisible = true; });
-      
-      final latestTagName = updateProvider.latestReleaseInfo?['tag_name'] ?? "Unknown";
-      final releaseNotes = updateProvider.latestReleaseInfo?['release_notes'] ?? "No release notes available.";
+      setState(() {
+        _isUpdateInfoBarVisible = true;
+      });
 
-      final PageStorageBucket infoBarBucket = PageStorageBucket(); 
+      final latestTagName =
+          updateProvider.latestReleaseInfo?['tag_name'] ?? "Unknown";
+      final releaseNotes =
+          updateProvider.latestReleaseInfo?['release_notes'] ??
+          "No release notes available.";
+
+      final PageStorageBucket infoBarBucket = PageStorageBucket();
 
       displayInfoBar(
         context,
         builder: (infoBarContext, close) {
-          return PageStorage( 
-            bucket: infoBarBucket, 
+          return PageStorage(
+            bucket: infoBarBucket,
             child: InfoBar(
               title: Text('Update Available: $latestTagName'),
               content: Column(
@@ -305,7 +326,10 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                   Expander(
                     header: const Text('View Release Notes'),
                     content: ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 150, maxWidth: 400),
+                      constraints: const BoxConstraints(
+                        maxHeight: 150,
+                        maxWidth: 400,
+                      ),
                       child: SingleChildScrollView(child: Text(releaseNotes)),
                     ),
                   ),
@@ -325,7 +349,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                     child: const Text('Later'),
                     onPressed: () {
                       updateProvider.ignoreCurrentUpdate();
-                      if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
+                      if (mounted) {
+                        setState(() {
+                          _isUpdateInfoBarVisible = false;
+                        });
+                      }
                       close();
                     },
                   ),
@@ -333,16 +361,29 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                   FilledButton(
                     child: const Text('Upgrade'),
                     onPressed: () {
-                       if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
-                      close(); 
-                      updateProvider.downloadAndInstallUpdate(GoRouter.of(context).routerDelegate.navigatorKey.currentContext ?? context);
+                      if (mounted) {
+                        setState(() {
+                          _isUpdateInfoBarVisible = false;
+                        });
+                      }
+                      close();
+                      updateProvider.downloadAndInstallUpdate(
+                        GoRouter.of(
+                              context,
+                            ).routerDelegate.navigatorKey.currentContext ??
+                            context,
+                      );
                     },
                   ),
                 ],
               ),
               severity: InfoBarSeverity.warning,
               onClose: () {
-                if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
+                if (mounted) {
+                  setState(() {
+                    _isUpdateInfoBarVisible = false;
+                  });
+                }
                 close();
               },
               isLong: true,
@@ -350,10 +391,14 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           );
         },
         alignment: Alignment.topRight,
-        duration: Duration(hours: 24), 
+        duration: Duration(hours: 24),
       );
     } else if (!updateProvider.showUpdateInfobar && _isUpdateInfoBarVisible) {
-       if (mounted) setState(() { _isUpdateInfoBarVisible = false; });
+      if (mounted) {
+        setState(() {
+          _isUpdateInfoBarVisible = false;
+        });
+      }
     }
   }
 
@@ -383,7 +428,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 indexFooter;
           }
         }
-        return 0; 
+        return 0;
       }
       return originalItems
               .where((element) => element.key != null)
@@ -394,7 +439,6 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
       return indexOriginal;
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -453,10 +497,13 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
             ),
           );
         }(),
-        actions: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [const WindowButtons()],
-        ),
+        actions:
+            isDesktop
+                ? Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [const WindowButtons()],
+                )
+                : null,
       ),
       paneBodyBuilder: (item, child) {
         final name =
@@ -523,29 +570,34 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     bool isPreventClose = await windowManager.isPreventClose();
     if (isPreventClose && mounted) {
       showDialog(
-        context: context,
-        builder: (_) {
-          return ContentDialog(
-            title: const Text('Confirm close'),
-            content: const Text('Are you sure you want to close this window?'),
-            actions: [
-              FilledButton(
-                child: const Text('Yes'),
-                onPressed: () {
-                  Navigator.pop(context);
-                  windowManager.destroy();
-                },
-              ),
-              Button(
-                child: const Text('No'),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          );
-        },
-      );
+      context: context,
+      builder: (_) {
+        return ContentDialog(
+          title: const Text('Downloads in Progress'), 
+          content: const Text(
+            'Closing the application will cancel all active downloads. '
+            'Are you sure you want to close?',
+          ),
+          actions: [
+            FilledButton(
+              child: const Text('Yes, Close & Cancel'), 
+              onPressed: () async { 
+                Navigator.pop(context); 
+                debugPrint("User chose to close; cancelling downloads.");
+                
+                windowManager.destroy(); 
+              },
+            ),
+            Button(
+              child: const Text('Keep Downloading'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
     }
   }
 }

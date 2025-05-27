@@ -1,10 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape android:shape="oval">
-            <solid android:color="#b8d8e8"/>
-            <stroke android:width="8dp" android:color="#153d6a"/>
-        </shape>
-    </item>
+    <item android:drawable="?android:colorBackground" />
 </layer-list>
