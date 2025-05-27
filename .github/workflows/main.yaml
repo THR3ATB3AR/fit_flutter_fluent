@@ -137,53 +137,71 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os_runner: ubuntu-latest         # Standard GitHub-hosted x64 runner
+          - os_runner: ubuntu-latest
             arch_name: x64
             flutter_arch: x64
-          - os_runner: ubuntu-22.04-arm      # Your specified ARM runner label
+          - os_runner: ubuntu-22.04-arm # Your specified ARM runner label
             arch_name: arm64
             flutter_arch: arm64
     runs-on: ${{ matrix.os_runner }}
     needs: resolve-version
+    env: # Define env vars for easier use in steps
+      APP_VERSION: ${{ needs.resolve-version.outputs.app_version }}
+      BUILD_NUMBER: ${{ needs.resolve-version.outputs.build_number }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Flutter
+      - name: Set up Flutter prerequisites & yq
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev
+          sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev yq # Added yq
+
       - name: Clone Flutter
         run: |
-          # Shallow-clone Flutter to reduce download size
           git clone --depth 1 --branch 3.32.0 https://github.com/flutter/flutter.git $RUNNER_TEMP/flutter
-
-          # Add Flutter to PATH
           echo "$RUNNER_TEMP/flutter/bin" >> $GITHUB_PATH
 
-      - name: Install Flutter
-        # Running "flutter doctor" will download Flutter's dependencies
+      - name: Install Flutter SDK
         run: flutter doctor
-      
-      - run: flutter pub get
+
+      - name: Update pubspec.yaml with CI version
+        run: |
+          echo "Original pubspec.yaml version:"
+          grep '^version: ' pubspec.yaml
+
+          yq -i ".version = \"${APP_VERSION}+${BUILD_NUMBER}\"" pubspec.yaml
+          
+
+          echo "Updated pubspec.yaml version to:"
+          grep '^version: ' pubspec.yaml
+        shell: bash
+
+      - name: Flutter Pub Get (after pubspec modification)
+        run: flutter pub get # Crucial to run after modifying pubspec.yaml
+
       - name: Flutter Build Linux (${{ matrix.arch_name }})
         run: |
-          flutter build linux --release --build-name=${{ needs.resolve-version.outputs.app_version }}
-          echo "Built for ${{ matrix.arch_name }} with version: ${{ needs.resolve-version.outputs.app_version }}"
+          flutter build linux --release \
+            --build-name=${APP_VERSION} \
+            --build-number=${BUILD_NUMBER}
+          echo "Built for ${{ matrix.arch_name }} with version (from CI args): ${APP_VERSION}+${BUILD_NUMBER}"
+          echo "Version in built pubspec.yaml (used by package_info_plus on Linux):"
+          cat build/linux/${{ matrix.flutter_arch }}/release/bundle/data/flutter_assets/pubspec.yaml | grep '^version: ' || echo "pubspec.yaml not found in bundle assets or version not present"
+
+
       - name: Prepare Linux Artifact (${{ matrix.arch_name }})
         id: prepare_artifact
         run: |
           FLUTTER_BUILD_OUTPUT_PATH="build/linux/${{ matrix.flutter_arch }}/release/bundle"
-          APP_VERSION="${{ needs.resolve-version.outputs.app_version }}"
+          # APP_VERSION is already available from job's env
           ARCH_LABEL="${{ matrix.arch_name }}"
 
+          # The tarball name should reflect the CI version
           TARBALL_FILENAME="fitflutterfluent-linux-$ARCH_LABEL-$APP_VERSION.tar.gz"
           
-          # Directory to store the final tarball file
           FINAL_TARBALL_DIR="dist_tarballs" 
           mkdir -p "$FINAL_TARBALL_DIR"
 
-          # Staging directory for the content that goes *into* the tarball
-          # We want the tarball to contain a single directory "fitflutterfluent"
           CONTENT_STAGING_DIR="dist_content_for_tar"
           mkdir -p "$CONTENT_STAGING_DIR/fitflutterfluent"
 
@@ -191,18 +209,17 @@ jobs:
           cp -r $FLUTTER_BUILD_OUTPUT_PATH/* "$CONTENT_STAGING_DIR/fitflutterfluent/"
           
           echo "Creating $FINAL_TARBALL_DIR/$TARBALL_FILENAME from content in $CONTENT_STAGING_DIR/fitflutterfluent"
-          # -C "$CONTENT_STAGING_DIR": Change to this directory before adding files
-          # "fitflutterfluent": The directory to add to the archive (will be at the root of the archive)
           tar -czf "$FINAL_TARBALL_DIR/$TARBALL_FILENAME" -C "$CONTENT_STAGING_DIR" fitflutterfluent
           
           ABSOLUTE_TARBALL_PATH="$(pwd)/$FINAL_TARBALL_DIR/$TARBALL_FILENAME"
           echo "Final tarball path: $ABSOLUTE_TARBALL_PATH"
           echo "tarball_path=$ABSOLUTE_TARBALL_PATH" >> $GITHUB_OUTPUT
           echo "artifact_upload_name=fitflutterfluent-linux-$ARCH_LABEL" >> $GITHUB_OUTPUT
+
       - name: Upload Linux Artifact (${{ matrix.arch_name }})
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.prepare_artifact.outputs.artifact_upload_name }} # e.g., fitflutterfluent-linux-x64
+          name: ${{ steps.prepare_artifact.outputs.artifact_upload_name }}
           path: ${{ steps.prepare_artifact.outputs.tarball_path }}
 
 
