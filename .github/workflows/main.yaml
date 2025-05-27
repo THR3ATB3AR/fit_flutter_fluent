@@ -330,6 +330,7 @@ jobs:
           echo "appimage_path=$ABSOLUTE_APPIMAGE_PATH" >> $GITHUB_OUTPUT
           echo "appimage_upload_name=fit-flutter-fluent-appimage-linux-$APPIMAGE_ARCH_LABEL_FOR_TOOL" >> $GITHUB_OUTPUT
           echo "appimage_filename_for_release=$APPIMAGE_FILENAME" >> $GITHUB_OUTPUT
+          echo "appimage_filename_for_release=$APPIMAGE_FILENAME" >> $GITHUB_OUTPUT 
 
       - name: Upload Linux AppImage Artifact (${{ matrix.arch_name }})
         uses: actions/upload-artifact@v4
