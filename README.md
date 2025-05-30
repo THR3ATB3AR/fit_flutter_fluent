@@ -78,7 +78,8 @@ Planned future enhancements include:
 * [X] Adding options to open webpage of repack.
 * [X] Show close prevention dialog only when downloading.
 * [X] Removing Windows-specific UI elements from the Android interface.
-* [ ] Implementing AppImage builds for Linux distribution.
+* [X] Implementing AppImage builds for Linux distribution.
+* [ ] Checking for updates of repacks.
 * [ ] Implementing app localization.
 * [ ] Adding automatic installation of repacks.
 * [ ] Adding filtering capabilities for repacks.
