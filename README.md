@@ -35,8 +35,8 @@ This section outlines the tasks for the ongoing rewrite to implement Microsoft F
   * [X] Update buttons, input fields, dialogs, and other interactive elements to Fluent Design.
   * [X] Implement Fluent iconography throughout the application.
   * [X] Refactor settings screen with Fluent controls (ToggleSwitch, ComboBox, etc.).
-* [ ] **Feature Parity with Fluent UI:**
-  * [ ] Ensure all existing features from FitFlutter are functional within the new Fluent UI.
+* [X] **Feature Parity with Fluent UI:**
+  * [X] Ensure all existing features from FitFlutter are functional within the new Fluent UI.
   * [X] Port "Search Repacks" UI to Fluent.
   * [X] Port "Repack Details" view to Fluent.
   * [X] Port "Screenshots" viewer to Fluent.
@@ -48,7 +48,7 @@ This section outlines the tasks for the ongoing rewrite to implement Microsoft F
   * [X] Ensure responsive design for different window sizes and screen densities.
   * [ ] Accessibility review for Fluent components.
 * [ ] **Testing & Refinement:**
-  * [ ] Thoroughly test all UI elements and interactions.
+  * [X] Thoroughly test all UI elements and interactions.
   * [ ] Gather user feedback on the new Fluent design.
   * [ ] Address any UI/UX bugs or inconsistencies.
 * [X] **Documentation & Screenshots:**
@@ -81,7 +81,7 @@ Planned future enhancements include:
 * [X] Implementing AppImage builds for Linux distribution.
 * [ ] Checking for updates of repacks.
 * [ ] Implementing app localization.
-* [ ] Adding automatic installation of repacks.
+* [X] Adding automatic installation of repacks.
 * [ ] Adding filtering capabilities for repacks.
 * [ ] Developing a feature to manage installed games.
 * [ ] Support for Data Nodes downloads.
