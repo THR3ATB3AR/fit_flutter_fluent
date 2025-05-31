@@ -264,6 +264,7 @@ class AppTheme extends ChangeNotifier {
     } else {
       _maxConcurrentDownloads = 2;
     }
+    downloadManager.setMaxConcurrentDownloads(_maxConcurrentDownloads);
   }
 
   void applyInitialWindowEffectIfNeeded(BuildContext context) {
