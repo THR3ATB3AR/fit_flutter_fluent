@@ -10,6 +10,7 @@ import 'package:path/path.dart' as p;
 class DdManager {
   final DownloadManager downloadManager = DownloadManager();
   final RarExtractor rarExtractor;
+  bool? autoInstall;
 
   final StreamController<String> _taskGroupUpdatedController =
       StreamController<String>.broadcast();
@@ -129,7 +130,7 @@ class DdManager {
       }
     }
 
-    if (allComplete) {
+    if (allComplete && autoInstall == true) {
       debugPrint(
         "DdManager: SUCCESS! All tasks in group '$sanitizedTitle' have completed. (Trigger: $eventReason)",
       );
@@ -366,6 +367,11 @@ class DdManager {
 
   void setMaxConcurrentDownloads(int maxDownloads) {
     downloadManager.maxConcurrentTasks = maxDownloads;
+  }
+
+  void setAutoInstall(bool value) {
+    autoInstall = value;
+    debugPrint("DdManager: Auto-install set to $value");
   }
 
   ValueNotifier<double>? getBatchProgressForTitle(String title) {

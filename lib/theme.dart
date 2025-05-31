@@ -155,9 +155,10 @@ class AppTheme extends ChangeNotifier {
 
   // Normal settings
 
-  DdManager downloadManager = DdManager.instance;
 
   static const String _kDownloadPath = 'download_path';
+  static const String _kInstallPath = 'install_path';
+  static const String _kAutoInstall = 'auto_install';
   static const String _kMaxConcurrentDownloads = 'max_concurrent_downloads';
 
   String _downloadPath = '';
@@ -168,11 +169,28 @@ class AppTheme extends ChangeNotifier {
     notifyListeners();
   }
 
+  String _installPath = '';
+  String get installPath => _installPath;
+  set installPath(String path) {
+    _installPath = path;
+    _saveInstallPath(path);
+    notifyListeners();
+  }
+
+  bool _autoInstall = false;
+  bool get autoInstall => _autoInstall;
+  set autoInstall(bool value) {
+    _autoInstall = value;
+    DdManager.instance.setAutoInstall(value);
+    _saveAutoInstall(value);
+    notifyListeners();
+  }
+
   int _maxConcurrentDownloads = 2;
   int get maxConcurrentDownloads => _maxConcurrentDownloads;
   set maxConcurrentDownloads(int value) {
     _maxConcurrentDownloads = value;
-    downloadManager.setMaxConcurrentDownloads(value);
+    DdManager.instance.setMaxConcurrentDownloads(value);
     _saveMaxConcurrentDownloads(value);
     notifyListeners();
   }
@@ -180,6 +198,16 @@ class AppTheme extends ChangeNotifier {
   Future<void> _saveDownloadPath(String path) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kDownloadPath, path);
+  }
+
+  Future<void> _saveInstallPath(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kInstallPath, path);
+  }
+
+  Future<void> _saveAutoInstall(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kAutoInstall, value);
   }
 
   Future<void> _saveMaxConcurrentDownloads(int value) async {
@@ -258,13 +286,28 @@ class AppTheme extends ChangeNotifier {
       _downloadPath = '';
     }
 
+    final String? installPath = prefs.getString(_kInstallPath);
+    if (installPath != null) {
+      _installPath = installPath;
+    } else {
+      _installPath = '';
+    }
+
+    final bool? autoInstall = prefs.getBool(_kAutoInstall);
+    if (autoInstall != null) {
+      _autoInstall = autoInstall;
+    } else {
+      _autoInstall = false;
+    }
+    DdManager.instance.setAutoInstall(_autoInstall);
+
     final int? maxConcurrentDownloads = prefs.getInt(_kMaxConcurrentDownloads);
     if (maxConcurrentDownloads != null) {
       _maxConcurrentDownloads = maxConcurrentDownloads;
     } else {
       _maxConcurrentDownloads = 2;
     }
-    downloadManager.setMaxConcurrentDownloads(_maxConcurrentDownloads);
+    DdManager.instance.setMaxConcurrentDownloads(_maxConcurrentDownloads);
   }
 
   void applyInitialWindowEffectIfNeeded(BuildContext context) {

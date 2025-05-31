@@ -92,6 +92,7 @@ class _SettingsState extends State<Settings> with PageMixin {
 
   final GlobalKey _downloadPathKey = GlobalKey();
   final GlobalKey _maxConcurrentDownloadsKey = GlobalKey();
+  final GlobalKey _autoInstallSettingsKey = GlobalKey(); // New Key
   final GlobalKey _themeModeKey = GlobalKey();
   final GlobalKey _paneDisplayModeKey = GlobalKey();
   final GlobalKey _accentColorKey = GlobalKey();
@@ -116,6 +117,7 @@ class _SettingsState extends State<Settings> with PageMixin {
     _sectionKeys = {
       'downloadPath': _downloadPathKey,
       'maxConcurrentDownloads': _maxConcurrentDownloadsKey,
+      'autoInstallSettings': _autoInstallSettingsKey, // Add new key
       'themeMode': _themeModeKey,
       'paneDisplayMode': _paneDisplayModeKey,
       'accentColor': _accentColorKey,
@@ -265,7 +267,9 @@ class _SettingsState extends State<Settings> with PageMixin {
         );
       }
     } catch (e) {
-      print("Error during force rescrape: $e");
+      if (kDebugMode) {
+        print("Error during force rescrape: $e");
+      }
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
         _updateForceRescrapeDialogStatusCallback("Error: $e");
@@ -354,7 +358,7 @@ class _SettingsState extends State<Settings> with PageMixin {
       header: const PageHeader(title: Text('Settings')),
       scrollController: _scrollController,
       children: [
-        Text('Downloads', style: FluentTheme.of(context).typography.title),
+        Text('Downloads & Installation', style: FluentTheme.of(context).typography.title),
         spacer,
         const Divider(
           style: DividerThemeData(horizontalMargin: EdgeInsets.zero),
@@ -370,14 +374,13 @@ class _SettingsState extends State<Settings> with PageMixin {
             child: TextBox(
               placeholder: 'Default Download Path',
               controller: TextEditingController(text: appTheme.downloadPath),
-              readOnly: true,
               suffix: IconButton(
                 icon: const Icon(FluentIcons.folder_open),
                 onPressed: () async {
                   final path = await FilePicker.platform.getDirectoryPath();
                   if (path != null) {
                     appTheme.downloadPath = path;
-                    setState(() {});
+                    // No need to call setState here as AppTheme provider will update
                   }
                 },
               ),
@@ -408,6 +411,55 @@ class _SettingsState extends State<Settings> with PageMixin {
             ),
           ),
         ], addBiggerSpacerAfter: false),
+        _buildSectionWrapper(_autoInstallSettingsKey, [
+          Text(
+            'Automatic Installation',
+            style: FluentTheme.of(context).typography.subtitle,
+          ),
+          spacer,
+          Row(
+            children: [
+              const Text('Enable Auto-Install after download:'),
+              const SizedBox(width: 10),
+              ToggleSwitch(
+                checked: appTheme.autoInstall,
+                onChanged: (v) {
+                  appTheme.autoInstall = v;
+                },
+              ),
+            ],
+          ),
+          spacer,
+          Text(
+            'Default Installation Path',
+            style: FluentTheme.of(context).typography.caption, // Smaller text for label
+          ),
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextBox(
+              placeholder: 'Default Install Path',
+              controller: TextEditingController(text: appTheme.installPath),
+              enabled: appTheme.autoInstall, 
+              suffix: IconButton(
+                icon: const Icon(FluentIcons.folder_open),
+                onPressed: appTheme.autoInstall 
+                  ? () async {
+                      final path = await FilePicker.platform.getDirectoryPath();
+                      if (path != null) {
+                        appTheme.installPath = path;
+                      }
+                    }
+                  : null,
+              ),
+            ),
+          ),
+          spacer,
+          InfoLabel(
+            label: 'When enabled, completed repacks will attempt to install to the specified path.',
+            isHeader: false,
+          ),
+        ], addBiggerSpacerAfter: false),
         bigSpacer,
         Text('Appearance', style: FluentTheme.of(context).typography.title),
         spacer,
@@ -435,7 +487,8 @@ class _SettingsState extends State<Settings> with PageMixin {
                 if (mode != null) {
                   appTheme.mode = mode;
                   if (kIsWindowEffectsSupported) {
-                    appTheme.setEffect(appTheme.windowEffect, context);
+                    // Ensure context is available and mounted for setEffect
+                    if (mounted) appTheme.setEffect(appTheme.windowEffect, context);
                   }
                 }
               },
@@ -515,7 +568,7 @@ class _SettingsState extends State<Settings> with PageMixin {
                 onChanged: (effect) {
                   if (effect != null) {
                     appTheme.windowEffect = effect;
-                    appTheme.setEffect(effect, context);
+                     if (mounted) appTheme.setEffect(effect, context);
                   }
                 },
               ),
@@ -597,13 +650,13 @@ class _SettingsState extends State<Settings> with PageMixin {
           else if (updateProvider.errorMessage != null &&
               updateProvider.errorMessage!.contains(
                 "latest version",
-              )) 
+              ))
             Text('Latest Available Version: ${updateProvider.errorMessage}')
           else if (updateProvider.lastUpdateCheckTimestamp == 0 &&
               !updateProvider.isCheckingForUpdates)
             const Text('Latest Available Version: Not checked yet.')
           else if (!updateProvider
-              .isCheckingForUpdates) 
+              .isCheckingForUpdates)
             const Text('Latest Available Version: Check to see.'),
 
           if (updateProvider.errorMessage != null &&
