@@ -10,7 +10,8 @@ import 'package:path/path.dart' as p;
 class DdManager {
   final DownloadManager downloadManager = DownloadManager();
   final RarExtractor rarExtractor;
-  bool? autoInstall;
+  bool _autoInstallEnabled = false;
+  String _currentInstallPath = ""; 
 
   final StreamController<String> _taskGroupUpdatedController =
       StreamController<String>.broadcast();
@@ -130,7 +131,7 @@ class DdManager {
       }
     }
 
-    if (allComplete && autoInstall == true) {
+    if (allComplete && _autoInstallEnabled) {
       debugPrint(
         "DdManager: SUCCESS! All tasks in group '$sanitizedTitle' have completed. (Trigger: $eventReason)",
       );
@@ -162,6 +163,8 @@ class DdManager {
             groupTitle: sanitizedTitle,
             downloadFolderPath: groupFilesDownloadPath,
             filesInGroup: filesToExtract,
+            performAutoInstall: _autoInstallEnabled,
+            installPath: _currentInstallPath, 
           );
         } else {
           debugPrint(
@@ -370,8 +373,13 @@ class DdManager {
   }
 
   void setAutoInstall(bool value) {
-    autoInstall = value;
-    debugPrint("DdManager: Auto-install set to $value");
+    _autoInstallEnabled = value;
+    debugPrint("DdManager: Auto-extract/install toggled to $_autoInstallEnabled");
+  }
+
+  void updateInstallPath(String path) {
+    _currentInstallPath = path;
+    debugPrint("DdManager: Install path updated to '$_currentInstallPath'");
   }
 
   ValueNotifier<double>? getBatchProgressForTitle(String title) {

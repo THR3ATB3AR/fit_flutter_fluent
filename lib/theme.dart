@@ -174,6 +174,7 @@ class AppTheme extends ChangeNotifier {
   set installPath(String path) {
     _installPath = path;
     _saveInstallPath(path);
+    DdManager.instance.updateInstallPath(path);
     notifyListeners();
   }
 
@@ -292,6 +293,7 @@ class AppTheme extends ChangeNotifier {
     } else {
       _installPath = '';
     }
+    DdManager.instance.updateInstallPath(_installPath);
 
     final bool? autoInstall = prefs.getBool(_kAutoInstall);
     if (autoInstall != null) {
@@ -348,7 +350,7 @@ class SearchProvider extends ChangeNotifier {
 
   void updateSearchQuery(String newQuery) {
     if (_searchQuery != newQuery) {
-      _searchQuery = newQuery.trim(); // Trim whitespace
+      _searchQuery = newQuery.trim();
       notifyListeners();
     }
   }

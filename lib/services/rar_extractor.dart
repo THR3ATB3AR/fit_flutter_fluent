@@ -4,13 +4,17 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p; 
 
 enum ExtractionStatus {
-  idle, 
-  queued, 
-  extracting, 
-  completed, 
-  failed, 
-  noRarFound, 
-  sevenZipNotFound, 
+  idle,
+  queued,
+  extracting,
+  completed,
+  failed,
+  noRarFound,
+  sevenZipNotFound,
+  installing, 
+  installation_succeeded, 
+  installation_failed, 
+  setupExeNotFound, 
 }
 
 class ExtractionProgress {
@@ -75,12 +79,16 @@ class RarExtractor {
     required String groupTitle,
     required String downloadFolderPath,
     required List<Map<String, dynamic>> filesInGroup,
+    required bool performAutoInstall, 
+    required String installPath,      
   }) async {
     if (_groupExtractionStatus[groupTitle] == ExtractionStatus.extracting ||
         _groupExtractionStatus[groupTitle] == ExtractionStatus.queued ||
-        _groupExtractionStatus[groupTitle] == ExtractionStatus.completed) {
+        _groupExtractionStatus[groupTitle] == ExtractionStatus.completed ||
+        _groupExtractionStatus[groupTitle] == ExtractionStatus.installing ||
+        _groupExtractionStatus[groupTitle] == ExtractionStatus.installation_succeeded) {
       debugPrint(
-        "RarExtractor: Extraction for group '$groupTitle' already handled. Skipping.",
+        "RarExtractor: Extraction/Installation for group '$groupTitle' already handled or in progress. Skipping.",
       );
       return;
     }
@@ -101,9 +109,12 @@ class RarExtractor {
       'groupTitle': groupTitle,
       'downloadFolderPath': downloadFolderPath,
       'filesInGroup': filesInGroup,
+      'performAutoInstall': performAutoInstall, 
+      'installPath': installPath,
     });
     _updateGroupStatus(groupTitle, ExtractionStatus.queued);
-    debugPrint("RarExtractor: Group '$groupTitle' queued for extraction.");
+    debugPrint(
+        "RarExtractor: Group '$groupTitle' queued for extraction. Auto-install: $performAutoInstall, Install Path: '$installPath'");
     _processExtractionQueue();
   }
 
@@ -133,9 +144,11 @@ class RarExtractor {
     final String groupTitle = job['groupTitle'];
     final String downloadFolderPath = job['downloadFolderPath'];
     final List<Map<String, dynamic>> filesInGroup = job['filesInGroup'];
+    final bool performAutoInstall = job['performAutoInstall'] as bool; 
+    final String installPath = job['installPath'] as String;
 
     debugPrint(
-      "RarExtractor: Starting extraction process for group '$groupTitle'.",
+      "RarExtractor: Starting extraction process for group '$groupTitle'. Perform auto-install: $performAutoInstall",
     );
     _updateGroupStatus(
       groupTitle,
@@ -250,6 +263,10 @@ class RarExtractor {
           message:
               "All $extractedCount archive(s) in group extracted successfully.",
         );
+
+        if (performAutoInstall) {
+            await _attemptAutoInstall(groupTitle, downloadFolderPath, installPath);
+        }
       } else {
         _updateGroupStatus(
           groupTitle,
@@ -269,6 +286,122 @@ class RarExtractor {
       );
     } finally {
       _finishProcessingJob();
+    }
+  }
+
+  Future<void> _attemptAutoInstall(
+    String groupTitle,
+    String extractedFilesPath, 
+    String targetInstallDir,   
+  ) async {
+    final setupExePath = p.join(extractedFilesPath, 'setup.exe');
+    final setupExeFile = File(setupExePath);
+
+    if (!await setupExeFile.exists()) {
+      debugPrint(
+          "RarExtractor: setup.exe not found in '$extractedFilesPath' for group '$groupTitle'. Installation skipped.");
+      _updateGroupStatus(
+        groupTitle,
+        ExtractionStatus.setupExeNotFound,
+        message: "setup.exe not found in extracted files. Installation cannot proceed.",
+      );
+      return;
+    }
+
+    debugPrint(
+        "RarExtractor: Found setup.exe at '$setupExePath'. Attempting installation for group '$groupTitle' to '$targetInstallDir'.");
+    _updateGroupStatus(
+      groupTitle,
+      ExtractionStatus.installing,
+      message: "Starting setup.exe...",
+    );
+
+    try {
+      final String logFileName = 'setup_install.log';
+      final List<String> setupArguments = [
+        '/LOG="$logFileName"', 
+        '/VERYSILENT',
+      ];
+
+      if (targetInstallDir.isNotEmpty) {
+        setupArguments.add('/DIR="$targetInstallDir"');
+      }
+
+      ProcessResult result;
+
+      if (Platform.isWindows) {
+        String psSetupExePath = setupExePath.replaceAll("'", "''"); 
+
+        String psArgumentListString = setupArguments.map((arg) {
+          return arg.replaceAll("'", "''");
+        }).join(' ');
+
+        String powerShellCommand = "Start-Process -FilePath '$psSetupExePath' -ArgumentList '$psArgumentListString' -Verb RunAs -Wait -PassThru";
+
+        debugPrint(
+            "RarExtractor: Running elevated command via PowerShell: powershell.exe -NoProfile -NonInteractive -Command \"$powerShellCommand\"");
+        
+        result = await Process.run(
+          'powershell.exe',
+          [
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            powerShellCommand,
+          ],
+          workingDirectory: extractedFilesPath, 
+        );
+      } else {
+        debugPrint(
+            "RarExtractor: Running command directly (non-Windows or fallback): \"$setupExePath\" ${setupArguments.join(' ')}");
+        result = await Process.run(
+          setupExePath,
+          setupArguments,
+          workingDirectory: extractedFilesPath,
+        );
+      }
+
+      if (result.exitCode == 0) {
+        debugPrint(
+            "RarExtractor: setup.exe for group '$groupTitle' command completed. Assuming success. Exit code: ${result.exitCode}");
+        if (result.stdout.toString().isNotEmpty) {
+          debugPrint("Setup/PowerShell stdout: ${result.stdout}");
+        }
+        if (result.stderr.toString().isNotEmpty) {
+          debugPrint("Setup/PowerShell stderr: ${result.stderr}");
+        }
+        _updateGroupStatus(
+          groupTitle,
+          ExtractionStatus.installation_succeeded,
+          message: "Installation completed successfully.",
+        );
+      } else {
+        String errorMessage =
+            "setup.exe for group '$groupTitle' failed or was cancelled. Exit code: ${result.exitCode}.";
+        if (result.stdout.toString().isNotEmpty) {
+          errorMessage += " Stdout: ${result.stdout}";
+        }
+        if (result.stderr.toString().isNotEmpty) {
+          errorMessage += " Stderr: ${result.stderr}";
+          if (result.stderr.toString().toLowerCase().contains("operation was canceled by the user")) {
+            errorMessage = "Installation for group '$groupTitle' was cancelled by the user (UAC prompt). Exit code: ${result.exitCode}. Stderr: ${result.stderr}";
+          }
+        }
+        debugPrint("RarExtractor: $errorMessage");
+        _updateGroupStatus(
+          groupTitle,
+          ExtractionStatus.installation_failed,
+          message: errorMessage,
+        );
+      }
+    } catch (e, s) {
+      debugPrint(
+          "RarExtractor: Exception running/orchestrating setup.exe for group '$groupTitle': $e\n$s");
+      _updateGroupStatus(
+        groupTitle,
+        ExtractionStatus.installation_failed,
+        message: "Exception during installation: $e",
+      );
     }
   }
 
