@@ -1,17 +1,22 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:fit_flutter_fluent/data/download_info.dart';
+import 'package:fit_flutter_fluent/services/rar_extractor.dart';
 import 'package:flutter_download_manager/flutter_download_manager.dart'
     show DownloadManager, DownloadTask, DownloadStatus;
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 
 class DdManager {
   final DownloadManager downloadManager = DownloadManager();
+  final RarExtractor rarExtractor;
 
   final StreamController<String> _taskGroupUpdatedController =
       StreamController<String>.broadcast();
   Stream<String> get onTaskGroupUpdated => _taskGroupUpdatedController.stream;
 
-  DdManager._privateConstructor();
+  DdManager._privateConstructor()
+    : rarExtractor = RarExtractor(sevenZipPath: _getPlatformSpecific7ZipPath());
 
   Map<String, List<Map<String, dynamic>>> downloadTasks = {};
   static final DdManager _instance = DdManager._privateConstructor();
@@ -19,6 +24,23 @@ class DdManager {
 
   final ValueNotifier<bool> isAnyTaskDownloading = ValueNotifier(false);
   final Map<String, VoidCallback> _statusListeners = {};
+  final Set<String> _processedForExtraction = {}; 
+
+  static String _getPlatformSpecific7ZipPath() {
+    if (Platform.isWindows) {
+      const String path1 = r"C:\Program Files\7-Zip\7z.exe";
+      if (File(path1).existsSync()) return path1;
+      const String path2 = r"C:\Program Files (x86)\7-Zip\7z.exe";
+      if (File(path2).existsSync()) return path2;
+      return "7z.exe";
+    } else if (Platform.isLinux || Platform.isMacOS) {
+      return "7z";
+    }
+    debugPrint(
+      "DdManager: Unsupported platform for 7-Zip path auto-detection. Assuming '7z' is in PATH.",
+    );
+    return "7z";
+  }
 
   void _checkActiveDownloads() {
     bool anyActive = false;
@@ -43,12 +65,21 @@ class DdManager {
     }
   }
 
-  void _addStatusListener(DownloadTask task) {
+  void _addStatusListener(DownloadTask task, String sanitizedTitle) {
     final url = task.request.url;
     if (_statusListeners.containsKey(url)) {
-      task.status.removeListener(_statusListeners[url]!);
+      final oldListener = _statusListeners[url]!;
+      task.status.removeListener(oldListener);
     }
-    VoidCallback listener = () => _checkActiveDownloads();
+
+    listener() {
+      _checkActiveDownloads(); 
+
+      if (task.status.value == DownloadStatus.completed) {
+        _handleTaskCompletionForGroup(sanitizedTitle, "task_completed: ${task.request.url}");
+      }
+    }
+
     _statusListeners[url] = listener;
     task.status.addListener(listener);
   }
@@ -67,6 +98,85 @@ class DdManager {
       }
     }
   }
+
+  void _handleTaskCompletionForGroup(String sanitizedTitle, String eventReason) {
+    if (_processedForExtraction.contains(sanitizedTitle)) {
+      return;
+    }
+
+    debugPrint("DdManager: Checking group '$sanitizedTitle' completion. Trigger: $eventReason.");
+
+    final List<Map<String, dynamic>>? tasksInGroup = downloadTasks[sanitizedTitle];
+    if (tasksInGroup == null || tasksInGroup.isEmpty) {
+      debugPrint("DdManager: Group '$sanitizedTitle' is empty or not found during completion check (Reason: $eventReason).");
+      _processedForExtraction.remove(sanitizedTitle); 
+      return;
+    }
+
+    bool allComplete = true;
+    for (var taskMap in tasksInGroup) {
+      final task = taskMap['task'] as DownloadTask?;
+      if (task == null) { 
+          debugPrint("DdManager: Null task found in group '$sanitizedTitle' while checking completion. This is unexpected.");
+          allComplete = false;
+          break;
+      }
+      final currentStatus = task.status.value;
+      if (currentStatus != DownloadStatus.completed) {
+        allComplete = false;
+        debugPrint("DdManager: Group '$sanitizedTitle' not (yet) fully complete. Task ${task.request.url} status: $currentStatus");
+        break;
+      }
+    }
+
+    if (allComplete) {
+      debugPrint(
+        "DdManager: SUCCESS! All tasks in group '$sanitizedTitle' have completed. (Trigger: $eventReason)",
+      );
+      
+      final List<Map<String, dynamic>>? completedGroupTasks = downloadTasks[sanitizedTitle];
+      if (completedGroupTasks != null) {
+          debugPrint("DdManager: Status of tasks in '$sanitizedTitle' UPON BATCH COMPLETION CONFIRMATION:");
+          for (var taskMap in completedGroupTasks) {
+              final task = taskMap['task'] as DownloadTask?;
+              debugPrint("  - Task URL: ${task?.request.url}, Final Status: ${task?.status.value}");
+          }
+      }
+
+      _processedForExtraction.add(sanitizedTitle); 
+
+      final filesInGroup = downloadTasks[sanitizedTitle]; 
+      if (filesInGroup != null && filesInGroup.isNotEmpty) {
+        final firstTaskInGroup = filesInGroup.first['task'] as DownloadTask?;
+        if (firstTaskInGroup != null) {
+          final String fullFilePathOfFirstTask = firstTaskInGroup.request.path;
+          final String groupFilesDownloadPath = p.dirname(fullFilePathOfFirstTask);
+
+          debugPrint(
+            "DdManager: Scheduling extraction for group '$sanitizedTitle' in '$groupFilesDownloadPath'.",
+          );
+          final List<Map<String, dynamic>> filesToExtract = List.from(filesInGroup);
+
+          rarExtractor.scheduleExtraction(
+            groupTitle: sanitizedTitle,
+            downloadFolderPath: groupFilesDownloadPath,
+            filesInGroup: filesToExtract,
+          );
+        } else {
+          debugPrint(
+            "DdManager: No task details for download path for '$sanitizedTitle' after confirming completion. This is unexpected.",
+          );
+          _processedForExtraction.remove(sanitizedTitle); 
+        }
+      } else {
+        debugPrint(
+          "DdManager: Group '$sanitizedTitle' empty after completion, skipping extraction. This is unexpected.",
+        );
+        _processedForExtraction.remove(sanitizedTitle); 
+      }
+    }
+  }
+
 
   String sanitizeFileName(String fileName) {
     final RegExp regExp = RegExp(r'[<>:"/\\|?*]');
@@ -105,7 +215,7 @@ class DdManager {
       return;
     }
 
-    _addStatusListener(task); 
+    _addStatusListener(task, sanitizedTitle); 
 
     if (!downloadTasks.containsKey(sanitizedTitle)) {
       downloadTasks[sanitizedTitle] = [];
@@ -123,8 +233,9 @@ class DdManager {
       });
       _taskGroupUpdatedController.add(sanitizedTitle);
     }
-    _checkActiveDownloads(); 
+    _checkActiveDownloads();
   }
+
 
   DownloadTask? getDownloadTask(DownloadInfo ddInfo) {
     return downloadManager.getDownload(ddInfo.downloadLink);
@@ -136,9 +247,7 @@ class DdManager {
 
   Future<void> cancelDownload(String url) async {
     await downloadManager.cancelDownload(url);
-    removeDownloadTaskByUrl(
-      url,
-    );
+    removeDownloadTaskByUrl(url); 
   }
 
   Future<void> pauseDownload(String url) async {
@@ -168,7 +277,7 @@ class DdManager {
         }
 
         if (taskUrl != null && taskUrl == url) {
-          _removeStatusListener(url);
+          _removeStatusListener(url); 
           updatedTitle = title;
           return true;
         }
@@ -178,17 +287,18 @@ class DdManager {
       if (tasks.isEmpty) {
         titleToRemoveFrom = title;
       } else if (initialCount > tasks.length) {
-        updatedTitle = title;
       }
     });
 
     if (titleToRemoveFrom != null) {
       downloadTasks.remove(titleToRemoveFrom);
       _taskGroupUpdatedController.add(titleToRemoveFrom!);
-      debugPrint("Group $titleToRemoveFrom became empty and was removed.");
+      _processedForExtraction.remove(titleToRemoveFrom!); 
+      debugPrint("DdManager: Group $titleToRemoveFrom became empty and was removed.");
     } else if (updatedTitle != null) {
       _taskGroupUpdatedController.add(updatedTitle!);
-      debugPrint("Task removed from group $updatedTitle.");
+      debugPrint("DdManager: Task $url removed from group $updatedTitle.");
+      _handleTaskCompletionForGroup(updatedTitle!, "task_removed: $url");
     }
     _checkActiveDownloads();
   }
@@ -222,30 +332,33 @@ class DdManager {
 
       downloadTasks.remove(sanitizedTitle);
       _taskGroupUpdatedController.add(sanitizedTitle);
-      _checkActiveDownloads(); 
+      _processedForExtraction.remove(sanitizedTitle); 
+      _checkActiveDownloads();
+      debugPrint("DdManager: Removed download group '$sanitizedTitle'.");
     } else {
+      debugPrint("DdManager: Attempted to remove non-existent group '$sanitizedTitle'.");
     }
   }
 
   void dispose() {
     _taskGroupUpdatedController.close();
-    _statusListeners.forEach((url, listener) {
-      final task = downloadManager.getDownload(url);
-      if (task != null) {
-        task.status.removeListener(listener);
-      }
-    });
-    _statusListeners.clear();
-    isAnyTaskDownloading.dispose(); 
+    List<String> urlsWithListeners = _statusListeners.keys.toList();
+    for (String url in urlsWithListeners) {
+        _removeStatusListener(url); 
+    }
+    _statusListeners.clear(); 
+    isAnyTaskDownloading.dispose();
+    _processedForExtraction.clear();
     debugPrint("DdManager: Disposed.");
   }
 
   void debugPrintDownloadTasks() {
     downloadTasks.forEach((title, tasks) {
-      debugPrint('Title: $title');
-      for (var task in tasks) {
+      debugPrint('Title: $title (${_processedForExtraction.contains(title) ? "Processed" : "Not Processed"})');
+      for (var taskMap in tasks) {
+        final task = taskMap['task'] as DownloadTask?;
         debugPrint(
-          '  FileName: ${task['fileName']}, URL: ${task['url']}, Task Status: ${(task['task'] as DownloadTask).status.value}',
+          '  FileName: ${taskMap['fileName']}, URL: ${taskMap['url']}, Task Status: ${task?.status.value}',
         );
       }
     });
@@ -264,7 +377,7 @@ class DdManager {
     final tasksForTitle = downloadTasks[sanitizedTitle]!;
     final List<String> urls =
         tasksForTitle.map((taskMap) => taskMap['url'] as String).toList();
-    if (urls.isEmpty) return ValueNotifier<double>(1.0);
+    if (urls.isEmpty) return ValueNotifier<double>(1.0); 
     return downloadManager.getBatchDownloadProgress(urls);
   }
 
@@ -272,12 +385,18 @@ class DdManager {
     final sanitizedTitle = sanitizeFileName(title);
     if (!downloadTasks.containsKey(sanitizedTitle) ||
         downloadTasks[sanitizedTitle]!.isEmpty) {
+      debugPrint(
+      "DdManager: whenBatchCompleteForTitle called for '$sanitizedTitle' but group is empty or not found. Returning null.",
+    );
       return null;
     }
     final tasksForTitle = downloadTasks[sanitizedTitle]!;
     final List<String> urls =
         tasksForTitle.map((taskMap) => taskMap['url'] as String).toList();
-    if (urls.isEmpty) return Future.value();
+    debugPrint(
+      "DdManager: whenBatchCompleteForTitle called for '$sanitizedTitle' with URLs: $urls. This Future is for external use.",
+    );
+    if (urls.isEmpty) return Future.value(); 
     return downloadManager.whenBatchDownloadsComplete(urls);
   }
 }
