@@ -16,6 +16,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart'; 
 
 import 'theme.dart';
 
@@ -123,6 +125,14 @@ class MyApp extends StatelessWidget {
               ),
             ),
             locale: appTheme.locale,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              FluentLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
             builder: (context, child) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 appTheme.applyInitialWindowEffectIfNeeded(context);

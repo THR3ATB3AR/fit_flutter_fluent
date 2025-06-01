@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fit_flutter_fluent/theme.dart';
 import 'package:fit_flutter_fluent/widgets/page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart'; 
 
 const List<String> accentColorNames = [
   'System',
@@ -350,7 +351,7 @@ class _SettingsState extends State<Settings> with PageMixin {
     const spacer = SizedBox(height: 10.0);
     const bigSpacer = SizedBox(height: 24.0);
 
-    final supportedLocales = FluentLocalizations.supportedLocales;
+    final supportedLocales = AppLocalizations.supportedLocales;
     final currentLocale =
         appTheme.locale ?? Localizations.maybeLocaleOf(context);
 
