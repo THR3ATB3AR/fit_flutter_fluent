@@ -12,8 +12,8 @@ enum ExtractionStatus {
   noRarFound,
   sevenZipNotFound,
   installing, 
-  installation_succeeded, 
-  installation_failed, 
+  installationSucceeded, 
+  installationFailed, 
   setupExeNotFound, 
 }
 
@@ -86,7 +86,7 @@ class RarExtractor {
         _groupExtractionStatus[groupTitle] == ExtractionStatus.queued ||
         _groupExtractionStatus[groupTitle] == ExtractionStatus.completed ||
         _groupExtractionStatus[groupTitle] == ExtractionStatus.installing ||
-        _groupExtractionStatus[groupTitle] == ExtractionStatus.installation_succeeded) {
+        _groupExtractionStatus[groupTitle] == ExtractionStatus.installationSucceeded) {
       debugPrint(
         "RarExtractor: Extraction/Installation for group '$groupTitle' already handled or in progress. Skipping.",
       );
@@ -372,7 +372,7 @@ class RarExtractor {
         }
         _updateGroupStatus(
           groupTitle,
-          ExtractionStatus.installation_succeeded,
+          ExtractionStatus.installationSucceeded,
           message: "Installation completed successfully.",
         );
       } else {
@@ -390,7 +390,7 @@ class RarExtractor {
         debugPrint("RarExtractor: $errorMessage");
         _updateGroupStatus(
           groupTitle,
-          ExtractionStatus.installation_failed,
+          ExtractionStatus.installationFailed,
           message: errorMessage,
         );
       }
@@ -399,7 +399,7 @@ class RarExtractor {
           "RarExtractor: Exception running/orchestrating setup.exe for group '$groupTitle': $e\n$s");
       _updateGroupStatus(
         groupTitle,
-        ExtractionStatus.installation_failed,
+        ExtractionStatus.installationFailed,
         message: "Exception during installation: $e",
       );
     }
