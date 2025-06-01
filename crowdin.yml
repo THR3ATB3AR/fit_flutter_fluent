@@ -1,4 +1,4 @@
 files:
-  - source: /lib/l10n/app_en.arb
+  - source: /lib/l10n/app_default.arb
     translation: /lib/l10n/translations/app_%two_letters_code%.arb
     multilingual: 1
