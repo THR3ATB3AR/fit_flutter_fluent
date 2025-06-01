@@ -1,5 +1,5 @@
-arb-dir: lib/l10n
-template-arb-file: app_default.arb
+arb-dir: lib/l10n/translations
+template-arb-file: lib/l10n/app_default.arb
 output-localization-file: app_localizations.dart
 generate : true       
 key-prefix: AppLocalizations.of(context)!.
