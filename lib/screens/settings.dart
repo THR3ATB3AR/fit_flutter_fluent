@@ -339,7 +339,7 @@ class _SettingsState extends State<Settings> with PageMixin {
     const spacer = SizedBox(height: 10.0);
     const bigSpacer = SizedBox(height: 24.0);
 
-    final supportedLocales = AppLocalizations.supportedLocales;
+    final supportedLocales = AppLocalizations.supportedLocales.toSet().intersection(FluentLocalizations.supportedLocales.toSet()).toList();
     final currentLocale =
         appTheme.locale ?? Localizations.maybeLocaleOf(context);
 
