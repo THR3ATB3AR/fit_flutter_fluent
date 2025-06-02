@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fit_flutter_fluent/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RepackLibrary extends StatefulWidget {
   const RepackLibrary({super.key});
@@ -169,18 +170,22 @@ class _RepackLibraryState extends State<RepackLibrary> {
     if (!mounted) return;
     setState(() {
       _isSyncingLibrary = true;
-      _syncStatusText = "Starting library sync...";
+      _syncStatusText = AppLocalizations.of(context)!.startingLibrarySync;
       ScraperService.instance.loadingProgress.value = 0.0;
     });
 
     try {
-      _updateSyncStatusText("Fetching all repack names...");
+      _updateSyncStatusText(
+        AppLocalizations.of(context)!.fetchingAllRepackNames,
+      );
       ScraperService.instance.loadingProgress.value = 0.0;
 
       final allNames = await ScraperService.instance.scrapeAllRepacksNames(
         onProgress: (current, total) {
           if (mounted) {
-            _updateSyncStatusText("Fetching names: $current/$total pages");
+            _updateSyncStatusText(
+              AppLocalizations.of(context)!.fetchingNamesPages(current, total),
+            );
             if (total > 0) {
               ScraperService.instance.loadingProgress.value =
                   current.toDouble() / total.toDouble();
@@ -195,7 +200,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
 
       if (mounted) {
         _updateSyncStatusText(
-          "Scraping missing repack details...\nThis may take a while.",
+          "${AppLocalizations.of(context)!.scrapingMissingRepackDetails}\n${AppLocalizations.of(context)!.thisMayTakeAWhile}",
         );
         ScraperService.instance.loadingProgress.value = 0.0;
       }
@@ -203,7 +208,9 @@ class _RepackLibraryState extends State<RepackLibrary> {
         onProgress: (current, total) {
           if (mounted) {
             _updateSyncStatusText(
-              "Scraping details: $current/$total missing repacks",
+              AppLocalizations.of(
+                context,
+              )!.scrapingMissingRepackDetailsProgress(current, total),
             );
           }
         },
@@ -214,8 +221,10 @@ class _RepackLibraryState extends State<RepackLibrary> {
           context,
           builder: (context, close) {
             return InfoBar(
-              title: const Text('Success'),
-              content: const Text('Repack library synchronized.'),
+              title: Text(AppLocalizations.of(context)!.success),
+              content: Text(
+                AppLocalizations.of(context)!.repackLibrarySynchronized,
+              ),
               action: IconButton(
                 icon: const Icon(FluentIcons.clear),
                 onPressed: close,
@@ -232,8 +241,10 @@ class _RepackLibraryState extends State<RepackLibrary> {
           context,
           builder: (context, close) {
             return InfoBar(
-              title: const Text('Error'),
-              content: Text('Failed to sync library: $e'),
+              title: Text(AppLocalizations.of(context)!.error),
+              content: Text(
+                AppLocalizations.of(context)!.failedToSyncLibrary(e.toString()),
+              ),
               action: IconButton(
                 icon: const Icon(FluentIcons.clear),
                 onPressed: close,
@@ -247,16 +258,14 @@ class _RepackLibraryState extends State<RepackLibrary> {
       if (mounted) {
         setState(() {
           _isSyncingLibrary = false;
-          _syncStatusText = ""; 
+          _syncStatusText = "";
         });
-        ScraperService.instance.loadingProgress.value =
-            0.0; 
+        ScraperService.instance.loadingProgress.value = 0.0;
         _fullRepackListFromService = List.from(_repackService.everyRepack);
         _performFilteringAndPagination();
       }
     }
   }
-
 
   @override
   void dispose() {
@@ -269,7 +278,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
   @override
   Widget build(BuildContext context) {
     final pageHeader = PageHeader(
-      title: const Text('Repack Library'),
+      title: Text(AppLocalizations.of(context)!.repackLibrary),
       commandBar: CommandBar(
         mainAxisAlignment: MainAxisAlignment.end,
         primaryItems: [
@@ -282,7 +291,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
                       child: ProgressRing(strokeWidth: 2.0),
                     )
                     : const Icon(FluentIcons.sync),
-            label: const Text('Sync Library'),
+            label: Text(AppLocalizations.of(context)!.syncLibrary),
             onPressed: _isSyncingLibrary ? null : _syncRepackLibrary,
           ),
         ],
@@ -300,7 +309,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Syncing Library...',
+                AppLocalizations.of(context)!.syncingLibrary,
                 style: FluentTheme.of(context).typography.subtitle,
               ),
               const SizedBox(height: 8),
@@ -315,7 +324,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
                   if (value > 0 && value <= 1) {
                     return ProgressBar(value: value * 100);
                   }
-                  return const ProgressRing(); 
+                  return const ProgressRing();
                 },
               ),
               ValueListenableBuilder<double>(
@@ -348,8 +357,10 @@ class _RepackLibraryState extends State<RepackLibrary> {
           child: Center(
             child: Text(
               _activeSearchQuery.isEmpty
-                  ? "No repacks found in the library."
-                  : "No repacks found matching '$_activeSearchQuery'.",
+                  ? AppLocalizations.of(context)!.noRepacksFoundInTheLibrary
+                  : AppLocalizations.of(
+                    context,
+                  )!.noRepacksFoundMatchingSearch(_activeSearchQuery),
               style: FluentTheme.of(context).typography.bodyLarge,
             ),
           ),
@@ -388,9 +399,9 @@ class _RepackLibraryState extends State<RepackLibrary> {
 
             if (repackItemHeight <= 0 ||
                 cardWidth <= cardInternalHorizontalMargin) {
-              return const Center(
+              return Center(
                 child: Text(
-                  "The window is too narrow to display items correctly.\nPlease resize the window.",
+                  "${AppLocalizations.of(context)!.theWindowIsTooNarrowToDisplayItemsCorrectly}\n${AppLocalizations.of(context)!.pleaseResizeTheWindow}",
                   textAlign: TextAlign.center,
                 ),
               );
@@ -433,7 +444,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
         children: [
           if (syncProgressWidget != null) syncProgressWidget,
           buildMainContentArea(),
-          if (_isLoadingMore && !_isSyncingLibrary) 
+          if (_isLoadingMore && !_isSyncingLibrary)
             const Padding(padding: EdgeInsets.all(16.0), child: ProgressRing()),
         ],
       ),

@@ -80,7 +80,7 @@ Planned future enhancements include:
 * [X] Removing Windows-specific UI elements from the Android interface.
 * [X] Implementing AppImage builds for Linux distribution.
 * [ ] Checking for updates of repacks.
-* [ ] Implementing app localization.
+* [X] Implementing app localization.
 * [X] Adding automatic installation of repacks.
 * [ ] Adding filtering capabilities for repacks.
 * [ ] Developing a feature to manage installed games.

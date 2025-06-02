@@ -3,6 +3,7 @@ import 'package:fit_flutter_fluent/services/dd_manager.dart';
 import 'package:flutter_download_manager/flutter_download_manager.dart' as fdm;
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Color getStatusColor(BuildContext context, fdm.DownloadStatus status) {
   final theme = FluentTheme.of(context);
@@ -22,20 +23,20 @@ Color getStatusColor(BuildContext context, fdm.DownloadStatus status) {
   }
 }
 
-String getStatusText(fdm.DownloadStatus status) {
+String getStatusText(fdm.DownloadStatus status, BuildContext context) {
   switch (status) {
     case fdm.DownloadStatus.queued:
-      return "Queued";
+      return AppLocalizations.of(context)!.queued;
     case fdm.DownloadStatus.downloading:
-      return "Downloading";
+      return AppLocalizations.of(context)!.downloading;
     case fdm.DownloadStatus.completed:
-      return "Completed";
+      return AppLocalizations.of(context)!.completed;
     case fdm.DownloadStatus.failed:
-      return "Failed";
+      return AppLocalizations.of(context)!.failed;
     case fdm.DownloadStatus.paused:
-      return "Paused";
+      return AppLocalizations.of(context)!.paused;
     case fdm.DownloadStatus.canceled:
-      return "Canceled";
+      return AppLocalizations.of(context)!.canceled;
   }
 }
 
@@ -108,9 +109,12 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
         context,
         builder: (context, close) {
           return InfoBar(
-            title: const Text('No completed groups to clear.'),
+            title: Text(AppLocalizations.of(context)!.noCompletedGroupsToClear),
             severity: InfoBarSeverity.info,
-            action: Button(onPressed: close, child: const Text('Dismiss')),
+            action: Button(
+              onPressed: close,
+              child: Text(AppLocalizations.of(context)!.dismiss),
+            ),
           );
         },
       );
@@ -121,13 +125,15 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
       context: context,
       builder:
           (ctx) => ContentDialog(
-            title: const Text('Confirm Clear'),
+            title: Text(AppLocalizations.of(context)!.confirmClear),
             content: Text(
-              'Are you sure you want to remove ${titlesToRemove.length} completed download group(s)? This will also remove files from disk if they are in dedicated subfolders managed by the app.',
+              AppLocalizations.of(
+                context,
+              )!.confirmRemoveDownloadGroups(titlesToRemove.length),
             ),
             actions: [
               Button(
-                child: const Text('Cancel'),
+                child: Text(AppLocalizations.of(context)!.cancel),
                 onPressed: () => Navigator.pop(ctx, false),
               ),
               FilledButton(
@@ -135,7 +141,7 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
                   backgroundColor: WidgetStatePropertyAll(Colors.red),
                 ),
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Clear Completed'),
+                child: Text(AppLocalizations.of(context)!.clearCompleted),
               ),
             ],
           ),
@@ -149,9 +155,16 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
         context,
         builder: (context, close) {
           return InfoBar(
-            title: Text('${titlesToRemove.length} completed group(s) cleared.'),
+            title: Text(
+              AppLocalizations.of(
+                context,
+              )!.completedGroupsCleared(titlesToRemove.length),
+            ),
             severity: InfoBarSeverity.success,
-            action: Button(onPressed: close, child: const Text('Dismiss')),
+            action: Button(
+              onPressed: close,
+              child: Text(AppLocalizations.of(context)!.dismiss),
+            ),
           );
         },
       );
@@ -165,20 +178,20 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
 
     return ScaffoldPage(
       header: PageHeader(
-        title: const Text('Download Manager'),
+        title: Text(AppLocalizations.of(context)!.downloadManager),
         commandBar: CommandBar(
           mainAxisAlignment: MainAxisAlignment.end,
           primaryItems: [
             CommandBarButton(
               icon: const Icon(FluentIcons.settings),
-              label: const Text('Max Concurrent'),
+              label: Text(AppLocalizations.of(context)!.maxConcurrent),
               onPressed: () {
                 context.go('/settings?section=maxConcurrentDownloads');
               },
             ),
             CommandBarButton(
               icon: const Icon(FluentIcons.clear_selection),
-              label: const Text('Clear Completed'),
+              label: Text(AppLocalizations.of(context)!.clearCompleted),
               onPressed: _clearAllCompletedGroups,
             ),
           ],
@@ -197,12 +210,14 @@ class _DownloadManagerScreenState extends State<DownloadManagerScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'No active downloads.',
+                      AppLocalizations.of(context)!.noActiveDownloads,
                       style: theme.typography.subtitle,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Downloads will appear here once added.',
+                      AppLocalizations.of(
+                        context,
+                      )!.downloadsWillAppearHereOnceAdded,
                       style: theme.typography.body,
                     ),
                   ],
@@ -272,8 +287,15 @@ class _DownloadGroupItem extends StatelessWidget {
                               const SizedBox(height: 4),
                               Text(
                                 progress == 1.0
-                                    ? 'Completed (${tasks.length} files)'
-                                    : 'Overall: ${(progress * 100).toStringAsFixed(0)}% (${tasks.length} files)',
+                                    ? AppLocalizations.of(
+                                      context,
+                                    )!.completedNumberFiles(tasks.length)
+                                    : AppLocalizations.of(
+                                      context,
+                                    )!.overallProgressFilesPercent(
+                                      (progress * 100).toStringAsFixed(0),
+                                      tasks.length,
+                                    ),
                                 style:
                                     FluentTheme.of(context).typography.caption,
                               ),
@@ -283,7 +305,9 @@ class _DownloadGroupItem extends StatelessWidget {
                       )
                     else
                       Text(
-                        'No active tasks or progress unavailable (${tasks.length} files)',
+                        AppLocalizations.of(
+                          context,
+                        )!.noActiveTasks(tasks.length),
                         style: FluentTheme.of(context).typography.caption,
                       ),
                   ],
@@ -291,7 +315,8 @@ class _DownloadGroupItem extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               Tooltip(
-                message: 'Cancel all downloads in this group',
+                message:
+                    AppLocalizations.of(context)!.cancelAllDownloadsInThisGroup,
                 child: IconButton(
                   icon: Icon(FluentIcons.remove_from_trash, color: Colors.red),
                   onPressed: () async {
@@ -299,13 +324,19 @@ class _DownloadGroupItem extends StatelessWidget {
                       context: context,
                       builder:
                           (ctx) => ContentDialog(
-                            title: Text('Cancel Group: $groupTitle?'),
-                            content: const Text(
-                              'Are you sure you want to cancel all downloads in this group and remove them?',
+                            title: Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.cancelGroupName(groupTitle),
+                            ),
+                            content: Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.areYouSureYouWantToCancelAllDownloadsInThisGroupAndRemoveThem,
                             ),
                             actions: [
                               Button(
-                                child: const Text('No'),
+                                child: Text(AppLocalizations.of(context)!.no),
                                 onPressed: () => Navigator.pop(ctx, false),
                               ),
                               FilledButton(
@@ -315,7 +346,9 @@ class _DownloadGroupItem extends StatelessWidget {
                                     Colors.red,
                                   ),
                                 ),
-                                child: const Text('Yes, Cancel Group'),
+                                child: Text(
+                                  AppLocalizations.of(context)!.yesCancelGroup,
+                                ),
                               ),
                             ],
                           ),
@@ -341,13 +374,16 @@ class _DownloadGroupItem extends StatelessWidget {
                 tasks.map((taskData) {
                   final task = taskData['task'] as fdm.DownloadTask?;
                   final fileName =
-                      taskData['fileName'] as String? ?? 'Unknown File';
+                      taskData['fileName'] as String? ??
+                      AppLocalizations.of(context)!.unknownFile;
                   final url = taskData['url'] as String? ?? '';
 
                   if (task == null) {
                     return ListTile(
                       title: Text(fileName),
-                      subtitle: const Text('Error: Task data unavailable'),
+                      subtitle: Text(
+                        AppLocalizations.of(context)!.errorTaskDataUnavailable,
+                      ),
                     );
                   }
                   return _DownloadFileItem(
@@ -415,7 +451,7 @@ class _DownloadFileItem extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        getStatusText(statusValue),
+                        getStatusText(statusValue, context),
                         style: theme.typography.caption?.copyWith(
                           color: theme.inactiveColor,
                         ),
@@ -446,7 +482,7 @@ class _DownloadFileItem extends StatelessWidget {
                       statusValue == fdm.DownloadStatus.queued) {
                     actions.add(
                       Tooltip(
-                        message: 'Pause',
+                        message: AppLocalizations.of(context)!.pause,
                         child: IconButton(
                           icon: const Icon(FluentIcons.pause),
                           onPressed:
@@ -457,7 +493,7 @@ class _DownloadFileItem extends StatelessWidget {
                   } else if (statusValue == fdm.DownloadStatus.paused) {
                     actions.add(
                       Tooltip(
-                        message: 'Resume',
+                        message: AppLocalizations.of(context)!.resume,
                         child: IconButton(
                           icon: const Icon(FluentIcons.play),
                           onPressed:
@@ -472,7 +508,7 @@ class _DownloadFileItem extends StatelessWidget {
                       statusValue != fdm.DownloadStatus.failed) {
                     actions.add(
                       Tooltip(
-                        message: 'Cancel',
+                        message: AppLocalizations.of(context)!.cancel,
                         child: IconButton(
                           icon: Icon(
                             FluentIcons.cancel,
@@ -487,7 +523,7 @@ class _DownloadFileItem extends StatelessWidget {
                       statusValue == fdm.DownloadStatus.canceled) {
                     actions.add(
                       Tooltip(
-                        message: 'Remove from list',
+                        message: AppLocalizations.of(context)!.removeFromList,
                         child: IconButton(
                           icon: Icon(
                             FluentIcons.delete,

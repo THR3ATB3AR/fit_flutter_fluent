@@ -6,6 +6,8 @@ import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:url_launcher/url_launcher.dart'; 
 import 'package:fit_flutter_fluent/services/scraper_service.dart'; 
 import 'package:fit_flutter_fluent/services/repack_service.dart'; 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class RepackDetails extends StatefulWidget {
   final Repack selectedRepack;
@@ -31,8 +33,8 @@ class _RepackDetailsState extends State<RepackDetails> {
   Future<void> _openRepackUrl() async {
     if (_currentRepack.url.isEmpty) {
       _showInfoBar(
-        title: 'Error',
-        content: 'Repack URL is not available.',
+        title: AppLocalizations.of(context)!.error,
+        content: AppLocalizations.of(context)!.repackUrlIsNotAvailable,
         severity: InfoBarSeverity.error,
       );
       return;
@@ -44,22 +46,22 @@ class _RepackDetailsState extends State<RepackDetails> {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
         } catch (e) {
           _showInfoBar(
-            title: 'Error',
-            content: 'Could not launch URL: $e',
+            title: AppLocalizations.of(context)!.error,
+            content: AppLocalizations.of(context)!.couldNotLaunchUrl(e.toString()),
             severity: InfoBarSeverity.error,
           );
         }
       } else {
         _showInfoBar(
-          title: 'Error',
-          content: 'Could not launch $_currentRepack.url',
+          title: AppLocalizations.of(context)!.error,
+          content: AppLocalizations.of(context)!.couldNotLaunch(_currentRepack.url),
           severity: InfoBarSeverity.error,
         );
       }
     } else {
       _showInfoBar(
-        title: 'Error',
-        content: 'Invalid URL format: $_currentRepack.url',
+        title: AppLocalizations.of(context)!.error,
+        content: AppLocalizations.of(context)!.invalidUrlFormat(_currentRepack.url),
         severity: InfoBarSeverity.error,
       );
     }
@@ -92,16 +94,16 @@ class _RepackDetailsState extends State<RepackDetails> {
           _currentRepack = newRepackData;
         });
         _showInfoBar(
-          title: 'Success',
+          title: AppLocalizations.of(context)!.success,
           content:
-              'Details for "${_currentRepack.title}" have been rescraped and updated.',
+              AppLocalizations.of(context)!.detailsHaveBeenRescraped(newRepackData.title),
           severity: InfoBarSeverity.success,
         );
       }
     } catch (e) {
       _showInfoBar(
-        title: 'Error Rescraping',
-        content: 'Failed to rescrape details: $e',
+        title: AppLocalizations.of(context)!.errorRescraping,
+        content: AppLocalizations.of(context)!.failedToRescrapeDetails(e.toString()),
         severity: InfoBarSeverity.error,
       );
     } finally {
@@ -141,7 +143,7 @@ class _RepackDetailsState extends State<RepackDetails> {
         primaryItems: [
           CommandBarButton(
             icon: const Icon(FluentIcons.globe),
-            label: const Text('Open Source Page'),
+            label: Text(AppLocalizations.of(context)!.openSourcePage),
             onPressed: _currentRepack.url.isNotEmpty ? _openRepackUrl : null,
           ),
           CommandBarButton(
@@ -153,7 +155,7 @@ class _RepackDetailsState extends State<RepackDetails> {
                       child: ProgressRing(),
                     )
                     : const Icon(FluentIcons.refresh),
-            label: const Text('Rescrape Details'),
+            label: Text(AppLocalizations.of(context)!.rescrapeDetails),
             onPressed:
                 _isRescrapingDetails || _currentRepack.url.isEmpty
                     ? null
