@@ -10,18 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fit_flutter_fluent/theme.dart';
 import 'package:fit_flutter_fluent/widgets/page.dart';
-
-const List<String> accentColorNames = [
-  'System',
-  'Yellow',
-  'Orange',
-  'Red',
-  'Magenta',
-  'Purple',
-  'Blue',
-  'Teal',
-  'Green',
-];
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 bool get kIsWindowEffectsSupported {
   return !kIsWeb &&
@@ -206,21 +195,20 @@ class _SettingsState extends State<Settings> with PageMixin {
       context: context,
       builder:
           (context) => ContentDialog(
-            title: const Text('Confirm Force Rescrape'),
-            content: const Text(
-              'This will delete ALL locally stored repack data and re-download everything from the source. '
-              'This process can take a very long time and consume significant network data. Are you sure?',
+            title: Text(AppLocalizations.of(context)!.confirmForceRescrape),
+            content: Text(
+              "${AppLocalizations.of(context)!.thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource}\n${AppLocalizations.of(context)!.thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure}",
             ),
             actions: [
               Button(
-                child: const Text('Cancel'),
+                child: Text(AppLocalizations.of(context)!.cancel),
                 onPressed: () => Navigator.pop(context, false),
               ),
               FilledButton(
                 style: ButtonStyle(
                   backgroundColor: WidgetStatePropertyAll(Colors.red.dark),
                 ),
-                child: const Text('Yes, Rescrape All'),
+                child: Text(AppLocalizations.of(context)!.yesRescrapeAll),
                 onPressed: () => Navigator.pop(context, true),
               ),
             ],
@@ -233,7 +221,7 @@ class _SettingsState extends State<Settings> with PageMixin {
     setState(() {
       _isForceRescraping = true;
     });
-    _showForceRescrapeProgressDialog("Starting full data rescrape...");
+    _showForceRescrapeProgressDialog(AppLocalizations.of(context)!.startingFullDataRescrape);
 
     try {
       await ScraperService.instance.forceRescrapeEverything(
@@ -247,6 +235,7 @@ class _SettingsState extends State<Settings> with PageMixin {
             _updateForceRescrapeDialogProgressCallback(progress);
           }
         },
+        context: context
       );
 
       if (mounted) {
@@ -255,8 +244,8 @@ class _SettingsState extends State<Settings> with PageMixin {
           context,
           builder: (context, close) {
             return InfoBar(
-              title: const Text('Success'),
-              content: const Text('All data has been forcefully rescraped.'),
+              title: Text(AppLocalizations.of(context)!.success),
+              content: Text(AppLocalizations.of(context)!.allDataHasBeenForcefullyRescraped),
               action: IconButton(
                 icon: const Icon(FluentIcons.clear),
                 onPressed: close,
@@ -272,13 +261,13 @@ class _SettingsState extends State<Settings> with PageMixin {
       }
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
-        _updateForceRescrapeDialogStatusCallback("Error: $e");
+        _updateForceRescrapeDialogStatusCallback(AppLocalizations.of(context)!.errorMessage(e.toString()));
         displayInfoBar(
           context,
           builder: (context, close) {
             return InfoBar(
-              title: const Text('Error'),
-              content: Text('Failed to force rescrape data: $e'),
+              title: Text(AppLocalizations.of(context)!.error),
+              content: Text(AppLocalizations.of(context)!.failedToForceRescrapeData(e.toString())),
               action: IconButton(
                 icon: const Icon(FluentIcons.clear),
                 onPressed: close,
@@ -305,7 +294,7 @@ class _SettingsState extends State<Settings> with PageMixin {
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return ContentDialog(
-          title: const Text('Force Rescraping Data'),
+          title: Text(AppLocalizations.of(context)!.forceRescrapingData),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setDialogState) {
               _updateForceRescrapeDialogStatusCallback = (newStatus) {
@@ -329,7 +318,7 @@ class _SettingsState extends State<Settings> with PageMixin {
                   ProgressBar(value: _forceRescrapeDialogProgress * 100),
                   const SizedBox(height: 8),
                   Text(
-                    '${(_forceRescrapeDialogProgress * 100).toStringAsFixed(1)}% Complete',
+                    AppLocalizations.of(context)!.percentComplete((_forceRescrapeDialogProgress * 100).toStringAsFixed(1)),
                   ),
                   const SizedBox(height: 16),
                   const Center(child: ProgressRing()),
@@ -350,29 +339,68 @@ class _SettingsState extends State<Settings> with PageMixin {
     const spacer = SizedBox(height: 10.0);
     const bigSpacer = SizedBox(height: 24.0);
 
-    final supportedLocales = FluentLocalizations.supportedLocales;
+    final supportedLocales = AppLocalizations.supportedLocales;
     final currentLocale =
         appTheme.locale ?? Localizations.maybeLocaleOf(context);
 
+    List<String> accentColorNames = [
+      AppLocalizations.of(context)!.system,
+      AppLocalizations.of(context)!.yellow,
+      AppLocalizations.of(context)!.orange,
+      AppLocalizations.of(context)!.red,
+      AppLocalizations.of(context)!.magenta,
+      AppLocalizations.of(context)!.purple,
+      AppLocalizations.of(context)!.blue,
+      AppLocalizations.of(context)!.teal,
+      AppLocalizations.of(context)!.green,
+    ];
+
+    String getUpdateCheckFrequencyText(UpdateCheckFrequency frequency) {
+      switch (frequency) {
+        case UpdateCheckFrequency.daily:
+          return AppLocalizations.of(context)!.daily;
+        case UpdateCheckFrequency.weekly:
+          return AppLocalizations.of(context)!.weekly;
+        case UpdateCheckFrequency.manual:
+          return AppLocalizations.of(context)!.manual;
+        case UpdateCheckFrequency.onStartup:
+          return AppLocalizations.of(context)!.onEveryStartup;
+      }
+    }
+
+    String getThemeModeText(ThemeMode mode) {
+      switch (mode) {
+        case ThemeMode.system:
+          return AppLocalizations.of(context)!.system;
+        case ThemeMode.light:
+          return AppLocalizations.of(context)!.light;
+        case ThemeMode.dark:
+          return AppLocalizations.of(context)!.dark;
+      }
+    }
+
     return ScaffoldPage.scrollable(
-      header: const PageHeader(title: Text('Settings')),
+      header: PageHeader(title: Text(AppLocalizations.of(context)!.settings)),
       scrollController: _scrollController,
       children: [
-        Text('Downloads & Installation', style: FluentTheme.of(context).typography.title),
+        Text(
+          AppLocalizations.of(context)!.downloadsInstallation,
+          style: FluentTheme.of(context).typography.title,
+        ),
         spacer,
         const Divider(
           style: DividerThemeData(horizontalMargin: EdgeInsets.zero),
         ),
         _buildSectionWrapper(_downloadPathKey, [
           Text(
-            'Default Download Path',
+            AppLocalizations.of(context)!.defaultDownloadPath,
             style: FluentTheme.of(context).typography.subtitle,
           ),
           spacer,
           Align(
             alignment: Alignment.centerLeft,
             child: TextBox(
-              placeholder: 'Default Download Path',
+              placeholder: AppLocalizations.of(context)!.defaultDownloadPath,
               controller: TextEditingController(text: appTheme.downloadPath),
               suffix: IconButton(
                 icon: const Icon(FluentIcons.folder_open),
@@ -389,7 +417,7 @@ class _SettingsState extends State<Settings> with PageMixin {
         ], addBiggerSpacerAfter: false),
         _buildSectionWrapper(_maxConcurrentDownloadsKey, [
           Text(
-            'Max Concurrent Downloads',
+            AppLocalizations.of(context)!.maxConcurrentDownloads,
             style: FluentTheme.of(context).typography.subtitle,
           ),
           spacer,
@@ -413,13 +441,13 @@ class _SettingsState extends State<Settings> with PageMixin {
         ], addBiggerSpacerAfter: false),
         _buildSectionWrapper(_autoInstallSettingsKey, [
           Text(
-            'Automatic Installation',
+            AppLocalizations.of(context)!.automaticInstallation,
             style: FluentTheme.of(context).typography.subtitle,
           ),
           spacer,
           Row(
             children: [
-              const Text('Enable Auto-Install after download:'),
+              Text(AppLocalizations.of(context)!.enableAutoInstallAfterDownload),
               const SizedBox(width: 10),
               ToggleSwitch(
                 checked: appTheme.autoInstall,
@@ -431,44 +459,50 @@ class _SettingsState extends State<Settings> with PageMixin {
           ),
           spacer,
           Text(
-            'Default Installation Path',
-            style: FluentTheme.of(context).typography.caption, // Smaller text for label
+            AppLocalizations.of(context)!.defaultInstallationPath,
+            style:
+                FluentTheme.of(
+                  context,
+                ).typography.caption, // Smaller text for label
           ),
           const SizedBox(height: 4),
           Align(
             alignment: Alignment.centerLeft,
             child: TextBox(
-              placeholder: 'Default Install Path',
+              placeholder: AppLocalizations.of(context)!.defaultInstallPath,
               controller: TextEditingController(text: appTheme.installPath),
-              enabled: appTheme.autoInstall, 
+              enabled: appTheme.autoInstall,
               suffix: IconButton(
                 icon: const Icon(FluentIcons.folder_open),
-                onPressed: appTheme.autoInstall 
-                  ? () async {
-                      final path = await FilePicker.platform.getDirectoryPath();
-                      if (path != null) {
-                        appTheme.installPath = path;
-                      }
-                    }
-                  : null,
+                onPressed:
+                    appTheme.autoInstall
+                        ? () async {
+                          final path =
+                              await FilePicker.platform.getDirectoryPath();
+                          if (path != null) {
+                            appTheme.installPath = path;
+                          }
+                        }
+                        : null,
               ),
             ),
           ),
           spacer,
           InfoLabel(
-            label: 'When enabled, completed repacks will attempt to install to the specified path.',
+            label:
+                AppLocalizations.of(context)!.whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath,
             isHeader: false,
           ),
         ], addBiggerSpacerAfter: false),
         bigSpacer,
-        Text('Appearance', style: FluentTheme.of(context).typography.title),
+        Text(AppLocalizations.of(context)!.appearance, style: FluentTheme.of(context).typography.title),
         spacer,
         const Divider(
           style: DividerThemeData(horizontalMargin: EdgeInsets.zero),
         ),
         _buildSectionWrapper(_themeModeKey, [
           Text(
-            'Theme mode',
+            AppLocalizations.of(context)!.themeMode,
             style: FluentTheme.of(context).typography.subtitle,
           ),
           spacer,
@@ -480,7 +514,8 @@ class _SettingsState extends State<Settings> with PageMixin {
                   ThemeMode.values.map((mode) {
                     return ComboBoxItem(
                       value: mode,
-                      child: Text(mode.toString().split('.').last.uppercaseFirst()),
+                      child: Text(
+                        getThemeModeText(mode),)
                     );
                   }).toList(),
               onChanged: (mode) {
@@ -488,7 +523,8 @@ class _SettingsState extends State<Settings> with PageMixin {
                   appTheme.mode = mode;
                   if (kIsWindowEffectsSupported) {
                     // Ensure context is available and mounted for setEffect
-                    if (mounted) appTheme.setEffect(appTheme.windowEffect, context);
+                    if (mounted)
+                      appTheme.setEffect(appTheme.windowEffect, context);
                   }
                 }
               },
@@ -497,7 +533,7 @@ class _SettingsState extends State<Settings> with PageMixin {
         ], addBiggerSpacerAfter: false),
         _buildSectionWrapper(_paneDisplayModeKey, [
           Text(
-            'Navigation Pane Display Mode',
+            AppLocalizations.of(context)!.navigationPaneDisplayMode,
             style: FluentTheme.of(context).typography.subtitle,
           ),
           spacer,
@@ -509,7 +545,9 @@ class _SettingsState extends State<Settings> with PageMixin {
                   PaneDisplayMode.values.map((mode) {
                     return ComboBoxItem(
                       value: mode,
-                      child: Text(mode.toString().split('.').last.uppercaseFirst()),
+                      child: Text(
+                        mode.toString().split('.').last.uppercaseFirst(),
+                      ),
                     );
                   }).toList(),
               onChanged: (mode) {
@@ -520,7 +558,7 @@ class _SettingsState extends State<Settings> with PageMixin {
         ], addBiggerSpacerAfter: false),
         _buildSectionWrapper(_accentColorKey, [
           Text(
-            'Accent Color',
+            AppLocalizations.of(context)!.accentColor,
             style: FluentTheme.of(context).typography.subtitle,
           ),
           spacer,
@@ -550,7 +588,7 @@ class _SettingsState extends State<Settings> with PageMixin {
         if (kIsWindowEffectsSupported)
           _buildSectionWrapper(_windowTransparencyKey, [
             Text(
-              'Window Transparency',
+              AppLocalizations.of(context)!.windowTransparency,
               style: FluentTheme.of(context).typography.subtitle,
             ),
             spacer,
@@ -562,20 +600,22 @@ class _SettingsState extends State<Settings> with PageMixin {
                     currentWindowEffects.map((effect) {
                       return ComboBoxItem(
                         value: effect,
-                        child: Text(effect.toString().split('.').last.uppercaseFirst()),
+                        child: Text(
+                          effect.toString().split('.').last.uppercaseFirst(),
+                        ),
                       );
                     }).toList(),
                 onChanged: (effect) {
                   if (effect != null) {
                     appTheme.windowEffect = effect;
-                     if (mounted) appTheme.setEffect(effect, context);
+                    if (mounted) appTheme.setEffect(effect, context);
                   }
                 },
               ),
             ),
           ], addBiggerSpacerAfter: false),
         _buildSectionWrapper(_localeKey, [
-          Text('Locale', style: FluentTheme.of(context).typography.subtitle),
+          Text(AppLocalizations.of(context)!.local, style: FluentTheme.of(context).typography.subtitle),
           spacer,
           Align(
             alignment: Alignment.centerLeft,
@@ -583,7 +623,10 @@ class _SettingsState extends State<Settings> with PageMixin {
               value: currentLocale,
               items:
                   supportedLocales.map((locale) {
-                    return ComboBoxItem(value: locale, child: Text('$locale'.toUpperCase()));
+                    return ComboBoxItem(
+                      value: locale,
+                      child: Text('$locale'.toUpperCase()),
+                    );
                   }).toList(),
               onChanged: (locale) {
                 if (locale != null) {
@@ -595,7 +638,7 @@ class _SettingsState extends State<Settings> with PageMixin {
         ], addBiggerSpacerAfter: false),
         bigSpacer,
         Text(
-          'Application Updates',
+          AppLocalizations.of(context)!.applicationUpdates,
           style: FluentTheme.of(context).typography.title,
         ),
         spacer,
@@ -604,7 +647,7 @@ class _SettingsState extends State<Settings> with PageMixin {
         ),
         _buildSectionWrapper(_updateSettingsKey, [
           Text(
-            'Update Check Frequency',
+            AppLocalizations.of(context)!.updateCheckFrequency,
             style: FluentTheme.of(context).typography.subtitle,
           ),
           spacer,
@@ -614,13 +657,7 @@ class _SettingsState extends State<Settings> with PageMixin {
               value: updateProvider.updateCheckFrequency,
               items:
                   UpdateCheckFrequency.values.map((freq) {
-                    String freqText = freq.toString().split('.').last;
-                    if (freqText == "onStartup") {
-                      freqText = "On Every Startup";
-                    } else {
-                      freqText =
-                          freqText[0].toUpperCase() + freqText.substring(1);
-                    }
+                    String freqText = getUpdateCheckFrequencyText(freq);
                     return ComboBoxItem(value: freq, child: Text(freqText));
                   }).toList(),
               onChanged: (freq) {
@@ -632,32 +669,29 @@ class _SettingsState extends State<Settings> with PageMixin {
           ),
           spacer,
           Text(
-            'Current App Version: ${updateProvider.currentAppVersion ?? "Loading..."}',
+            '${AppLocalizations.of(context)!.currentAppVersion} ${updateProvider.currentAppVersion ?? AppLocalizations.of(context)!.loading}',
           ),
           if (updateProvider.latestReleaseInfo != null &&
               updateProvider.updateAvailable)
             Text(
-              'Latest Available Version: ${updateProvider.latestReleaseInfo!['tag_name']}',
+              AppLocalizations.of(context)!.latestAvailableVersion(updateProvider.latestReleaseInfo!['tag_name'].toString()),
             )
           else if (updateProvider.latestReleaseInfo != null &&
               !updateProvider.updateAvailable &&
               !updateProvider.isCheckingForUpdates)
             Text(
-              'You are on the latest version (${updateProvider.currentAppVersion ?? ""})',
+              '${AppLocalizations.of(context)!.youAreOnTheLatestVersion} (${updateProvider.currentAppVersion ?? ""})',
             )
           else if (updateProvider.isCheckingForUpdates)
-            const Text('Latest Available Version: Checking...')
+            Text('${AppLocalizations.of(context)!.latestAvailableVersion} ${AppLocalizations.of(context)!.checking}')
           else if (updateProvider.errorMessage != null &&
-              updateProvider.errorMessage!.contains(
-                "latest version",
-              ))
-            Text('Latest Available Version: ${updateProvider.errorMessage}')
+              updateProvider.errorMessage!.contains("latest version"))
+            Text('${AppLocalizations.of(context)!.latestAvailableVersion}  ${updateProvider.errorMessage}')
           else if (updateProvider.lastUpdateCheckTimestamp == 0 &&
               !updateProvider.isCheckingForUpdates)
-            const Text('Latest Available Version: Not checked yet.')
-          else if (!updateProvider
-              .isCheckingForUpdates)
-            const Text('Latest Available Version: Check to see.'),
+            Text('${AppLocalizations.of(context)!.latestAvailableVersion} ${AppLocalizations.of(context)!.notCheckedYet}')
+          else if (!updateProvider.isCheckingForUpdates)
+            Text('${AppLocalizations.of(context)!.latestAvailableVersion} ${AppLocalizations.of(context)!.checkToSee}'),
 
           if (updateProvider.errorMessage != null &&
               !updateProvider.errorMessage!.contains("latest version"))
@@ -672,10 +706,10 @@ class _SettingsState extends State<Settings> with PageMixin {
                   updateProvider.ignoredVersion)
             Row(
               children: [
-                const Text('You have ignored this update.'),
+                Text(AppLocalizations.of(context)!.youHaveIgnoredThisUpdate),
                 const SizedBox(width: 8),
                 Button(
-                  child: const Text('Unignore & Check Again'),
+                  child: Text(AppLocalizations.of(context)!.unignoreCheckAgain),
                   onPressed: () {
                     updateProvider.clearIgnoredVersion();
                     updateProvider.checkForUpdates(
@@ -699,24 +733,24 @@ class _SettingsState extends State<Settings> with PageMixin {
                 updateProvider.isCheckingForUpdates
                     ? Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        SizedBox(
+                      children: [
+                        const SizedBox(
                           width: 12,
                           height: 12,
                           child: ProgressRing(strokeWidth: 1.5),
                         ),
-                        SizedBox(width: 8),
-                        Text('Checking...'),
+                        const SizedBox(width: 8),
+                        Text(AppLocalizations.of(context)!.checking),
                       ],
                     )
-                    : const Text('Check for Updates Now'),
+                    : Text(AppLocalizations.of(context)!.checkForUpdatesNow),
           ),
           if (updateProvider.updateAvailable &&
               updateProvider.latestReleaseInfo?['tag_name'] !=
                   updateProvider.ignoredVersion) ...[
             spacer,
             Text(
-              'An update to version ${updateProvider.latestReleaseInfo!['tag_name']} is available.',
+              AppLocalizations.of(context)!.updateToVersionIsAvaible(updateProvider.latestReleaseInfo!['tag_name'].toString()),
               style: FluentTheme.of(context).typography.bodyStrong,
             ),
             spacer,
@@ -724,16 +758,18 @@ class _SettingsState extends State<Settings> with PageMixin {
               children: [
                 FilledButton(
                   style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(Colors.green.lighter),
+                    backgroundColor: WidgetStatePropertyAll(
+                      Colors.green.lighter,
+                    ),
                   ),
                   onPressed: () {
                     updateProvider.downloadAndInstallUpdate(context);
                   },
-                  child: const Text('Download and Install Update'),
+                  child: Text(AppLocalizations.of(context)!.downloadAndInstallUpdate),
                 ),
                 const SizedBox(width: 10),
                 HyperlinkButton(
-                  child: const Text('View Release Page'),
+                  child: Text(AppLocalizations.of(context)!.viewReleasePage),
                   onPressed: () => updateProvider.openReleasePage(),
                 ),
               ],
@@ -744,7 +780,7 @@ class _SettingsState extends State<Settings> with PageMixin {
                     .isNotEmpty) ...[
               spacer,
               Expander(
-                header: const Text('View Release Notes'),
+                header: Text(AppLocalizations.of(context)!.viewReleaseNotes),
                 content: ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 200),
                   child: SingleChildScrollView(
@@ -758,7 +794,7 @@ class _SettingsState extends State<Settings> with PageMixin {
           ],
         ], addBiggerSpacerAfter: false),
         Text(
-          'Data Management',
+          AppLocalizations.of(context)!.dataManagement,
           style: FluentTheme.of(context).typography.title,
         ),
         spacer,
@@ -767,13 +803,12 @@ class _SettingsState extends State<Settings> with PageMixin {
         ),
         _buildSectionWrapper(_dataManagementKey, [
           Text(
-            'Force Rescrape All Data',
+            AppLocalizations.of(context)!.forceRescrapeAllData,
             style: FluentTheme.of(context).typography.subtitle,
           ),
           spacer,
           Text(
-            'This will delete ALL locally stored repack data and re-download everything from the source. '
-            'Warning: This process can take a very long time and consume significant network data. Use with caution.',
+            '${AppLocalizations.of(context)!.thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource}\n${AppLocalizations.of(context)!.warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution}',
             style: FluentTheme.of(context).typography.body,
           ),
           spacer,
@@ -789,17 +824,17 @@ class _SettingsState extends State<Settings> with PageMixin {
                 _isForceRescraping
                     ? Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        SizedBox(
+                      children: [
+                        const SizedBox(
                           width: 16,
                           height: 16,
                           child: ProgressRing(strokeWidth: 2.0),
                         ),
-                        SizedBox(width: 12),
-                        Text('Rescraping... See Dialog'),
+                        const SizedBox(width: 12),
+                        Text(AppLocalizations.of(context)!.rescrapingSeeDialog),
                       ],
                     )
-                    : const Text('Force Rescrape All Data Now'),
+                    :  Text(AppLocalizations.of(context)!.forceRescrapeAllDataNow),
           ),
         ], addBiggerSpacerAfter: false),
       ],

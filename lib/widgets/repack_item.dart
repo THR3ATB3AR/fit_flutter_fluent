@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' as m;
 import 'package:fit_flutter_fluent/data/repack.dart';
 
 class RepackItem extends StatelessWidget {
@@ -10,15 +11,18 @@ class RepackItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8.0),
-        child: CachedNetworkImage(
-          imageUrl: repack.cover,
-          fit: BoxFit.cover,
-          width: itemHeight * 0.65,
+    return Tooltip(
+      message: repack.title,
+      child: m.Card(
+        margin: const EdgeInsets.all(8.0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.0),
+          child: CachedNetworkImage(
+            imageUrl: repack.cover,
+            fit: BoxFit.cover,
+            width: itemHeight * 0.65,
+          ),
         ),
       ),
     );

@@ -1,38 +1,35 @@
 import 'dart:io';
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fit_flutter_fluent/services/repack_service.dart';
-import 'package:flutter/foundation.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/dom.dart' as dom;
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ScraperService {
   ScraperService._privateConstructor();
   static final ScraperService _instance = ScraperService._privateConstructor();
   static ScraperService get instance => _instance;
 
-  bool isRescraping = false; // General lock for any major scraping operation
+  bool isRescraping = false;
   final RepackService _repackService = RepackService.instance;
-  final ValueNotifier<double> loadingProgress = ValueNotifier<double>(
-    0.0,
-  ); // 0.0 to 1.0
+  final ValueNotifier<double> loadingProgress = ValueNotifier<double>(0.0);
 
-  // Renamed from rescrapeNewRepacks for clarity
   Future<void> _scrapeAndSaveNewRepacks({
     Function(int, int)? onProgress,
   }) async {
-    _repackService.newRepacks.clear(); // Clear in-memory list first
+    _repackService.newRepacks.clear();
     _repackService.newRepacks = await scrapeNewRepacks(
       onProgress: onProgress ?? (i, e) {},
     );
     await _repackService.saveNewRepackList();
   }
 
-  // Renamed from rescrapePopularRepacks for clarity
   Future<void> _scrapeAndSavePopularRepacks({
     Function(int, int)? onProgress,
   }) async {
-    _repackService.popularRepacks.clear(); // Clear in-memory list first
+    _repackService.popularRepacks.clear();
     _repackService.popularRepacks = await scrapePopularRepacks(
       onProgress: onProgress ?? (i, e) {},
     );
@@ -45,14 +42,14 @@ class ScraperService {
       return;
     }
     isRescraping = true;
-    loadingProgress.value = 0.0; // Reset progress
+    loadingProgress.value = 0.0;
 
     try {
       debugPrint("Rescraping new repacks...");
       await _scrapeAndSaveNewRepacks(
         onProgress: (current, total) {
           if (total > 0) {
-            loadingProgress.value = (current / total) * 0.5; // 50% for new
+            loadingProgress.value = (current / total) * 0.5;
           }
         },
       );
@@ -62,25 +59,21 @@ class ScraperService {
       await _scrapeAndSavePopularRepacks(
         onProgress: (current, total) {
           if (total > 0) {
-            loadingProgress.value =
-                0.5 + (current / total) * 0.5; // 50% for popular
+            loadingProgress.value = 0.5 + (current / total) * 0.5;
           }
         },
       );
       debugPrint("Popular repacks rescraped and saved.");
-
-      // _repackService.notifyListeners(); // Individual save methods already notify
     } catch (e) {
       debugPrint("Error during rescrapeNewAndPopularRepacks: $e");
       rethrow;
     } finally {
       isRescraping = false;
-      loadingProgress.value = 0.0; // Reset progress fully
+      loadingProgress.value = 0.0;
     }
   }
 
   Future<void> rescrapeAllRepacksNames() async {
-    // This is if only names are needed separately
     if (isRescraping) return;
     isRescraping = true;
     loadingProgress.value = 0.0;
@@ -103,7 +96,6 @@ class ScraperService {
       final response = await http.head(Uri.parse(url));
       return response.statusCode == 200;
     } catch (e) {
-      // debugPrint("Failed to check image URL $url: $e");
       return false;
     }
   }
@@ -124,7 +116,6 @@ class ScraperService {
   }
 
   Future<List<Repack>> scrapeEveryRepack({
-    // This scrapes all based on allRepacksNames
     required Function(int, int) onProgress,
   }) async {
     List<Repack> repacks = [];
@@ -138,12 +129,7 @@ class ScraperService {
         repacks.add(repack);
       } catch (e) {
         debugPrint('Failed to scrape repack: ${entry.key}, error: $e');
-        // Optionally add to failedRepacks here too, if this func is used standalone
-        // await _repackService.saveFailedRepack(entry.key, entry.value);
       }
-      // loadingProgress.value is managed by forceRescrapeEverything if called from there
-      // If called standalone, it should update loadingProgress.value
-      // For now, assume it's part of a larger flow or the caller manages global progress
       onProgress(i + 1, totalToScrape);
     }
     return repacks;
@@ -154,9 +140,8 @@ class ScraperService {
         _repackService.everyRepack.map((repack) => repack.url).toSet();
     final allRepackNamesCopy = Map<String, String>.from(
       _repackService.allRepacksNames,
-    ); // Copy for iteration safety
+    );
 
-    // Filter out already scraped URLs and URLs present in failedRepacks
     final Set<String> urlsToPotentiallyScrape =
         allRepackNamesCopy.values.toSet();
     urlsToPotentiallyScrape.removeAll(everyRepackUrls);
@@ -169,15 +154,14 @@ class ScraperService {
     int totalMissing = missingRepackUrls.length;
     if (totalMissing == 0) {
       debugPrint("No missing repacks to scrape.");
-      loadingProgress.value = 1.0; // Indicate completion
+      loadingProgress.value = 1.0;
       onProgress?.call(0, 0);
-      _repackService
-          .notifyListeners(); // Ensure UI updates if nothing was to scrape
+      _repackService.notifyListeners();
       return;
     }
 
     debugPrint("Found $totalMissing missing repacks to scrape.");
-    loadingProgress.value = 0.0; // Reset for this specific operation
+    loadingProgress.value = 0.0;
 
     for (int i = 0; i < totalMissing; i++) {
       final url = missingRepackUrls[i];
@@ -190,26 +174,24 @@ class ScraperService {
               .key;
       try {
         final repack = await scrapeRepackFromSearch(url);
-        // Add to in-memory list before saving, ensure no duplicates if called multiple times
         if (!_repackService.everyRepack.any((r) => r.url == repack.url)) {
           _repackService.everyRepack.add(repack);
-          await _repackService.saveSingleEveryRepack(
-            repack,
-          ); // This also notifies
+          await _repackService.saveSingleEveryRepack(repack);
         }
       } catch (e) {
         debugPrint('Failed to scrape repack: $url ($title), error: $e');
-        await _repackService.saveFailedRepack(title, url); // This also notifies
+        await _repackService.saveFailedRepack(title, url);
       }
       if (totalMissing > 0) loadingProgress.value = (i + 1) / totalMissing;
       onProgress?.call(i + 1, totalMissing);
     }
-    await _repackService
-        .deleteFailedRepacksFromAllRepackNames(); // This also notifies
+    await _repackService.deleteFailedRepacksFromAllRepackNames();
     _repackService.everyRepack.sort((a, b) => a.title.compareTo(b.title));
-    _repackService.notifyListeners(); // Final notification for sort
-    debugPrint('scrapeMissingRepacks finished. Scraped/Attempted: $totalMissing');
-    if (totalMissing > 0) loadingProgress.value = 1.0; // Mark as complete
+    _repackService.notifyListeners();
+    debugPrint(
+      'scrapeMissingRepacks finished. Scraped/Attempted: $totalMissing',
+    );
+    if (totalMissing > 0) loadingProgress.value = 1.0;
   }
 
   Future<Map<String, String>> scrapeAllRepacksNames({
@@ -224,17 +206,13 @@ class ScraperService {
     );
 
     if (pageLinks.isEmpty) {
-      // Handle case where site structure might change or no pagination
       debugPrint(
         "Warning: Could not find pagination for all repacks names. Scraping first page only.",
       );
-      // Try to scrape current page if no paginator
       final titles =
           html.querySelectorAll('ul.lcp_catlist > li > a').map((element) {
             final title = element.innerHtml.trim();
-            final index = title.indexOf(
-              RegExp(r'[–+]'),
-            ); // Using RegExp for robustness
+            final index = title.indexOf(RegExp(r'[–+]'));
             return index != -1 ? title.substring(0, index).trim() : title;
           }).toList();
       final links =
@@ -245,7 +223,7 @@ class ScraperService {
       for (int j = 0; j < titles.length; j++) {
         repacks[titles[j]] = links[j];
       }
-      onProgress(1, 1); // Indicate one page processed
+      onProgress(1, 1);
       return repacks;
     }
 
@@ -254,7 +232,7 @@ class ScraperService {
             .map(
               (element) => int.tryParse(element.attributes['title'] ?? '') ?? 0,
             )
-            .where((p) => p > 0) // Filter out non-numeric or zero titles
+            .where((p) => p > 0)
             .toList();
 
     int totalPages =
@@ -284,7 +262,6 @@ class ScraperService {
       for (int j = 0; j < titles.length; j++) {
         repacks[titles[j]] = links[j];
       }
-      // loadingProgress.value is managed by caller like forceRescrapeEverything
       onProgress(i, totalPages);
     }
     return repacks;
@@ -304,10 +281,9 @@ class ScraperService {
   }
 
   Future<List<Repack>> scrapeNewRepacks({
-    // Returns list, does not save
     required Function(int, int) onProgress,
   }) async {
-    int pagesToScrape = 2; // Usually 2 pages for "new"
+    int pagesToScrape = 2;
     List<Repack> repacks = [];
     for (int i = 0; i < pagesToScrape; i++) {
       try {
@@ -320,14 +296,12 @@ class ScraperService {
           'article.category-lossless-repack',
         );
         if (articles.isEmpty && i == 0) {
-          // If first page has no articles, something is wrong or no new repacks
           debugPrint(
             "No articles found on the first page of new repacks. Stopping scrape for new repacks.",
           );
           break;
         }
         if (articles.isEmpty) {
-          // If subsequent page is empty, means no more new repacks
           break;
         }
         for (final article in articles) {
@@ -336,15 +310,13 @@ class ScraperService {
         onProgress(i + 1, pagesToScrape);
       } catch (e) {
         debugPrint("Error scraping new repacks page ${i + 1}: $e");
-        // Decide if to continue or rethrow. For new/popular, might be okay to skip a page.
-        if (i == 0) rethrow; // If first page fails, it's a bigger issue
+        if (i == 0) rethrow;
       }
     }
     return repacks;
   }
 
   Future<List<Repack>> scrapePopularRepacks({
-    // Returns list, does not save
     required Function(int, int) onProgress,
   }) async {
     List<Repack> repacks = [];
@@ -360,7 +332,7 @@ class ScraperService {
               'article > div.entry-content > div.jetpack_top_posts_widget > div.widgets-grid-layout > div.widget-grid-view-image > a',
             )
             .map((element) => element.attributes['href']?.trim())
-            .whereType<String>() // Filter out nulls
+            .whereType<String>()
             .toList();
 
     if (individualRepackPageUrls.isEmpty) {
@@ -407,10 +379,6 @@ class ScraperService {
   }
 
   Repack scrapeRepack(dom.Element article, {String url = ''}) {
-    // This is the existing scraping logic, not changing it per instructions.
-    // However, it's prone to errors if site structure changes.
-    // Minimal safety checks can be added if absolutely necessary without altering main logic.
-
     dom.Document html = dom.Document.html(article.outerHtml);
     final List<dom.Element> h3Elements = html.querySelectorAll(
       'div.entry-content h3',
@@ -456,7 +424,7 @@ class ScraperService {
     try {
       releaseDate = DateFormat('dd/MM/yyyy').parse(dateString);
     } catch (e) {
-      releaseDate = DateTime.now(); // Fallback
+      releaseDate = DateTime.now();
     }
 
     final coverContent = repackSections[0]['content'] ?? "";
@@ -466,7 +434,7 @@ class ScraperService {
               coverContent.indexOf('src="') + 5,
               coverContent.indexOf('"', coverContent.indexOf('src="') + 5),
             )
-            : 'https://github.com/THR3ATB3AR/fit_flutter_assets/blob/main/noposter.png?raw=true'; // Fallback cover
+            : 'https://github.com/THR3ATB3AR/fit_flutter_assets/blob/main/noposter.png?raw=true';
 
     final dom.Element? infoElement = html.querySelector('div.entry-content p');
     String genres = 'N/A';
@@ -478,14 +446,14 @@ class ScraperService {
     if (infoElement != null) {
       Map<String, String> infoMap = infoElement.innerHtml
           .split('<br>\n')
-          .where((s) => s.contains(':')) // Ensure there's a colon
+          .where((s) => s.contains(':'))
           .map((element) {
             final parts = element.split(':');
             final key = parts[0].trim().toLowerCase();
             final value =
                 parts
                     .sublist(1)
-                    .join(':') // Handle colons in value
+                    .join(':')
                     .replaceAll('<strong>', '')
                     .replaceAll('</strong>', '')
                     .trim();
@@ -624,15 +592,13 @@ class ScraperService {
       try {
         final response = await http
             .get(url)
-            .timeout(const Duration(seconds: 30)); // Added timeout
+            .timeout(const Duration(seconds: 30));
         if (response.statusCode == 200) {
           return response;
         } else if (response.statusCode == 404 && attempt < retries - 1) {
           debugPrint("Got 404 for $url, retrying (${attempt + 1}/$retries)...");
-          await Future.delayed(
-            Duration(seconds: 2 + attempt * 2),
-          ); // Exponential backoff
-          continue; // Retry on 404 as well
+          await Future.delayed(Duration(seconds: 2 + attempt * 2));
+          continue;
         } else {
           throw http.ClientException(
             'Failed to load data: ${response.statusCode} from $url',
@@ -651,7 +617,6 @@ class ScraperService {
         );
         await Future.delayed(Duration(seconds: 2 + attempt * 2));
       } catch (e) {
-        // Catch other errors like TimeoutException
         if (attempt == retries - 1) rethrow;
         debugPrint(
           "Generic error for $url: $e. Retrying (${attempt + 1}/$retries)...",
@@ -664,103 +629,127 @@ class ScraperService {
     );
   }
 
-  // New function for settings page
- Future<void> forceRescrapeEverything({
+  Future<void> forceRescrapeEverything({
     required Function(String status) onStatusUpdate,
     required Function(double progress) onProgressUpdate,
+    required BuildContext context,
   }) async {
     if (isRescraping) {
-      onStatusUpdate("Another rescraping process is already running.");
+      onStatusUpdate(
+        AppLocalizations.of(context)!.anotherRescrapingProcessIsAlreadyRunning,
+      );
       return;
     }
     isRescraping = true;
-    loadingProgress.value = 0.0; // Global progress reset
+    loadingProgress.value = 0.0;
 
     try {
-      onStatusUpdate("Clearing all existing data...");
+      onStatusUpdate(AppLocalizations.of(context)!.clearingAllExistingData);
       onProgressUpdate(0.0);
       await _repackService.forceClearAllData();
-      onProgressUpdate(0.05); // 5% for clearing
+      onProgressUpdate(0.05);
 
-      onStatusUpdate("Scraping all repack names (Phase 1/4)...");
+      onStatusUpdate(
+        AppLocalizations.of(context)!.scrapingAllRepackNamesPhase1,
+      );
       _repackService.allRepacksNames = await scrapeAllRepacksNames(
         onProgress: (current, total) {
           if (total > 0) {
-            onProgressUpdate(
-              0.05 + (current / total) * 0.20,
-            ); // Names: 20% (total 25%)
-            onStatusUpdate("Scraping all repack names (Phase 1/4): Page $current of $total");
+            onProgressUpdate(0.05 + (current / total) * 0.20);
+            onStatusUpdate(
+              AppLocalizations.of(
+                context,
+              )!.scrapingAllRepackNamesPhase1Progress(current, total),
+            );
           }
         },
       );
       await _repackService.saveAllRepackList();
       onStatusUpdate(
-        "All repack names scraped. (${_repackService.allRepacksNames.length} names found) (Phase 1/4 Complete)",
+        AppLocalizations.of(
+          context,
+        )!.allRepackNamesScrapedPhase1(_repackService.allRepacksNames.length),
       );
       onProgressUpdate(0.25);
 
       onStatusUpdate(
-        "Scraping details for every repack (Phase 2/4 - Longest Phase)...",
+        AppLocalizations.of(
+          context,
+        )!.scrapingDetailsForEveryRepackPhase2LongestPhase,
       );
       _repackService.everyRepack = await scrapeEveryRepack(
         onProgress: (current, total) {
           if (total > 0) {
-            onProgressUpdate(
-              0.25 + (current / total) * 0.50,
-            ); // Details: 50% (total 75%)
-            onStatusUpdate("Scraping details for every repack (Phase 2/4): Repack $current of $total");
+            onProgressUpdate(0.25 + (current / total) * 0.50);
+            onStatusUpdate(
+              AppLocalizations.of(
+                context,
+              )!.scrapingDetailsForEveryRepackPhase2Progress(current, total),
+            );
           }
         },
       );
       await _repackService.saveEveryRepackList();
       onStatusUpdate(
-        "All repack details scraped. (${_repackService.everyRepack.length} repacks processed) (Phase 2/4 Complete)",
+        AppLocalizations.of(
+          context,
+        )!.allRepackDetailsScrapedPhase2(_repackService.everyRepack.length),
       );
       onProgressUpdate(0.75);
 
-      onStatusUpdate("Rescraping new repacks (Phase 3/4)...");
+      onStatusUpdate(AppLocalizations.of(context)!.rescrapingNewRepacksPhase3);
       await _scrapeAndSaveNewRepacks(
         onProgress: (current, total) {
           if (total > 0) {
-            onProgressUpdate(
-              0.75 + (current / total) * 0.10,
-            ); // New: 10% (total 85%)
-            onStatusUpdate("Rescraping new repacks (Phase 3/4): Page $current of $total");
+            onProgressUpdate(0.75 + (current / total) * 0.10);
+            onStatusUpdate(
+              AppLocalizations.of(
+                context,
+              )!.rescrapingNewRepacksPhase3Progress(current, total),
+            );
           }
         },
       );
-       onStatusUpdate("New repacks rescraped. (Phase 3/4 Complete)");
-       onProgressUpdate(0.85);
+      onStatusUpdate(
+        AppLocalizations.of(context)!.newRepacksRescrapedPhase3Complete,
+      );
+      onProgressUpdate(0.85);
 
-
-      onStatusUpdate("Rescraping popular repacks (Phase 4/4)...");
+      onStatusUpdate(
+        AppLocalizations.of(context)!.rescrapingPopularRepacksPhase4,
+      );
       await _scrapeAndSavePopularRepacks(
         onProgress: (current, total) {
           if (total > 0) {
-            onProgressUpdate(
-              0.85 + (current / total) * 0.10,
-            ); // Popular: 10% (total 95%)
-            onStatusUpdate("Rescraping popular repacks (Phase 4/4): Item $current of $total");
+            onProgressUpdate(0.85 + (current / total) * 0.10);
+            onStatusUpdate(
+              AppLocalizations.of(
+                context,
+              )!.rescrapingPopularRepacksPhase4Progress(current, total),
+            );
           }
         },
       );
-      onStatusUpdate("Popular repacks rescraped. (Phase 4/4 Complete)");
+      onStatusUpdate(
+        AppLocalizations.of(context)!.popularRepacksRescrapedPhase4Complete,
+      );
       onProgressUpdate(0.95);
 
-
-      onStatusUpdate("Finalizing...");
+      onStatusUpdate(AppLocalizations.of(context)!.finalizing);
       _repackService.notifyListeners();
-      // Small delay for finalization to show before completion message
-      await Future.delayed(const Duration(milliseconds: 500)); 
-      onProgressUpdate(1.0); // All done
-      onStatusUpdate("Full rescrape completed successfully!");
+      await Future.delayed(const Duration(milliseconds: 500));
+      onProgressUpdate(1.0);
+      onStatusUpdate(
+        AppLocalizations.of(context)!.fullRescrapeCompletedSuccessfully,
+      );
     } catch (e) {
       debugPrint("Error during force rescrape everything: $e");
-      onStatusUpdate("Error: $e. Process halted.");
-      // Do not rethrow if onStatusUpdate is used for final error reporting to UI
+      onStatusUpdate(
+        AppLocalizations.of(context)!.errorProcessHalted(e.toString()),
+      );
     } finally {
       isRescraping = false;
-      loadingProgress.value = 0.0; // Reset global progress
+      loadingProgress.value = 0.0;
     }
   }
 }

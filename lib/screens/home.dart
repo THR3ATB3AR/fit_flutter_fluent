@@ -4,6 +4,7 @@ import 'package:fit_flutter_fluent/services/scraper_service.dart';
 import 'package:fit_flutter_fluent/widgets/repack_slider.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../widgets/page.dart';
 
@@ -27,9 +28,11 @@ class _HomePageState extends State<HomePage> with PageMixin {
           context,
           builder: (context, close) {
             return InfoBar(
-              title: const Text('Success'),
-              content: const Text(
-                'New and Popular repacks have been rescraped.',
+              title: Text(AppLocalizations.of(context)!.success),
+              content: Text(
+                AppLocalizations.of(
+                  context,
+                )!.newAndPopularRepacksHaveBeenRescraped,
               ),
               action: IconButton(
                 icon: const Icon(FluentIcons.clear),
@@ -47,8 +50,12 @@ class _HomePageState extends State<HomePage> with PageMixin {
           context,
           builder: (context, close) {
             return InfoBar(
-              title: const Text('Error'),
-              content: Text('Failed to rescrape data: $e'),
+              title: Text(AppLocalizations.of(context)!.error),
+              content: Text(
+                AppLocalizations.of(
+                  context,
+                )!.failedToRescrapeData(e.toString()),
+              ),
               action: IconButton(
                 icon: const Icon(FluentIcons.clear),
                 onPressed: close,
@@ -71,7 +78,7 @@ class _HomePageState extends State<HomePage> with PageMixin {
 
     return ScaffoldPage(
       header: PageHeader(
-        title: const Text('Home'),
+        title: Text(AppLocalizations.of(context)!.home),
         commandBar: CommandBar(
           mainAxisAlignment: MainAxisAlignment.end,
           primaryItems: [
@@ -84,7 +91,7 @@ class _HomePageState extends State<HomePage> with PageMixin {
                         child: ProgressRing(strokeWidth: 2.0),
                       )
                       : const Icon(FluentIcons.refresh),
-              label: const Text('Rescrape New & Popular'),
+              label: Text(AppLocalizations.of(context)!.rescrapeNewPopular),
               onPressed: _isRescrapingHome ? null : _rescrapeHomeData,
             ),
           ],
@@ -95,7 +102,7 @@ class _HomePageState extends State<HomePage> with PageMixin {
           Expanded(
             child: RepackSlider(
               repackListType: RepackListType.newest,
-              title: "New Repacks",
+              title: AppLocalizations.of(context)!.newRepacks,
               onRepackTap: (Repack repack) {
                 context.push("/repackdetails", extra: repack);
               },
@@ -104,7 +111,7 @@ class _HomePageState extends State<HomePage> with PageMixin {
           Expanded(
             child: RepackSlider(
               repackListType: RepackListType.popular,
-              title: "Popular Repacks",
+              title: AppLocalizations.of(context)!.popularRepacks,
               onRepackTap: (Repack repack) {
                 context.push("/repackdetails", extra: repack);
               },

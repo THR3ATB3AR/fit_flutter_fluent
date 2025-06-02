@@ -16,6 +16,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'theme.dart';
 
@@ -123,6 +125,14 @@ class MyApp extends StatelessWidget {
               ),
             ),
             locale: appTheme.locale,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              FluentLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
             builder: (context, child) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 appTheme.applyInitialWindowEffectIfNeeded(context);
@@ -194,13 +204,13 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
         PaneItem(
           key: const ValueKey('/'),
           icon: const Icon(FluentIcons.home),
-          title: const Text('Home'),
+          title: Text(AppLocalizations.of(context)!.home),
           body: const SizedBox.shrink(),
         ),
         PaneItem(
           key: const ValueKey('/repacklibrary'),
           icon: const Icon(FluentIcons.library),
-          title: const Text('Repack Library'),
+          title: Text(AppLocalizations.of(context)!.repackLibrary),
           body: const SizedBox.shrink(),
         ),
       ].map<NavigationPaneItem>((e) {
@@ -241,7 +251,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     PaneItem(
       key: const ValueKey('/downloadmanager'),
       icon: const Icon(FluentIcons.download),
-      title: const Text('Download Manager'),
+      title: Text(AppLocalizations.of(context)!.downloadManager),
       body: const SizedBox.shrink(),
       onTap: () {
         if (GoRouterState.of(context).uri.toString() != '/downloadmanager') {
@@ -252,7 +262,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     PaneItem(
       key: const ValueKey('/settings'),
       icon: const Icon(FluentIcons.settings),
-      title: const Text('Settings'),
+      title: Text(AppLocalizations.of(context)!.settings),
       body: const SizedBox.shrink(),
       onTap: () {
         if (GoRouterState.of(context).uri.toString() != '/settings') {
@@ -303,10 +313,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
       });
 
       final latestTagName =
-          updateProvider.latestReleaseInfo?['tag_name'] ?? "Unknown";
+          updateProvider.latestReleaseInfo?['tag_name'] ??
+          AppLocalizations.of(context)!.unknown;
       final releaseNotes =
           updateProvider.latestReleaseInfo?['release_notes'] ??
-          "No release notes available.";
+          AppLocalizations.of(context)!.noReleaseNotesAvailable;
 
       final PageStorageBucket infoBarBucket = PageStorageBucket();
 
@@ -316,15 +327,23 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           return PageStorage(
             bucket: infoBarBucket,
             child: InfoBar(
-              title: Text('Update Available: $latestTagName'),
+              title: Text(
+                AppLocalizations.of(context)!.updateAvailable(latestTagName),
+              ),
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('A new version of FitFlutter is available.'),
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.aNewVersionOfFitflutterIsAvailable,
+                  ),
                   const SizedBox(height: 8),
                   Expander(
-                    header: const Text('View Release Notes'),
+                    header: Text(
+                      AppLocalizations.of(context)!.viewReleaseNotes,
+                    ),
                     content: ConstrainedBox(
                       constraints: const BoxConstraints(
                         maxHeight: 150,
@@ -339,14 +358,14 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   HyperlinkButton(
-                    child: const Text('Release Page'),
+                    child: Text(AppLocalizations.of(context)!.releasePage),
                     onPressed: () {
                       updateProvider.openReleasePage();
                     },
                   ),
                   const SizedBox(width: 8),
                   Button(
-                    child: const Text('Later'),
+                    child: Text(AppLocalizations.of(context)!.later),
                     onPressed: () {
                       updateProvider.ignoreCurrentUpdate();
                       if (mounted) {
@@ -359,7 +378,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                   ),
                   const SizedBox(width: 8),
                   FilledButton(
-                    child: const Text('Upgrade'),
+                    child: Text(AppLocalizations.of(context)!.upgrade),
                     onPressed: () {
                       if (mounted) {
                         setState(() {
@@ -532,7 +551,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
               focusNode: searchFocusNode,
               controller: searchController,
               unfocusedColor: Colors.transparent,
-              placeholder: 'Search',
+              placeholder: AppLocalizations.of(context)!.search,
               onChanged: (text) {
                 searchProvider.updateSearchQuery(text);
               },
@@ -570,34 +589,37 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     bool isPreventClose = await windowManager.isPreventClose();
     if (isPreventClose && mounted) {
       showDialog(
-      context: context,
-      builder: (_) {
-        return ContentDialog(
-          title: const Text('Downloads in Progress'), 
-          content: const Text(
-            'Closing the application will cancel all active downloads. '
-            'Are you sure you want to close?',
-          ),
-          actions: [
-            FilledButton(
-              child: const Text('Yes, Close & Cancel'), 
-              onPressed: () async { 
-                Navigator.pop(context); 
-                debugPrint("User chose to close; cancelling downloads.");
-                
-                windowManager.destroy(); 
-              },
+        context: context,
+        builder: (_) {
+          return ContentDialog(
+            title: Text(AppLocalizations.of(context)!.downloadsInProgress),
+            content: Text(
+              '${AppLocalizations.of(context)!.closingTheApplicationWillCancelAllActiveDownloads}\n${AppLocalizations.of(context)!.areYouSureYouWantToClose}',
             ),
-            Button(
-              child: const Text('Keep Downloading'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
+            actions: [
+              FilledButton(
+                child: Text(AppLocalizations.of(context)!.yesCloseCancel),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  debugPrint(
+                    AppLocalizations.of(
+                      context,
+                    )!.userChoseToCloseCancellingDownloads,
+                  );
+
+                  windowManager.destroy();
+                },
+              ),
+              Button(
+                child: Text(AppLocalizations.of(context)!.keepDownloading),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 }
