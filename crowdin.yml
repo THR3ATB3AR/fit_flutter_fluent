@@ -2,3 +2,5 @@ files:
   - source: /lib/l10n/app_default.arb
     translation: /lib/l10n/app_%two_letters_code%.arb
     multilingual: 1
+bundles:
+  - 8
