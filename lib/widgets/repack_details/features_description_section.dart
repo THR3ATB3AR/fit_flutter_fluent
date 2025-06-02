@@ -1,6 +1,7 @@
 import 'package:fit_flutter_fluent/widgets/repack_details/repack_info_card.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FeaturesDescriptionSection extends StatelessWidget {
   final Repack repack;
@@ -19,13 +20,13 @@ class FeaturesDescriptionSection extends StatelessWidget {
             children: [
               _buildSectionCard(
                 context,
-                title: 'About game',
+                title: AppLocalizations.of(context)!.aboutGame,
                 content: repack.description,
               ),
               const SizedBox(height: 16),
               _buildSectionCard(
                 context,
-                title: 'Features',
+                title: AppLocalizations.of(context)!.features,
                 content: repack.repackFeatures,
               ),
             ],

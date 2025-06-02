@@ -674,7 +674,7 @@ class _SettingsState extends State<Settings> with PageMixin {
           if (updateProvider.latestReleaseInfo != null &&
               updateProvider.updateAvailable)
             Text(
-              AppLocalizations.of(context)!.latestAvailableVersion(updateProvider.latestReleaseInfo!['tag_name'].toString()),
+              '${AppLocalizations.of(context)!.latestAvailableVersion} ${updateProvider.latestReleaseInfo!['tag_name'].toString()}',
             )
           else if (updateProvider.latestReleaseInfo != null &&
               !updateProvider.updateAvailable &&

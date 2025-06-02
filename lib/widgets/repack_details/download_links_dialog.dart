@@ -2,6 +2,7 @@ import 'package:fit_flutter_fluent/services/dd_manager.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:fit_flutter_fluent/data/download_info.dart'; 
 import 'package:fit_flutter_fluent/services/host_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DownloadLinksDialog extends StatefulWidget {
   final String repackTitle;
@@ -55,7 +56,7 @@ class _DownloadLinksDialogState extends State<DownloadLinksDialog> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _processingError = "No URLs found in the mirror configuration.";
+        _processingError = AppLocalizations.of(context)!.noUrlsFoundInTheMirrorConfiguration;
       });
       return;
     }
@@ -74,9 +75,9 @@ class _DownloadLinksDialogState extends State<DownloadLinksDialog> {
           collectedInfos.add(DownloadInfo(
               repackTitle: widget.repackTitle,
               downloadLink: url,
-              fileName: 'Failed to process (Unknown Plugin): ${url.split('/').last}',
+              fileName: '${AppLocalizations.of(context)!.failedToProcessUnknownPlugin} ${url.split('/').last}',
               downloadType: 'Error'));
-          errorDuringProcessing = '${errorDuringProcessing ?? ""}Problem processing some links. ';
+          errorDuringProcessing = '${errorDuringProcessing ?? ""}${AppLocalizations.of(context)!.problemProcessingSomeLinks}';
         }
       } catch (e) {
         debugPrint('Error processing link $url: $e');
@@ -87,7 +88,7 @@ class _DownloadLinksDialogState extends State<DownloadLinksDialog> {
             downloadLink: url,
             fileName: 'Error processing ${url.split('/').last}: $shortError',
             downloadType: 'Error'));
-        errorDuringProcessing = '${errorDuringProcessing ?? ""}Error processing one or more links. ';
+        errorDuringProcessing = '${errorDuringProcessing ?? ""}${AppLocalizations.of(context)!.errorProcessingOneOrMoreLinks}';
       }
     }
 
@@ -147,18 +148,18 @@ class _DownloadLinksDialogState extends State<DownloadLinksDialog> {
     showDialog(
       context: context,
       builder: (ctx) => ContentDialog(
-        title: const Text("Download Started"),
-        content: Text("${itemsToDownload.length} file(s) added to download manager."),
-        actions: [Button(child: const Text("OK"), onPressed: () => Navigator.pop(ctx))],
+        title: Text(AppLocalizations.of(context)!.downloadStarted),
+        content: Text(AppLocalizations.of(context)!.filesAddedToDownloadManager(itemsToDownload.length)),
+        actions: [Button(child: Text(AppLocalizations.of(context)!.ok), onPressed: () => Navigator.pop(ctx))],
       ),
     );
   } else {
     showDialog(
       context: context,
       builder: (ctx) => ContentDialog(
-        title: const Text("No Files Selected"),
-        content: const Text("Please select one or more files from the tree to download."),
-        actions: [Button(child: const Text("OK"), onPressed: () => Navigator.pop(ctx))],
+        title: Text(AppLocalizations.of(context)!.noFilesSelected),
+        content: Text(AppLocalizations.of(context)!.pleaseSelectOneOrMoreFilesFromTheTreeToDownload),
+        actions: [Button(child: Text(AppLocalizations.of(context)!.ok), onPressed: () => Navigator.pop(ctx))],
       ),
     );
   }
@@ -182,7 +183,7 @@ class _DownloadLinksDialogState extends State<DownloadLinksDialog> {
       dialogContent = Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Text('Error: $_processingError\nNo files could be retrieved.', textAlign: TextAlign.center),
+          child: Text('${AppLocalizations.of(context)!.errorMessage(_processingError!)}\n${AppLocalizations.of(context)!.noFilesCouldBeRetrieved}', textAlign: TextAlign.center),
         ),
       );
     } else {
@@ -194,13 +195,13 @@ class _DownloadLinksDialogState extends State<DownloadLinksDialog> {
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Text(
-                'Notice: $_processingError Some files may have encountered issues.',
+                AppLocalizations.of(context)!.noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(_processingError!),
                 style: TextStyle(color: Colors.orange.normal),
               ),
             ),
           if (_treeViewItems.isEmpty)
-            const Expanded(
-              child: Center(child: Text('No downloadable files found for this mirror.'))
+            Expanded(
+              child: Center(child: Text(AppLocalizations.of(context)!.noDownloadableFilesFoundForThisMirror))
             )
           else
             Expanded(
@@ -225,7 +226,7 @@ class _DownloadLinksDialogState extends State<DownloadLinksDialog> {
     }
 
     return ContentDialog(
-      title: Text('Download Files: ${widget.repackTitle}'),
+      title: Text(AppLocalizations.of(context)!.downloadFilesGame(widget.repackTitle)),
       constraints: const BoxConstraints(maxWidth: 600, maxHeight: 600),
       content: SizedBox( 
         width: double.maxFinite,
@@ -234,13 +235,13 @@ class _DownloadLinksDialogState extends State<DownloadLinksDialog> {
       ),
       actions: [
         Button(
-          child: const Text('Close'),
+          child: Text(AppLocalizations.of(context)!.close),
           onPressed: () => Navigator.pop(context),
         ),
         if (!_isLoading && _treeViewItems.isNotEmpty)
           FilledButton(
             onPressed: _selectedTreeItems.isNotEmpty ? _startDownloadSelected : null,
-            child: const Text('Download Selected'),
+            child: Text(AppLocalizations.of(context)!.downloadSelected),
           ),
       ],
     );

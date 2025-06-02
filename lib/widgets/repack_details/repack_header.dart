@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:fit_flutter_fluent/services/dd_manager.dart';
 import 'package:fit_flutter_fluent/services/host_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RepackHeader extends StatefulWidget {
   final Repack repack;
@@ -134,7 +135,7 @@ class _RepackHeaderState extends State<RepackHeader> {
             }
 
             return ContentDialog(
-              title: const Text('Select download options'),
+              title: Text(AppLocalizations.of(context)!.selectDownloadOptions),
               constraints: const BoxConstraints(maxWidth: 600),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -145,7 +146,7 @@ class _RepackHeaderState extends State<RepackHeader> {
                     children: [
                       Expanded(
                         child: InfoLabel(
-                          label: 'Download Method:',
+                          label: AppLocalizations.of(context)!.downloadMethod,
                           child: ComboBox<String>(
                             value: currentDialogSelectedMethod, 
                             isExpanded: true,
@@ -171,14 +172,14 @@ class _RepackHeaderState extends State<RepackHeader> {
                                 });
                               }
                             },
-                            placeholder: const Text('Select method'),
+                            placeholder: Text(AppLocalizations.of(context)!.selectMethod),
                           ),
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: InfoLabel(
-                          label: 'Mirror:',
+                          label: AppLocalizations.of(context)!.mirror,
                           child: ComboBox<Map<String, String>>(
                             value: currentDialogSelectedMirror, 
                             isExpanded: true,
@@ -197,7 +198,7 @@ class _RepackHeaderState extends State<RepackHeader> {
                                 });
                               }
                             },
-                            placeholder: const Text('Select mirror'),
+                            placeholder: Text(AppLocalizations.of(context)!.selectMirror),
                           ),
                         ),
                       ),
@@ -205,9 +206,9 @@ class _RepackHeaderState extends State<RepackHeader> {
                   ),
                   const SizedBox(height: 20),
                   InfoLabel(
-                    label: 'Download Location:',
+                    label: AppLocalizations.of(context)!.downloadLocation,
                     child: TextBox(
-                      placeholder: 'Enter download location or browse',
+                      placeholder: AppLocalizations.of(context)!.enterDownloadLocationOrBrowse,
                       controller: localDownloadPathController,
                       suffix: IconButton(
                         icon: const Icon(FluentIcons.folder_open),
@@ -225,7 +226,7 @@ class _RepackHeaderState extends State<RepackHeader> {
               ),
               actions: [
                 Button(
-                  child: const Text('Close'),
+                  child: Text(AppLocalizations.of(context)!.close),
                   onPressed: () {
                     Navigator.pop(dialogContext);
                   },
@@ -240,13 +241,13 @@ class _RepackHeaderState extends State<RepackHeader> {
                         context: context,
                         builder:
                             (ctx) => ContentDialog(
-                              title: const Text("Download Location Empty"),
-                              content: const Text(
-                                "Please select or enter a download location.",
+                              title: Text(AppLocalizations.of(context)!.downloadLocationEmpty),
+                              content: Text(
+                                AppLocalizations.of(context)!.pleaseSelectOrEnterADownloadLocation,
                               ),
                               actions: [
                                 Button(
-                                  child: const Text("OK"),
+                                  child: Text(AppLocalizations.of(context)!.ok),
                                   onPressed: () => Navigator.pop(ctx),
                                 ),
                               ],
@@ -280,13 +281,13 @@ class _RepackHeaderState extends State<RepackHeader> {
                         context: context, 
                         builder:
                             (ctx) => ContentDialog(
-                              title: const Text("Selection Incomplete"),
-                              content: const Text(
-                                "Please select a download method and a mirror.",
+                              title: Text(AppLocalizations.of(context)!.selectionIncomplete),
+                              content: Text(
+                                AppLocalizations.of(context)!.pleaseSelectADownloadMethodAndAMirror,
                               ),
                               actions: [
                                 Button(
-                                  child: const Text("OK"),
+                                  child: Text(AppLocalizations.of(context)!.ok),
                                   onPressed: () => Navigator.pop(ctx),
                                 ),
                               ],
@@ -294,7 +295,7 @@ class _RepackHeaderState extends State<RepackHeader> {
                       );
                     }
                   },
-                  child: const Text('Next'),
+                  child: Text(AppLocalizations.of(context)!.next),
                 ),
               ],
             );
@@ -425,7 +426,7 @@ class _RepackHeaderState extends State<RepackHeader> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    "Download",
+                    AppLocalizations.of(context)!.download,
                     style: typography.bodyStrong?.copyWith(
                       color:
                           theme.brightness == Brightness.dark
@@ -453,10 +454,10 @@ class _RepackHeaderState extends State<RepackHeader> {
                   const SizedBox(height: 8),
                   Text(
                     _batchProgress == 1.0
-                        ? 'Download complete!'
+                        ? AppLocalizations.of(context)!.downloadComplete
                         : _batchProgress == 0.0
-                        ? 'Download pending...'
-                        : 'Downloading: ${(_batchProgress * 100).toStringAsFixed(0)}%',
+                        ? AppLocalizations.of(context)!.downloadPending
+                        : '${AppLocalizations.of(context)!.downloading} ${(_batchProgress * 100).toStringAsFixed(0)}%',
                     style: typography.body,
                   ),
                 ],

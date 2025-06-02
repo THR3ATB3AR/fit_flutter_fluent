@@ -125,6 +125,7 @@ class MyApp extends StatelessWidget {
               ),
             ),
             locale: appTheme.locale,
+            // locale: Locale.fromSubtags(languageCode: "en"),
             localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,

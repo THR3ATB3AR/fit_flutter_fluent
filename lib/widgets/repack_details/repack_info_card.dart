@@ -1,5 +1,6 @@
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class _InfoRow extends StatelessWidget {
   final IconData icon;
@@ -59,11 +60,11 @@ class RepackInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = FluentTheme.of(context);
-    const String genresLabel = "Genres";
-    const String companyLabel = "Company";
-    const String languageLabel = "Language";
-    const String originalSizeLabel = "Original Size";
-    const String repackSizeLabel = "Repack Size";
+    String genresLabel = AppLocalizations.of(context)!.genres;
+    String companyLabel = AppLocalizations.of(context)!.company;
+    String languageLabel = AppLocalizations.of(context)!.language;
+    String originalSizeLabel = AppLocalizations.of(context)!.originalSize;
+    String repackSizeLabel = AppLocalizations.of(context)!.repackSize;
 
     return Card(
       borderRadius: BorderRadius.circular(8.0),
@@ -81,7 +82,7 @@ class RepackInfoCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Repack Information',
+                AppLocalizations.of(context)!.repackInformation,
                 style: theme.typography.subtitle?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ScreenshotSection extends StatefulWidget {
   final Repack repack;
@@ -70,7 +71,7 @@ class _ScreenshotSectionState extends State<ScreenshotSection> {
               ),
               const SizedBox(height: 12),
               Text(
-                'No screenshots available.',
+                AppLocalizations.of(context)!.noScreenshotsAvailable,
                 style: theme.typography.bodyLarge,
               ),
             ],
@@ -114,7 +115,7 @@ class _ScreenshotSectionState extends State<ScreenshotSection> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Error loading image',
+                  AppLocalizations.of(context)!.errorLoadingImage,
                   style: theme.typography.body?.copyWith(
                     color: theme.inactiveColor,
                   ),
@@ -143,7 +144,7 @@ class _ScreenshotSectionState extends State<ScreenshotSection> {
                     bottom: 8.0,
                   ),
                   child: Text(
-                    'Screenshots (${screenshots.length})',
+                    AppLocalizations.of(context)!.screenshotsTitle(screenshots.length),
                     style: theme.typography.subtitle,
                   ),
                 ),
