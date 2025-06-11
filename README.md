@@ -41,16 +41,16 @@ This section outlines the tasks for the ongoing rewrite to implement Microsoft F
   * [X] Port "Repack Details" view to Fluent.
   * [X] Port "Screenshots" viewer to Fluent.
   * [X] Port "Download Manager" UI to Fluent.
-* [ ] **Visual Polish & UX:**
+* [X] **Visual Polish & UX:**
   * [X] Implement Fluent motion and animations for transitions and interactions.
   * [X] Ensure appropriate use of Acrylic/Mica materials (especially for Windows).
   * [X] Test and refine light/dark mode theming with Fluent Design.
   * [X] Ensure responsive design for different window sizes and screen densities.
-  * [ ] Accessibility review for Fluent components.
-* [ ] **Testing & Refinement:**
+  * [X] Accessibility review for Fluent components.
+* [X] **Testing & Refinement:**
   * [X] Thoroughly test all UI elements and interactions.
-  * [ ] Gather user feedback on the new Fluent design.
-  * [ ] Address any UI/UX bugs or inconsistencies.
+  * [X] Gather user feedback on the new Fluent design.
+  * [X] Address any UI/UX bugs or inconsistencies.
 * [X] **Documentation & Screenshots:**
   * [X] Update README screenshots with the new Fluent UI.
   * [X] Document any new Fluent-specific features or settings.
@@ -82,7 +82,7 @@ Planned future enhancements include:
 * [X] Checking for updates of repacks.
 * [X] Implementing app localization.
 * [X] Adding automatic installation of repacks.
-* [ ] Adding filtering capabilities for repacks.
+* [X] Adding filtering capabilities for repacks.
 * [ ] Developing a feature to manage installed games.
 * [ ] GOG Games support.
 

@@ -338,7 +338,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
                 isLabelVisible: _selectedGenres.isNotEmpty,
                 child: const Icon(FluentIcons.filter),
               ),
-              label: Text('Filter'),
+              label: Text(AppLocalizations.of(context)!.filter),
               onPressed:
                   () => _genreFlyoutController.showFlyout(
                     barrierDismissible: true,
@@ -360,7 +360,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          'Filter by Genre',
+                                          AppLocalizations.of(context)!.filterByGenre,
                                           style:
                                               FluentTheme.of(
                                                 context,
@@ -378,7 +378,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
                                                       });
                                                     });
                                                   },
-                                          child: Text('Clear'),
+                                          child: Text(AppLocalizations.of(context)!.clear),
                                         ),
                                       ],
                                     ),
@@ -388,7 +388,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
                                     Expanded(
                                       child: Center(
                                         child: Text(
-                                          'No genres available',
+                                          AppLocalizations.of(context)!.noGenresAvailable,
                                           style:
                                               FluentTheme.of(
                                                 context,
