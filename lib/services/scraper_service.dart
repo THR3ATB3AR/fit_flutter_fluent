@@ -463,7 +463,7 @@ class ScraperService {
             prev[element.key] = element.value;
             return prev;
           });
-      genres = infoMap['genres/tags'] ?? infoMap['genres'] ?? 'N/A';
+      genres = infoMap['genres/tags']?.replaceAll(RegExp(r'<a href=".*?">'),'').replaceAll('</a>', '') ?? infoMap['genres']?.replaceAll(RegExp(r'<a href=".*?">'),'').replaceAll('</a>', '') ?? 'N/A';
       language = infoMap['languages'] ?? infoMap['language'] ?? 'N/A';
       company = infoMap['companies'] ?? infoMap['company'] ?? 'N/A';
       originalSize = infoMap['original size'] ?? 'N/A';
@@ -523,7 +523,6 @@ class ScraperService {
 
     if (updatesSections.isNotEmpty) {
       updates = updatesSections;
-      print(updates);
     } else {
       updates = null;
     }
