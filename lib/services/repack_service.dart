@@ -70,21 +70,21 @@ class RepackService {
       CREATE TABLE IF NOT EXISTS new_repacks (
         title TEXT PRIMARY KEY, url TEXT, releaseDate TEXT, cover TEXT, genres TEXT,
         language TEXT, company TEXT, originalSize TEXT, repackSize TEXT,
-        downloadLinks TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
+        downloadLinks TEXT, updates TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
       )
     ''');
     db.execute('''
       CREATE TABLE IF NOT EXISTS popular_repacks (
         title TEXT PRIMARY KEY, url TEXT, releaseDate TEXT, cover TEXT, genres TEXT,
         language TEXT, company TEXT, originalSize TEXT, repackSize TEXT,
-        downloadLinks TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
+        downloadLinks TEXT, updates TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
       )
     ''');
     db.execute('''
       CREATE TABLE IF NOT EXISTS every_repack (
         title TEXT PRIMARY KEY, url TEXT, releaseDate TEXT, cover TEXT, genres TEXT,
         language TEXT, company TEXT, originalSize TEXT, repackSize TEXT,
-        downloadLinks TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
+        downloadLinks TEXT, updates TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
       )
     ''');
     db.execute('''
@@ -163,7 +163,7 @@ class RepackService {
     db.execute('BEGIN TRANSACTION');
     db.execute('DELETE FROM new_repacks');
     final stmt = db.prepare(
-      'INSERT INTO new_repacks (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO new_repacks (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, updates, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
     for (var repack in newRepacks) {
       stmt.execute(repack.toSqliteParams());
@@ -181,7 +181,7 @@ class RepackService {
     db.execute('BEGIN TRANSACTION');
     db.execute('DELETE FROM popular_repacks');
     final stmt = db.prepare(
-      'INSERT INTO popular_repacks (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO popular_repacks (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, updates, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
     for (var repack in popularRepacks) {
       stmt.execute(repack.toSqliteParams());
@@ -199,7 +199,7 @@ class RepackService {
     db.execute('BEGIN TRANSACTION');
     db.execute('DELETE FROM every_repack');
     final stmt = db.prepare(
-      'INSERT INTO every_repack (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO every_repack (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, updates, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
     for (var repack in everyRepack) {
       stmt.execute(repack.toSqliteParams());
@@ -218,7 +218,7 @@ class RepackService {
 
     final db = sqlite3.open('${await _getAppDataPath()}/repacks.db');
     final stmt = db.prepare(
-      'INSERT OR REPLACE INTO every_repack (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT OR REPLACE INTO every_repack (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, updates, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
     stmt.execute(repack.toSqliteParams());
     stmt.dispose();

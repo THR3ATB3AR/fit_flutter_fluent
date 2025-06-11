@@ -507,6 +507,27 @@ class ScraperService {
       }
     }
 
+    String? updates;
+    final updatesSections = repackSections
+      .where((section) =>
+      section['title']!.toLowerCase().contains('game updates'),
+      )
+      .map((section) => section['content'])
+      .expand((content) {
+      final document = dom.Document.html(content!);
+      final innerHtml = document.querySelector('div')?.innerHtml;
+      return innerHtml != null ? [innerHtml] : <String>[];
+      })
+      .join('\n')
+      .replaceAll(RegExp(r'\s?\(Source:.*?\)', caseSensitive: false), '');
+
+    if (updatesSections.isNotEmpty) {
+      updates = updatesSections;
+      print(updates);
+    } else {
+      updates = null;
+    }
+
     final String repackFeatures = repackSections
         .where(
           (section) =>
@@ -531,6 +552,7 @@ class ScraperService {
         return document.querySelectorAll('div.su-spoiler').map((element) => element.innerHtml.trim().split('</div>')).where((list) => list.isNotEmpty && list[0].toLowerCase().contains('game description'));
       }).toList()[0][1]}</div>',
     );
+
     final description = descriptionHelper
         .querySelector('div')!
         .innerHtml
@@ -581,6 +603,7 @@ class ScraperService {
       originalSize: originalSize,
       repackSize: repackSize,
       downloadLinks: sectionDownloadLinks,
+      updates: updates,
       repackFeatures: repackFeatures,
       description: description,
       screenshots: screenshots,

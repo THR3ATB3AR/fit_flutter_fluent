@@ -79,12 +79,12 @@ Planned future enhancements include:
 * [X] Show close prevention dialog only when downloading.
 * [X] Removing Windows-specific UI elements from the Android interface.
 * [X] Implementing AppImage builds for Linux distribution.
-* [ ] Checking for updates of repacks.
+* [X] Checking for updates of repacks.
 * [X] Implementing app localization.
 * [X] Adding automatic installation of repacks.
 * [ ] Adding filtering capabilities for repacks.
 * [ ] Developing a feature to manage installed games.
-* [ ] Support for Data Nodes downloads.
+* [ ] GOG Games support.
 
 I am open for contributions and suggestions!
 
@@ -92,6 +92,7 @@ I am open for contributions and suggestions!
 
 This section lists known issues that have been reported. While these issues have been observed, they may not affect all users or all devices. We are working to resolve them. *(This section will be updated as the rewrite progresses)*
 
+* **Genres Showing Hrefs:** Some repack genres may display as raw URLs (e.g., `https://...`) instead of readable text. A fix is planned to parse and display genres as plain text.
 * **Limited Testing:** The application (especially the new Fluent UI) will initially undergo limited testing. We are actively seeking broader testing to identify and address issues.
 
 ## 📦 Installation
