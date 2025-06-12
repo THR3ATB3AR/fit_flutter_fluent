@@ -197,5 +197,9 @@
   "repackInformation": "حزمة المعلومات",
   "screenshotsTitle": "{count, plural, zero{لقطات شاشة} one{لقطة شاشة} other{لقطات شاشة}} ({count})",
   "errorLoadingImage": "خطأ في تحميل الصورة",
-  "noScreenshotsAvailable": "لا توجد لقطات شاشة متوفرة."
+  "noScreenshotsAvailable": "لا توجد لقطات شاشة متوفرة.",
+  "noGenresAvailable": "لا توجد أنواع متاحة",
+  "clear": "مسح",
+  "filterByGenre": "تصفية حسب النوع",
+  "filter": "تصفية"
 }
