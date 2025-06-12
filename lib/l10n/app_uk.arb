@@ -197,5 +197,9 @@
   "repackInformation": "Передача інформації",
   "screenshotsTitle": "{count, plural, zero{Скріншоти} one{Скріншот} other{Скріншот}} ({count})",
   "errorLoadingImage": "Помилка при завантаженні зображення",
-  "noScreenshotsAvailable": "Немає доступних знятків."
+  "noScreenshotsAvailable": "Немає доступних знятків.",
+  "noGenresAvailable": "Немає доступних жанрів",
+  "clear": "Очистити",
+  "filterByGenre": "Фільтр за жанром",
+  "filter": "Фільтр"
 }
