@@ -1,7 +1,7 @@
 {
   "@@locale": "pl",
   "success": "Sukces",
-  "newAndPopularRepacksHaveBeenRescraped": "Nowe i Popularne paczki zostały zniszczone.",
+  "newAndPopularRepacksHaveBeenRescraped": "Nowe i Popularne paczki zostały zrescrapowane.",
   "error": "Błąd",
   "failedToRescrapeData": "Nie udało się odkryć danych: {errorMessage}",
   "home": "Strona główna",
@@ -141,7 +141,7 @@
   "allRepackNamesScrapedPhase1": "Wszystkie nazwy przepakowań. ({count} {count, plural, zero{imiona} one{imię} other{imiona}} (ukończono 1/4)",
   "scrapingDetailsForEveryRepackPhase2LongestPhase": "Rozbijanie szczegółów dla każdego przepakowanego (Phaza 2/4 - Najdłuższa faza)...",
   "scrapingDetailsForEveryRepackPhase2Progress": "Szczegóły kradzieży dla każdej paczki (haj 2/4): Przepakuj {current} z {total}",
-  "allRepackDetailsScrapedPhase2": "All repack details scraped. ({count} {count, plural, zero{repacks} one{repack} other{repacks}} processed (Phase 2/4 Complete)",
+  "allRepackDetailsScrapedPhase2": "Detale wszystkich repacków zostały zrepacowane. (Przetworzono {count} {count, plural, one{repack} few {repacki} many {repacków} other{repacków}}) (Etap 2/4 Ukończony)",
   "rescrapingNewRepacksPhase3": "Przepakowywanie nowych paczek (zmiana 3/4)...",
   "rescrapingNewRepacksPhase3Progress": "Rescraping new repacking (Phaza 3/4): Strona {current} of {total}",
   "newRepacksRescrapedPhase3Complete": "Nowe przepakowywanie ponownie zbankrutowane. (Paza 3/4 zakończona)",
@@ -197,5 +197,9 @@
   "repackInformation": "Informacje o przepakowaniu",
   "screenshotsTitle": "{count, plural, zero{Zrzuty ekranu} one{zrzut ekranu} other{Zrzuty ekranu}} ({count})",
   "errorLoadingImage": "Błąd ładowania obrazu",
-  "noScreenshotsAvailable": "Brak dostępnych zrzutów ekranu."
+  "noScreenshotsAvailable": "Brak dostępnych zrzutów ekranu.",
+  "noGenresAvailable": "Brak dostępnych gatunków",
+  "clear": "Wyczyść",
+  "filterByGenre": "Filtruj według gatunku",
+  "filter": "Filtr"
 }
