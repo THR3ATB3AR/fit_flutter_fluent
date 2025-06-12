@@ -197,5 +197,9 @@
   "repackInformation": "Informații despre Repack",
   "screenshotsTitle": "{count, plural, zero{Capturi de ecran} one{screenshot} other{Captură de ecran}} ({count})",
   "errorLoadingImage": "Eroare la încărcarea imaginii",
-  "noScreenshotsAvailable": "Nici o captură de ecran disponibilă."
+  "noScreenshotsAvailable": "Nici o captură de ecran disponibilă.",
+  "noGenresAvailable": "Niciun gen disponibil",
+  "clear": "Curăță",
+  "filterByGenre": "Filtrare după gen",
+  "filter": "Filtrare"
 }
