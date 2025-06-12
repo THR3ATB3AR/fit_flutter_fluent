@@ -197,5 +197,9 @@
   "repackInformation": "Informazioni Repack",
   "screenshotsTitle": "{count, plural, zero{Screenshot} one{screenshot} other{Screenshot}} ({count})",
   "errorLoadingImage": "Errore nel caricamento dell'immagine",
-  "noScreenshotsAvailable": "Nessuna schermata disponibile."
+  "noScreenshotsAvailable": "Nessuna schermata disponibile.",
+  "noGenresAvailable": "Nessun genere disponibile",
+  "clear": "Pulisci",
+  "filterByGenre": "Filtra per genere",
+  "filter": "Filtro"
 }
