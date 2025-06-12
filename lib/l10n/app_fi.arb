@@ -197,5 +197,9 @@
   "repackInformation": "Repack Information",
   "screenshotsTitle": "{count, plural, zero{Screenshots} one{screenshot} other{Screenshots}} ({count})",
   "errorLoadingImage": "Virhe ladattaessa kuvaa",
-  "noScreenshotsAvailable": "Kuvakaappauksia ei ole saatavilla."
+  "noScreenshotsAvailable": "Kuvakaappauksia ei ole saatavilla.",
+  "noGenresAvailable": "Lajityyppejä ei saatavilla",
+  "clear": "Tyhjennä",
+  "filterByGenre": "Suodata lajin mukaan",
+  "filter": "Suodatin"
 }
