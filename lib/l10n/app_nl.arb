@@ -197,5 +197,9 @@
   "repackInformation": "Herhaling Informatie",
   "screenshotsTitle": "{count, plural, zero{Screenshots} one{screenshot} other{Screenshots}} ({count})",
   "errorLoadingImage": "Fout bij laden afbeelding",
-  "noScreenshotsAvailable": "Geen schermafbeeldingen beschikbaar."
+  "noScreenshotsAvailable": "Geen schermafbeeldingen beschikbaar.",
+  "noGenresAvailable": "Geen genres beschikbaar",
+  "clear": "Verwijderen",
+  "filterByGenre": "Filteren op genre",
+  "filter": "Filteren"
 }
