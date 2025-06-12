@@ -75,7 +75,9 @@ class Repack {
               ),
             ),
           ),
-      updates: row['updates'],
+      updates: row['updates'] != null && row['updates'].isNotEmpty
+          ? row['updates']
+          : null,
       repackFeatures: row['repackFeatures'],
       description: row['description'],
       screenshots: List<String>.from(jsonDecode(row['screenshots'])),
