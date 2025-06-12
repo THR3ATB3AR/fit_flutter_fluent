@@ -197,5 +197,9 @@
   "repackInformation": "Πληροφορίες Repack",
   "screenshotsTitle": "{count, plural, zero{Screenshots} one{screenshot} other{Screenshots}} ({count})",
   "errorLoadingImage": "Σφάλμα φόρτωσης εικόνας",
-  "noScreenshotsAvailable": "Δεν υπάρχουν διαθέσιμα στιγμιότυπα οθόνης."
+  "noScreenshotsAvailable": "Δεν υπάρχουν διαθέσιμα στιγμιότυπα οθόνης.",
+  "noGenresAvailable": "Δεν υπάρχουν διαθέσιμα είδη",
+  "clear": "Εκκαθάριση",
+  "filterByGenre": "Φιλτράρισμα ανά είδος",
+  "filter": "Φίλτρο"
 }
