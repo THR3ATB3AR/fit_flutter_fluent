@@ -197,5 +197,9 @@
   "repackInformation": "Informations sur le Repack",
   "screenshotsTitle": "{count, plural, zero{Des captures d'écran} one{une capture d'écran} other{Des captures d'écran}} ({count})",
   "errorLoadingImage": "Erreur lors du chargement de l'image",
-  "noScreenshotsAvailable": "Aucune capture d'écran disponible."
+  "noScreenshotsAvailable": "Aucune capture d'écran disponible.",
+  "noGenresAvailable": "Aucun genre disponible",
+  "clear": "Nettoyer",
+  "filterByGenre": "Filtrer par genre",
+  "filter": "Filtre"
 }
