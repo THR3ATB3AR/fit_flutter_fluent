@@ -197,5 +197,9 @@
   "repackInformation": "Repack Information",
   "screenshotsTitle": "{count, plural, zero{Skærmbilleder} one{skærmbillede} other{Skærmbilleder}} ({count})",
   "errorLoadingImage": "Fejl under indlæsning af billede",
-  "noScreenshotsAvailable": "Ingen screenshots tilgængelige."
+  "noScreenshotsAvailable": "Ingen screenshots tilgængelige.",
+  "noGenresAvailable": "Ingen genrer tilgængelige",
+  "clear": "Ryd",
+  "filterByGenre": "Filtrer efter genre",
+  "filter": "Filtrer"
 }
