@@ -197,5 +197,9 @@
   "repackInformation": "Перезабрать информацию",
   "screenshotsTitle": "{count, plural, zero{Скриншоты} one{снимок экрана} other{Скриншоты}} ({count})",
   "errorLoadingImage": "Ошибка загрузки изображения",
-  "noScreenshotsAvailable": "Скриншоты недоступны."
+  "noScreenshotsAvailable": "Скриншоты недоступны.",
+  "noGenresAvailable": "Нет доступных жанров",
+  "clear": "Очистить",
+  "filterByGenre": "Фильтр по жанру",
+  "filter": "Фильтр"
 }
