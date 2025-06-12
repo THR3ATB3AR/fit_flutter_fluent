@@ -197,5 +197,9 @@
   "repackInformation": "返品情報",
   "screenshotsTitle": "{count, plural, zero{スクリーンショット} one{スクリーンショット} other{スクリーンショット}} ({count})",
   "errorLoadingImage": "画像の読み込みに失敗しました",
-  "noScreenshotsAvailable": "スクリーンショットはありません。"
+  "noScreenshotsAvailable": "スクリーンショットはありません。",
+  "noGenresAvailable": "利用可能なジャンルがありません",
+  "clear": "クリア",
+  "filterByGenre": "ジャンルでフィルター",
+  "filter": "フィルター"
 }
