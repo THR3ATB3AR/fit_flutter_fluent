@@ -106,7 +106,6 @@
   "automaticInstallation": "自動インストール",
   "enableAutoInstallAfterDownload": "ダウンロード後に自動インストールを有効にする:",
   "defaultInstallationPath": "デフォルトのインストールパス",
-  "defaultInstallPath": "既定のインストールパス",
   "whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath": "有効にすると、完了したリパックは指定されたパスにインストールしようとします。",
   "appearance": "外観",
   "themeMode": "テーマモード",
