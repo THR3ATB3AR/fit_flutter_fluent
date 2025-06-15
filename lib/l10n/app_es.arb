@@ -106,7 +106,6 @@
   "automaticInstallation": "Instalación automática",
   "enableAutoInstallAfterDownload": "Activar la instalación automática después de la descarga:",
   "defaultInstallationPath": "Ruta de instalación por defecto",
-  "defaultInstallPath": "Ruta de instalación por defecto",
   "whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath": "Cuando está habilitado, los paquetes completados intentarán instalarse en la ruta especificada.",
   "appearance": "Apariencia",
   "themeMode": "Modo de tema",
