@@ -106,7 +106,6 @@
   "automaticInstallation": "Автоматическая установка",
   "enableAutoInstallAfterDownload": "Включить автоустановку после загрузки:",
   "defaultInstallationPath": "Путь установки по умолчанию",
-  "defaultInstallPath": "Путь установки по умолчанию",
   "whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath": "Если включено, завершенные пакеты будут пытаться установить на указанный путь.",
   "appearance": "Внешний вид",
   "themeMode": "Режим темы",
