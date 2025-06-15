@@ -194,7 +194,7 @@
   "originalSize": "Dimensiune originală",
   "repackSize": "Dimensiunea reîmpachetării",
   "repackInformation": "Informații despre Repack",
-  "screenshotsTitle": "{count, plural, zero{Capturi de ecran} one{screenshot} other{Captură de ecran}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "Eroare la încărcarea imaginii",
   "noScreenshotsAvailable": "Nici o captură de ecran disponibilă.",
   "noGenresAvailable": "Niciun gen disponibil",
