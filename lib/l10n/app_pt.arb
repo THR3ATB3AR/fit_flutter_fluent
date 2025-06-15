@@ -194,7 +194,7 @@
   "originalSize": "Tamanho Original",
   "repackSize": "Tamanho da embalagem",
   "repackInformation": "Informações de recompactação",
-  "screenshotsTitle": "{count, plural, zero{Screenshots} one{screenshot} other{Screenshots}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "Erro ao carregar imagem",
   "noScreenshotsAvailable": "Nenhuma captura de tela disponível.",
   "noGenresAvailable": "Nenhum gênero disponível",
