@@ -194,7 +194,7 @@
   "originalSize": "Alkuperäinen Koko",
   "repackSize": "Repackin Koko",
   "repackInformation": "Repack Information",
-  "screenshotsTitle": "{count, plural, zero{Screenshots} one{screenshot} other{Screenshots}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "Virhe ladattaessa kuvaa",
   "noScreenshotsAvailable": "Kuvakaappauksia ei ole saatavilla.",
   "noGenresAvailable": "Lajityyppejä ei saatavilla",
