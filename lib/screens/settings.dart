@@ -463,13 +463,13 @@ class _SettingsState extends State<Settings> with PageMixin {
             style:
                 FluentTheme.of(
                   context,
-                ).typography.caption, // Smaller text for label
+                ).typography.caption, 
           ),
           const SizedBox(height: 4),
           Align(
             alignment: Alignment.centerLeft,
             child: TextBox(
-              placeholder: AppLocalizations.of(context)!.defaultInstallPath,
+              placeholder: AppLocalizations.of(context)!.defaultInstallationPath,
               controller: TextEditingController(text: appTheme.installPath),
               enabled: appTheme.autoInstall,
               suffix: IconButton(
