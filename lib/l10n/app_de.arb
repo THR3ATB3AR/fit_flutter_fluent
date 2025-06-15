@@ -106,7 +106,6 @@
   "automaticInstallation": "Automatische Installation",
   "enableAutoInstallAfterDownload": "Auto-Installation nach dem Download aktivieren:",
   "defaultInstallationPath": "Standard-Installationspfad",
-  "defaultInstallPath": "Standard-Installationspfad",
   "whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath": "Wenn aktiviert, werden abgeschlossene Repacks versuchen, den angegebenen Pfad zu installieren.",
   "appearance": "Erscheinung",
   "themeMode": "Theme-Modus",
