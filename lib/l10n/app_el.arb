@@ -194,7 +194,7 @@
   "originalSize": "Αρχικό Μέγεθος",
   "repackSize": "Μέγεθος Επαναπακέτου",
   "repackInformation": "Πληροφορίες Repack",
-  "screenshotsTitle": "{count, plural, zero{Screenshots} one{screenshot} other{Screenshots}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "Σφάλμα φόρτωσης εικόνας",
   "noScreenshotsAvailable": "Δεν υπάρχουν διαθέσιμα στιγμιότυπα οθόνης.",
   "noGenresAvailable": "Δεν υπάρχουν διαθέσιμα είδη",
