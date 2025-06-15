@@ -194,7 +194,7 @@
   "originalSize": "Исходный размер",
   "repackSize": "Размер обновления",
   "repackInformation": "Перезабрать информацию",
-  "screenshotsTitle": "{count, plural, zero{Скриншоты} one{снимок экрана} other{Скриншоты}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "Ошибка загрузки изображения",
   "noScreenshotsAvailable": "Скриншоты недоступны.",
   "noGenresAvailable": "Нет доступных жанров",
