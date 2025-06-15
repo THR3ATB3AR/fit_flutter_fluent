@@ -106,7 +106,6 @@
   "automaticInstallation": "تثبيت تلقائي",
   "enableAutoInstallAfterDownload": "تمكين التثبيت التلقائي بعد التنزيل:",
   "defaultInstallationPath": "مسار التثبيت الافتراضي",
-  "defaultInstallPath": "مسار التثبيت الافتراضي",
   "whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath": "عند التمكين، ستحاول الحزم المكتملة التثبيت إلى المسار المحدد.",
   "appearance": "المظهر",
   "themeMode": "وضع السمة",
