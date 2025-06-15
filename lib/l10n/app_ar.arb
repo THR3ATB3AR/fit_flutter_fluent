@@ -194,7 +194,7 @@
   "originalSize": "الحجم الأصلي",
   "repackSize": "حجم الحزمة",
   "repackInformation": "حزمة المعلومات",
-  "screenshotsTitle": "{count, plural, zero{لقطات شاشة} one{لقطة شاشة} other{لقطات شاشة}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "خطأ في تحميل الصورة",
   "noScreenshotsAvailable": "لا توجد لقطات شاشة متوفرة.",
   "noGenresAvailable": "لا توجد أنواع متاحة",
