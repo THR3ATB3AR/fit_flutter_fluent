@@ -106,7 +106,6 @@
   "automaticInstallation": "Automatische installatie",
   "enableAutoInstallAfterDownload": "Auto-installatie inschakelen na download:",
   "defaultInstallationPath": "Standaard installatiepad",
-  "defaultInstallPath": "Standaard Installatiepad",
   "whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath": "Wanneer ingeschakeld, zullen voltooide herpakken proberen te installeren naar het opgegeven pad.",
   "appearance": "Uiterlijk",
   "themeMode": "Thema modus",
