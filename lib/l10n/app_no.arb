@@ -194,7 +194,7 @@
   "originalSize": "Opprinnelig størrelse",
   "repackSize": "Repakk størrelse",
   "repackInformation": "Reparer informasjon",
-  "screenshotsTitle": "{count, plural, zero{Skjermbilder} one{Skjermbilde !<} other{Skjermbilder}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "Feil ved lasting av bilde",
   "noScreenshotsAvailable": "Ingen skjermbilder tilgjengelig.",
   "noGenresAvailable": "Ingen sjangre tilgjengelig",

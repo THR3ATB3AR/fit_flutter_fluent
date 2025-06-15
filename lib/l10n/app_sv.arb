@@ -194,7 +194,7 @@
   "originalSize": "Ursprunglig storlek",
   "repackSize": "Omvänd storlek",
   "repackInformation": "Upprepa information",
-  "screenshotsTitle": "{count, plural, zero{Skärmdumpar} one{skärmdump} other{Skärmdumpar}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "Fel vid inläsning av bild",
   "noScreenshotsAvailable": "Inga skärmdumpar tillgängliga.",
   "noGenresAvailable": "Inga genrer tillgängliga",

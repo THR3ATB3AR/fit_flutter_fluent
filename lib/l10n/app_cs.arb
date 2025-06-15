@@ -194,7 +194,7 @@
   "originalSize": "Původní velikost",
   "repackSize": "Velikost repozitáře",
   "repackInformation": "Informace o repozitáři",
-  "screenshotsTitle": "{count, plural, zero{Snímek obrazovky} one{Snímek obrazovky} other{Snímek obrazovky}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "Chyba při načítání obrázku",
   "noScreenshotsAvailable": "Žádné snímky obrazovky nejsou k dispozici.",
   "noGenresAvailable": "Žádné žánry nejsou k dispozici",

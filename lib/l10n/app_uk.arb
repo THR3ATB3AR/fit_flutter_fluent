@@ -194,7 +194,7 @@
   "originalSize": "Оригінальний розмір",
   "repackSize": "Перевизначити розмір",
   "repackInformation": "Передача інформації",
-  "screenshotsTitle": "{count, plural, zero{Скріншоти} one{Скріншот} other{Скріншот}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "Помилка при завантаженні зображення",
   "noScreenshotsAvailable": "Немає доступних знятків.",
   "noGenresAvailable": "Немає доступних жанрів",
