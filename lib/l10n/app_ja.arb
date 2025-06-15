@@ -194,7 +194,7 @@
   "originalSize": "元のサイズ",
   "repackSize": "返品サイズ",
   "repackInformation": "返品情報",
-  "screenshotsTitle": "{count, plural, zero{スクリーンショット} one{スクリーンショット} other{スクリーンショット}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "画像の読み込みに失敗しました",
   "noScreenshotsAvailable": "スクリーンショットはありません。",
   "noGenresAvailable": "利用可能なジャンルがありません",
