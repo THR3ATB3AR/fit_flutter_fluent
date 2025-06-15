@@ -194,7 +194,7 @@
   "originalSize": "Original Size",
   "repackSize": "Repack Size",
   "repackInformation": "Repack Information",
-  "screenshotsTitle": "{count, plural, zero{Screenshots} one{screenshot} other{Screenshots}} ({count})",
+  "screenshotsTitle": "Screenshots({count})",
   "errorLoadingImage": "Error loading image",
   "noScreenshotsAvailable": "No screenshots available.",
   "noGenresAvailable": "No genres available",
