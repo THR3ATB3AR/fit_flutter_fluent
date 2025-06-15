@@ -106,7 +106,6 @@
   "automaticInstallation": "Installation automatique",
   "enableAutoInstallAfterDownload": "Activer l’installation automatique après le téléchargement:",
   "defaultInstallationPath": "Chemin par défaut de l'installation",
-  "defaultInstallPath": "Chemin par défaut de l'installation",
   "whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath": "Lorsque cette option est activée, les recharges terminées essaieront d'installer le chemin d'accès spécifié.",
   "appearance": "Apparence",
   "themeMode": "Mode thème",
