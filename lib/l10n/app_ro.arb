@@ -106,7 +106,6 @@
   "automaticInstallation": "Instalare automată",
   "enableAutoInstallAfterDownload": "Activează Auto-Instalarea după descărcare:",
   "defaultInstallationPath": "Calea implicită de instalare",
-  "defaultInstallPath": "Calea implicită de instalare",
   "whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath": "Când este activată, repachetele complete vor încerca să se instaleze la calea specificată.",
   "appearance": "Aspectul",
   "themeMode": "Mod temă",
