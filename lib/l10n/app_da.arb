@@ -194,7 +194,7 @@
   "originalSize": "Oprindelig Størrelse",
   "repackSize": "Repack Størrelse",
   "repackInformation": "Repack Information",
-  "screenshotsTitle": "{count, plural, zero{Skærmbilleder} one{skærmbillede} other{Skærmbilleder}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "Fejl under indlæsning af billede",
   "noScreenshotsAvailable": "Ingen screenshots tilgængelige.",
   "noGenresAvailable": "Ingen genrer tilgængelige",
