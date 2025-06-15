@@ -106,7 +106,6 @@
   "automaticInstallation": "Автоматичне встановлення",
   "enableAutoInstallAfterDownload": "Автоматичне встановлення після завантаження:",
   "defaultInstallationPath": "Типовий шлях встановлення",
-  "defaultInstallPath": "Шлях встановлення за замовчуванням",
   "whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath": "Якщо увімкнуто, завершені репакти спробують встановити на вказаний шлях.",
   "appearance": "Зовнішній вигляд",
   "themeMode": "Теми",
