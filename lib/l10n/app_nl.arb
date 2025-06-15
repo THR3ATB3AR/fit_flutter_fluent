@@ -194,7 +194,7 @@
   "originalSize": "Oorspronkelijke grootte",
   "repackSize": "Herhaling grootte",
   "repackInformation": "Herhaling Informatie",
-  "screenshotsTitle": "{count, plural, zero{Screenshots} one{screenshot} other{Screenshots}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "Fout bij laden afbeelding",
   "noScreenshotsAvailable": "Geen schermafbeeldingen beschikbaar.",
   "noGenresAvailable": "Geen genres beschikbaar",
