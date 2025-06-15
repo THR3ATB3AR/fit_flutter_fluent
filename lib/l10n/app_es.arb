@@ -194,7 +194,7 @@
   "originalSize": "Tamaño original",
   "repackSize": "Tamaño del paquete",
   "repackInformation": "Información de Repetir",
-  "screenshotsTitle": "{count, plural, zero{Capturas de pantalla} one{Captura de pantalla} other{Capturas de pantalla}} ({count})",
+  "screenshotsTitle": "Screenshots ({count})",
   "errorLoadingImage": "Error al cargar la imagen",
   "noScreenshotsAvailable": "No hay pantallas disponibles.",
   "noGenresAvailable": "Ningún género disponible",
