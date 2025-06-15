@@ -106,7 +106,6 @@
   "automaticInstallation": "Automatisk installation",
   "enableAutoInstallAfterDownload": "Aktivera automatisk installation efter nedladdning:",
   "defaultInstallationPath": "Standardsökväg för installation",
-  "defaultInstallPath": "Standardsökväg för installation",
   "whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath": "När aktiverad, kommer färdiga repacks att försöka installera till den angivna sökvägen.",
   "appearance": "Utseende",
   "themeMode": "Tema läge",
