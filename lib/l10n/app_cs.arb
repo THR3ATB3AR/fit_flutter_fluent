@@ -106,7 +106,6 @@
   "automaticInstallation": "Automatická instalace",
   "enableAutoInstallAfterDownload": "Povolit automatickou instalaci po stažení:",
   "defaultInstallationPath": "Výchozí cesta instalace",
-  "defaultInstallPath": "Výchozí cesta k instalaci",
   "whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath": "Pokud je povoleno, dokončené republičky se pokusí nainstalovat na zadanou cestu.",
   "appearance": "Vzhled",
   "themeMode": "Režim motivu",
