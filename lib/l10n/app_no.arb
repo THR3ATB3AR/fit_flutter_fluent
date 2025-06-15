@@ -106,7 +106,6 @@
   "automaticInstallation": "Automatisk installasjon",
   "enableAutoInstallAfterDownload": "Aktiver automatisk installering etter nedlasting:",
   "defaultInstallationPath": "Standard installasjons-sti",
-  "defaultInstallPath": "Standard installasjons-sti",
   "whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath": "Når aktivert, vil fullførte repacks forsøke å installere til den angitte stien.",
   "appearance": "Utseende",
   "themeMode": "Tema modus",
