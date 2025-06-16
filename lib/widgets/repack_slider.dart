@@ -3,7 +3,7 @@ import 'package:fit_flutter_fluent/data/repack_list_type.dart';
 import 'package:fit_flutter_fluent/services/repack_service.dart';
 import 'package:fit_flutter_fluent/widgets/repack_item.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:fit_flutter_fluent/l10n/generated/app_localizations.dart';
 
 class RepackSlider extends StatefulWidget {
   final RepackListType repackListType;

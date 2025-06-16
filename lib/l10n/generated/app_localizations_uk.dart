@@ -373,11 +373,13 @@ class AppLocalizationsUk extends AppLocalizations {
   String get confirmForceRescrape => 'Підтвердити примусове перенаправлення';
 
   @override
-  String get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+  String
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
       'Буде видалено ВСІ локально збережені дані і повторно завантажити все з джерела. ';
 
   @override
-  String get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+  String
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
       'Цей процес може зайняти дуже багато часу і споживати значні дані мережі. Ви впевнені?';
 
   @override
@@ -429,7 +431,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get defaultInstallationPath => 'Типовий шлях встановлення';
 
   @override
-  String get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+  String
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
       'Якщо увімкнуто, завершені репакти спробують встановити на вказаний шлях.';
 
   @override
@@ -504,7 +507,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get forceRescrapeAllData => 'Примусово збирати всі дані';
 
   @override
-  String get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+  String
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
       'Попередження: Цей процес може зайняти багато часу та споживати значні дані мережі. Використовуйте з обережністю.';
 
   @override
@@ -553,7 +557,9 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'Шлібкувальна інформація для кожного кафедри (Фаза 2/4): Передачіть $current в $total';
   }
 
@@ -670,7 +676,8 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return 'Повідомлення: $processingError деякі файли можуть виникнути проблеми.';
   }
 

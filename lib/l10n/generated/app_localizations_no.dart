@@ -374,11 +374,13 @@ class AppLocalizationsNo extends AppLocalizations {
   String get confirmForceRescrape => 'Bekreft Tving Rescrape';
 
   @override
-  String get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+  String
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
       'Dette vil slette ALLE lagrede repakkedata og laste ned alt fra kilden. ';
 
   @override
-  String get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+  String
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
       'Denne prosessen kan ta veldig lang tid og forbruke betydelige nettverksdata. Er du sikker?';
 
   @override
@@ -429,7 +431,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get defaultInstallationPath => 'Standard installasjons-sti';
 
   @override
-  String get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+  String
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
       'Når aktivert, vil fullførte repacks forsøke å installere til den angitte stien.';
 
   @override
@@ -505,7 +508,8 @@ class AppLocalizationsNo extends AppLocalizations {
   String get forceRescrapeAllData => 'Tving «Rescrape» alle data';
 
   @override
-  String get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+  String
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
       'Advarsel: Denne prosessen kan ta svært lang tid og bruke betydelige nettverksdata. Bruk med forsiktighet.';
 
   @override
@@ -554,7 +558,9 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'Scraping for hver repack (Fase 2/4): Repack $current av $total';
   }
 
@@ -670,7 +676,8 @@ class AppLocalizationsNo extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return 'Merk: $processingError Noen filer kan ha oppstått problemer.';
   }
 

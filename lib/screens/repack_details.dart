@@ -6,7 +6,7 @@ import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:url_launcher/url_launcher.dart'; 
 import 'package:fit_flutter_fluent/services/scraper_service.dart'; 
 import 'package:fit_flutter_fluent/services/repack_service.dart'; 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:fit_flutter_fluent/l10n/generated/app_localizations.dart';
 
 
 class RepackDetails extends StatefulWidget {

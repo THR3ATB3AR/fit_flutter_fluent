@@ -371,11 +371,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get confirmForceRescrape => 'تأكيد إعادة فرز القوة';
 
   @override
-  String get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+  String
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
       'سيؤدي هذا إلى حذف جميع بيانات الحزمة المخزنة محليا وإعادة تحميل كل شيء من المصدر. ';
 
   @override
-  String get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+  String
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
       'هذه العملية قد تستغرق وقتاً طويلاً وتستهلك بيانات شبكة كبيرة. هل أنت متأكد؟';
 
   @override
@@ -427,8 +429,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String
-      get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
-          'عند التمكين، ستحاول الحزم المكتملة التثبيت إلى المسار المحدد.';
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+      'عند التمكين، ستحاول الحزم المكتملة التثبيت إلى المسار المحدد.';
 
   @override
   String get appearance => 'المظهر';
@@ -502,7 +504,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get forceRescrapeAllData => 'إعادة فرض جميع البيانات';
 
   @override
-  String get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+  String
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
       'تحذير: هذه العملية قد تستغرق وقتاً طويلاً وتستهلك بيانات شبكة كبيرة. استخدمها بحذر.';
 
   @override
@@ -551,7 +554,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'تفاصيل التخريب لكل حزمة (المرحلة 2/4): الحزمة $current من $total';
   }
 
@@ -666,7 +671,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return 'إشعار: $processingError قد واجهت بعض الملفات مشكلات.';
   }
 

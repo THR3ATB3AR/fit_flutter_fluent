@@ -374,11 +374,13 @@ class AppLocalizationsSv extends AppLocalizations {
   String get confirmForceRescrape => 'Bekräfta Tvinga Rescrape';
 
   @override
-  String get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+  String
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
       'Detta kommer att ta bort ALLA lokalt lagrade repack-data och ladda ner allt från källan. ';
 
   @override
-  String get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+  String
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
       'Denna process kan ta mycket lång tid och konsumera betydande nätverksdata. Är du säker?';
 
   @override
@@ -429,7 +431,8 @@ class AppLocalizationsSv extends AppLocalizations {
   String get defaultInstallationPath => 'Standardsökväg för installation';
 
   @override
-  String get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+  String
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
       'När aktiverad, kommer färdiga repacks att försöka installera till den angivna sökvägen.';
 
   @override
@@ -504,7 +507,8 @@ class AppLocalizationsSv extends AppLocalizations {
   String get forceRescrapeAllData => 'Tvinga Rescrape alla data';
 
   @override
-  String get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+  String
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
       'Varning: Denna process kan ta mycket lång tid och konsumera betydande nätverksdata. Använd med försiktighet.';
 
   @override
@@ -553,7 +557,9 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'Skrapdetaljer för varje repack (fas 2/4): Repack $current i $total';
   }
 
@@ -671,7 +677,8 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return 'Observera: $processingError Vissa filer kan ha stött på problem.';
   }
 

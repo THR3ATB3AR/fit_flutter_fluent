@@ -379,11 +379,13 @@ class AppLocalizationsRo extends AppLocalizations {
   String get confirmForceRescrape => 'Confirmare Cursă forţată';
 
   @override
-  String get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+  String
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
       'Aceasta va şterge TOATE datele de reambalare stocate local şi va redescărca totul de la sursă. ';
 
   @override
-  String get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+  String
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
       'Acest proces poate dura foarte mult timp și poate consuma date de rețea semnificative. Ești sigur?';
 
   @override
@@ -435,7 +437,8 @@ class AppLocalizationsRo extends AppLocalizations {
   String get defaultInstallationPath => 'Calea implicită de instalare';
 
   @override
-  String get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+  String
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
       'Când este activată, repachetele complete vor încerca să se instaleze la calea specificată.';
 
   @override
@@ -510,7 +513,8 @@ class AppLocalizationsRo extends AppLocalizations {
   String get forceRescrapeAllData => 'Forțează Rescrape Toate Datele';
 
   @override
-  String get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+  String
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
       'Atenție: Acest proces poate dura foarte mult timp și poate consuma date de rețea semnificative. Utilizați cu prudență.';
 
   @override
@@ -560,7 +564,9 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'Detalii răzuire pentru fiecare reambalare (faza 2/4): Reambalare $current de $total';
   }
 
@@ -679,7 +685,8 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return 'Observație: $processingError Unele fișiere au întâlnit probleme.';
   }
 

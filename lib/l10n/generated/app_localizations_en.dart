@@ -4,9 +4,9 @@ import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
 
-/// The translations for Vietnamese (`vi`).
-class AppLocalizationsVi extends AppLocalizations {
-  AppLocalizationsVi([String locale = 'vi']) : super(locale);
+/// The translations for English (`en`).
+class AppLocalizationsEn extends AppLocalizations {
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
   String get success => 'Success';
@@ -372,11 +372,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get confirmForceRescrape => 'Confirm Force Rescrape';
 
   @override
-  String get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+  String
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
       'This will delete ALL locally stored repack data and re-download everything from the source. ';
 
   @override
-  String get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+  String
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
       'This process can take a very long time and consume significant network data. Are you sure?';
 
   @override
@@ -427,7 +429,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get defaultInstallationPath => 'Default Installation Path';
 
   @override
-  String get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+  String
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
       'When enabled, completed repacks will attempt to install to the specified path.';
 
   @override
@@ -502,7 +505,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get forceRescrapeAllData => 'Force Rescrape All Data';
 
   @override
-  String get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+  String
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
       'Warning: This process can take a very long time and consume significant network data. Use with caution.';
 
   @override
@@ -551,7 +555,9 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'Scraping details for every repack (Phase 2/4): Repack $current of $total';
   }
 
@@ -668,7 +674,8 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return 'Notice: $processingError Some files may have encountered issues.';
   }
 

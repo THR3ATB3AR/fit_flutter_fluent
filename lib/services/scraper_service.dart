@@ -6,7 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/dom.dart' as dom;
 import 'package:intl/intl.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:fit_flutter_fluent/l10n/generated/app_localizations.dart';
 
 class ScraperService {
   ScraperService._privateConstructor();

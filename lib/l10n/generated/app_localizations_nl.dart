@@ -375,11 +375,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get confirmForceRescrape => 'Bevestig Rescrape Kracht';
 
   @override
-  String get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+  String
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
       'Dit zal ALLE lokaal opgeslagen repack-gegevens verwijderen en opnieuw downloaden van alles van de bron. ';
 
   @override
-  String get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+  String
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
       'Dit proces kan heel lang duren en verbruikt significante netwerkgegevens. Weet je het zeker?';
 
   @override
@@ -431,7 +433,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get defaultInstallationPath => 'Standaard installatiepad';
 
   @override
-  String get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+  String
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
       'Wanneer ingeschakeld, zullen voltooide herpakken proberen te installeren naar het opgegeven pad.';
 
   @override
@@ -506,7 +509,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get forceRescrapeAllData => 'Forceer Rescrape Alle gegevens';
 
   @override
-  String get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+  String
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
       'Waarschuwing: Dit proces kan zeer lang duren en aanzienlijke netwerkgegevens verbruiken. Wees voorzichtig.';
 
   @override
@@ -555,7 +559,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'Scrap-details voor elke repack (Phase 2/4): Repack $current of $total';
   }
 
@@ -674,7 +680,8 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return 'Let op: $processingError Sommige bestanden kunnen problemen hebben.';
   }
 

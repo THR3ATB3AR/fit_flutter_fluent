@@ -369,13 +369,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String
-      get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
-          'これは、ローカルに保存されたすべてのリポジトリデータを削除し、ソースからすべてを再ダウンロードします。 ';
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+      'これは、ローカルに保存されたすべてのリポジトリデータを削除し、ソースからすべてを再ダウンロードします。 ';
 
   @override
   String
-      get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
-          'このプロセスには非常に長い時間がかかり、重要なネットワークデータを消費します。よろしいですか？';
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+      'このプロセスには非常に長い時間がかかり、重要なネットワークデータを消費します。よろしいですか？';
 
   @override
   String get yesRescrapeAll => 'はい、すべて再スクレイプします';
@@ -424,8 +424,8 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String
-      get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
-          '有効にすると、完了したリパックは指定されたパスにインストールしようとします。';
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+      '有効にすると、完了したリパックは指定されたパスにインストールしようとします。';
 
   @override
   String get appearance => '外観';
@@ -500,8 +500,8 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String
-      get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
-          '警告：このプロセスには非常に長い時間がかかり、重要なネットワークデータを消費する可能性があります。注意して使用してください。';
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+      '警告：このプロセスには非常に長い時間がかかり、重要なネットワークデータを消費する可能性があります。注意して使用してください。';
 
   @override
   String get rescrapingSeeDialog => '再起動中... ダイアログ を参照';
@@ -548,7 +548,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'すべてのリパックの詳細をスクラップする (フェーズ2/4): $current のリパック $total';
   }
 
@@ -658,7 +660,8 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return '注意: $processingError いくつかのファイルに問題が発生した可能性があります。';
   }
 
