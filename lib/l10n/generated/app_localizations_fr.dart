@@ -379,11 +379,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get confirmForceRescrape => 'Confirmer le remaniement de la force';
 
   @override
-  String get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+  String
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
       'Ceci supprimera TOUTES les données de repack stockées localement et retéléchargera tout depuis la source. ';
 
   @override
-  String get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+  String
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
       'Ce processus peut prendre beaucoup de temps et consommer des données importantes sur le réseau. Êtes-vous sûr?';
 
   @override
@@ -436,7 +438,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get defaultInstallationPath => 'Chemin par défaut de l\'installation';
 
   @override
-  String get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+  String
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
       'Lorsque cette option est activée, les recharges terminées essaieront d\'installer le chemin d\'accès spécifié.';
 
   @override
@@ -515,7 +518,8 @@ class AppLocalizationsFr extends AppLocalizations {
       'Forcer le remaniement de toutes les données';
 
   @override
-  String get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+  String
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
       'Attention : Ce processus peut prendre beaucoup de temps et consommer des données réseau significatives. À utiliser avec prudence.';
 
   @override
@@ -566,7 +570,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'Détails de débordement pour chaque dépôt (Phase 2/4): Reconditionnez $current de $total';
   }
 
@@ -684,7 +690,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return 'Notice: $processingError Some files may have encountered issues.';
   }
 

@@ -10,7 +10,7 @@ import 'dart:async';
 import 'package:fit_flutter_fluent/services/dd_manager.dart';
 import 'package:fit_flutter_fluent/services/host_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:fit_flutter_fluent/l10n/generated/app_localizations.dart';
 
 class RepackHeader extends StatefulWidget {
   final Repack repack;

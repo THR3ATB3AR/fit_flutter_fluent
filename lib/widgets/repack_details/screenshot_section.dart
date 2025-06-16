@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:fit_flutter_fluent/l10n/generated/app_localizations.dart';
 
 class ScreenshotSection extends StatefulWidget {
   final Repack repack;

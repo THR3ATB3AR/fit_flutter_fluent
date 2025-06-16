@@ -378,11 +378,13 @@ class AppLocalizationsEl extends AppLocalizations {
   String get confirmForceRescrape => 'Επιβεβαίωση Ανασυγκρότησης';
 
   @override
-  String get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+  String
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
       'Αυτό θα διαγράψει ΟΛΑ τα αποθηκευμένα τοπικά δεδομένα επανασυσκευασίας και θα τα κατεβάσετε ξανά από την πηγή. ';
 
   @override
-  String get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+  String
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
       'Αυτή η διαδικασία μπορεί να διαρκέσει πολύ καιρό και να καταναλώνουν σημαντικά δεδομένα δικτύου. Είστε σίγουροι?';
 
   @override
@@ -434,7 +436,8 @@ class AppLocalizationsEl extends AppLocalizations {
   String get defaultInstallationPath => 'Προεπιλεγμένη Διαδρομή Εγκατάστασης';
 
   @override
-  String get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+  String
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
       'Όταν ενεργοποιηθεί, οι ολοκληρωμένες επισκευές θα προσπαθήσουν να εγκαταστήσουν στην καθορισμένη διαδρομή.';
 
   @override
@@ -510,7 +513,8 @@ class AppLocalizationsEl extends AppLocalizations {
   String get forceRescrapeAllData => 'Εξαναγκασμός Rescrape Όλων Των Δεδομένων';
 
   @override
-  String get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+  String
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
       'Προειδοποίηση: Αυτή η διαδικασία μπορεί να διαρκέσει πολύ καιρό και να καταναλώσει σημαντικά δεδομένα δικτύου. Χρησιμοποιήστε τα με προσοχή.';
 
   @override
@@ -561,7 +565,9 @@ class AppLocalizationsEl extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'Scraping details for every repack (Phase 2/4): Repack $current of $total';
   }
 
@@ -679,7 +685,8 @@ class AppLocalizationsEl extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return 'Notice: $processingError Some files may have encountered issues.';
   }
 

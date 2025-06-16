@@ -9,7 +9,7 @@ import 'package:flutter/material.dart' show Badge;
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fit_flutter_fluent/theme.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:fit_flutter_fluent/l10n/generated/app_localizations.dart';
 
 class RepackLibrary extends StatefulWidget {
   const RepackLibrary({super.key});

@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fit_flutter_fluent/theme.dart';
 import 'package:fit_flutter_fluent/widgets/page.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:fit_flutter_fluent/l10n/generated/app_localizations.dart';
 
 bool get kIsWindowEffectsSupported {
   return !kIsWeb &&

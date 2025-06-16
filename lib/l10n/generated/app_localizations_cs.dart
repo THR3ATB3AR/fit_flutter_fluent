@@ -375,11 +375,13 @@ class AppLocalizationsCs extends AppLocalizations {
   String get confirmForceRescrape => 'Potvrdit vynucené opakování';
 
   @override
-  String get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+  String
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
       'Tímto smažete VŠECHNY lokálně uložená data repack a znovu stáhnete vše ze zdroje. ';
 
   @override
-  String get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+  String
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
       'Tento proces může trvat velmi dlouho a spotřebovávat významná síťová data. Jste si jisti?';
 
   @override
@@ -430,7 +432,8 @@ class AppLocalizationsCs extends AppLocalizations {
   String get defaultInstallationPath => 'Výchozí cesta instalace';
 
   @override
-  String get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+  String
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
       'Pokud je povoleno, dokončené republičky se pokusí nainstalovat na zadanou cestu.';
 
   @override
@@ -505,7 +508,8 @@ class AppLocalizationsCs extends AppLocalizations {
   String get forceRescrapeAllData => 'Vynutit Rescrape všechna data';
 
   @override
-  String get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+  String
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
       'Varování: Tento proces může trvat velmi dlouho a spotřebovávat významná síťová data. Používejte s opatrností.';
 
   @override
@@ -554,7 +558,9 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'Detaily o každém repack (Phase 2/4): repozitář $current z $total';
   }
 
@@ -672,7 +678,8 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return 'Upozornění: $processingError Některé soubory mohly narazit na problémy.';
   }
 

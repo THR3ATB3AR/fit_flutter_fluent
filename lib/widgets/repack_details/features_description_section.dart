@@ -1,7 +1,7 @@
 import 'package:fit_flutter_fluent/widgets/repack_details/repack_info_card.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:fit_flutter_fluent/l10n/generated/app_localizations.dart';
 
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';

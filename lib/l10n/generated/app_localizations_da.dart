@@ -373,11 +373,13 @@ class AppLocalizationsDa extends AppLocalizations {
   String get confirmForceRescrape => 'Bekræft Kraft Rescrape';
 
   @override
-  String get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+  String
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
       'Dette vil slette ALLE lokalt lagrede repack data og re-downloade alt fra kilden. ';
 
   @override
-  String get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+  String
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
       'Denne proces kan tage meget lang tid og forbruge betydelige netværksdata. Er du sikker?';
 
   @override
@@ -428,7 +430,8 @@ class AppLocalizationsDa extends AppLocalizations {
   String get defaultInstallationPath => 'Standard Installationssti';
 
   @override
-  String get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+  String
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
       'Når aktiveret, vil fuldførte repacks forsøge at installere på den angivne sti.';
 
   @override
@@ -503,7 +506,8 @@ class AppLocalizationsDa extends AppLocalizations {
   String get forceRescrapeAllData => 'Gennemtving Gendan Alle Data';
 
   @override
-  String get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+  String
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
       'Advarsel: Denne proces kan tage meget lang tid og forbruge betydelige netværksdata. Bruges med forsigtighed.';
 
   @override
@@ -552,7 +556,9 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'Scraping detaljer for hvert svar (fase 2/4): Repack $current af $total';
   }
 
@@ -670,7 +676,8 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return 'Bemærk: $processingError Nogle filer kan have stødt på problemer.';
   }
 

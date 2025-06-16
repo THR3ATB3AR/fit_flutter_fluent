@@ -375,11 +375,13 @@ class AppLocalizationsFi extends AppLocalizations {
   String get confirmForceRescrape => 'Vahvista Uudelleennimeäminen';
 
   @override
-  String get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
+  String
+  get thisWillDeleteAllLocallyStoredRepackDataAndReDownloadEverythingFromTheSource =>
       'Tämä poistaa KAIKKI paikallisesti tallennetut tiedot ja lataa kaikki uudelleen lähteestä. ';
 
   @override
-  String get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
+  String
+  get thisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataAreYouSure =>
       'Tämä prosessi voi kestää hyvin kauan ja kuluttaa merkittäviä verkkotietoja. Oletko varma?';
 
   @override
@@ -431,7 +433,8 @@ class AppLocalizationsFi extends AppLocalizations {
   String get defaultInstallationPath => 'Asennuksen Oletuspolku';
 
   @override
-  String get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
+  String
+  get whenEnabledCompletedRepacksWillAttemptToInstallToTheSpecifiedPath =>
       'Kun käytössä, valmiit repaketit yrittävät asentaa määritellylle polulle.';
 
   @override
@@ -506,7 +509,8 @@ class AppLocalizationsFi extends AppLocalizations {
   String get forceRescrapeAllData => 'Pakota Uudelleennimeämään Kaikki Tiedot';
 
   @override
-  String get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
+  String
+  get warningThisProcessCanTakeAVeryLongTimeAndConsumeSignificantNetworkDataUseWithCaution =>
       'Varoitus: Tämä prosessi voi kestää hyvin kauan ja kuluttaa merkittäviä verkkotietoja. Käytä varoen.';
 
   @override
@@ -557,7 +561,9 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String scrapingDetailsForEveryRepackPhase2Progress(
-      Object current, Object total) {
+    Object current,
+    Object total,
+  ) {
     return 'Scraping details for every repack (Phase 2/4): Repack $current of $total';
   }
 
@@ -675,7 +681,8 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String noticeProcessingErrorSomeFilesMayHaveEncounteredIssues(
-      Object processingError) {
+    Object processingError,
+  ) {
     return 'Huomautus: $processingError Joitakin tiedostoja on saattanut kohdata ongelmia.';
   }
 
