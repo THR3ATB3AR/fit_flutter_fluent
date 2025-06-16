@@ -11,6 +11,7 @@ class Repack {
   final String originalSize;
   final String repackSize;
   final Map<String, List<Map<String, String>>> downloadLinks;
+  String? updates;
   final String repackFeatures;
   final String description;
   List<String> screenshots;
@@ -26,6 +27,7 @@ class Repack {
     required this.originalSize,
     required this.repackSize,
     required this.downloadLinks,
+    this.updates,
     required this.repackFeatures,
     required this.description,
     required this.screenshots,
@@ -43,6 +45,7 @@ class Repack {
       'originalSize': originalSize,
       'repackSize': repackSize,
       'downloadLinks': downloadLinks,
+      'updates': updates,
       'repackFeatures': repackFeatures,
       'description': description,
       'screenshots': screenshots,
@@ -72,6 +75,9 @@ class Repack {
               ),
             ),
           ),
+      updates: row['updates'] != null && row['updates'].isNotEmpty
+          ? row['updates']
+          : null,
       repackFeatures: row['repackFeatures'],
       description: row['description'],
       screenshots: List<String>.from(jsonDecode(row['screenshots'])),
@@ -90,6 +96,7 @@ class Repack {
       originalSize,
       repackSize,
       jsonEncode(downloadLinks),
+      updates ?? '',
       repackFeatures,
       description,
       jsonEncode(screenshots),

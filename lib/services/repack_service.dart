@@ -1,4 +1,3 @@
-// services/repack_service.dart
 import 'dart:async';
 import 'dart:io';
 import 'package:fit_flutter_fluent/data/repack.dart';
@@ -27,9 +26,8 @@ class RepackService {
     if (!isDataLoadedInMemory && (await _hasDataToLoad())) {
       await loadRepacks();
     } else if (isDataLoadedInMemory) {
-      _controller.add(null); // Notify if already loaded (e.g. hot reload)
+      _controller.add(null); 
     }
-    // Startup rescrape of new/popular is handled in main.dart after this init
   }
 
   Future<void> _downloadDatabase(String url, String savePath) async {
@@ -44,7 +42,7 @@ class RepackService {
 
   Future<bool> _hasDataToLoad() async {
     final dbPath =
-        '${await _getAppDataPath()}/repacks.db'; // Use / for path segments
+        '${await _getAppDataPath()}/repacks.db'; 
     if (!File(dbPath).existsSync()) {
       return false;
     }
@@ -63,7 +61,6 @@ class RepackService {
         print("Database downloaded successfully.");
       } catch (e) {
         print("Failed to download database: $e. Will create empty tables.");
-        // If download fails, we proceed to create tables, so the app can still function with scraped data.
       }
     }
 
@@ -71,34 +68,33 @@ class RepackService {
 
     db.execute('''
       CREATE TABLE IF NOT EXISTS new_repacks (
-        title TEXT PRIMARY KEY, url TEXT, releaseDate TEXT, cover TEXT, genres TEXT,
+        title TEXT, url TEXT PRIMARY KEY, releaseDate TEXT, cover TEXT, genres TEXT,
         language TEXT, company TEXT, originalSize TEXT, repackSize TEXT,
-        downloadLinks TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
+        downloadLinks TEXT, updates TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
       )
     ''');
-    // ... (other table creations are identical) ...
     db.execute('''
       CREATE TABLE IF NOT EXISTS popular_repacks (
-        title TEXT PRIMARY KEY, url TEXT, releaseDate TEXT, cover TEXT, genres TEXT,
+        title TEXT, url TEXT PRIMARY KEY, releaseDate TEXT, cover TEXT, genres TEXT,
         language TEXT, company TEXT, originalSize TEXT, repackSize TEXT,
-        downloadLinks TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
+        downloadLinks TEXT, updates TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
       )
     ''');
     db.execute('''
       CREATE TABLE IF NOT EXISTS every_repack (
-        title TEXT PRIMARY KEY, url TEXT, releaseDate TEXT, cover TEXT, genres TEXT,
+        title TEXT, url TEXT PRIMARY KEY, releaseDate TEXT, cover TEXT, genres TEXT,
         language TEXT, company TEXT, originalSize TEXT, repackSize TEXT,
-        downloadLinks TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
+        downloadLinks TEXT, updates TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
       )
     ''');
     db.execute('''
       CREATE TABLE IF NOT EXISTS all_repacks_names (
-        title TEXT PRIMARY KEY, url TEXT
+        title TEXT, url TEXT PRIMARY KEY
       )
     ''');
     db.execute('''
       CREATE TABLE IF NOT EXISTS failed_repacks (
-        title TEXT PRIMARY KEY, url TEXT
+        title TEXT, url TEXT PRIMARY KEY
       )
     ''');
     db.dispose();
@@ -130,7 +126,7 @@ class RepackService {
           everyRepackResult.map((row) => Repack.fromSqlite(row)).toList();
       everyRepack.sort(
         (a, b) => a.title.compareTo(b.title),
-      ); // Ensure sorted on load
+      );
 
       final allRepacksNamesResult = db.select(
         'SELECT * FROM all_repacks_names',
@@ -151,7 +147,6 @@ class RepackService {
     } catch (e) {
       print("Error loading repacks from database: $e");
       isDataLoadedInMemory = false;
-      // Clear lists on error to ensure consistent state
       newRepacks.clear();
       popularRepacks.clear();
       everyRepack.clear();
@@ -168,7 +163,7 @@ class RepackService {
     db.execute('BEGIN TRANSACTION');
     db.execute('DELETE FROM new_repacks');
     final stmt = db.prepare(
-      'INSERT INTO new_repacks (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO new_repacks (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, updates, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
     for (var repack in newRepacks) {
       stmt.execute(repack.toSqliteParams());
@@ -176,7 +171,7 @@ class RepackService {
     stmt.dispose();
     db.execute('COMMIT');
     db.dispose();
-    isDataLoadedInMemory = true; // Data is now in memory and DB
+    isDataLoadedInMemory = true; 
     _controller.add(null);
     print("New repacks list saved to DB. Count: ${newRepacks.length}");
   }
@@ -186,7 +181,7 @@ class RepackService {
     db.execute('BEGIN TRANSACTION');
     db.execute('DELETE FROM popular_repacks');
     final stmt = db.prepare(
-      'INSERT INTO popular_repacks (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO popular_repacks (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, updates, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
     for (var repack in popularRepacks) {
       stmt.execute(repack.toSqliteParams());
@@ -204,7 +199,7 @@ class RepackService {
     db.execute('BEGIN TRANSACTION');
     db.execute('DELETE FROM every_repack');
     final stmt = db.prepare(
-      'INSERT INTO every_repack (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO every_repack (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, updates, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
     for (var repack in everyRepack) {
       stmt.execute(repack.toSqliteParams());
@@ -218,28 +213,17 @@ class RepackService {
   }
 
   Future<void> saveSingleEveryRepack(Repack repack) async {
-    // Check if repack already exists by URL (primary unique content identifier)
-    // or Title (primary key in DB) to avoid duplicates if this is called multiple times
-    // For now, assume scrapeMissingRepacks logic prevents adding duplicates to everyRepack list.
     if (everyRepack.any((r) => r.url == repack.url)) {
-      // Optional: Update if found, or just skip
-      // print("Repack ${repack.title} already in everyRepack list, skipping saveSingle or updating.");
-      // To update: remove old, add new, then save to DB.
-      // everyRepack.removeWhere((r) => r.url == repack.url);
-      // everyRepack.add(repack);
-      // For simplicity, this function assumes it's a new one to be added to DB.
     }
 
     final db = sqlite3.open('${await _getAppDataPath()}/repacks.db');
-    // Use INSERT OR REPLACE to handle cases where a title might already exist
     final stmt = db.prepare(
-      'INSERT OR REPLACE INTO every_repack (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT OR REPLACE INTO every_repack (title, url, releaseDate, cover, genres, language, company, originalSize, repackSize, downloadLinks, updates, repackFeatures, description, screenshots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
     stmt.execute(repack.toSqliteParams());
     stmt.dispose();
     db.dispose();
-    // No need to set isDataLoadedInMemory = true here as this is for single additions
-    _controller.add(null); // Notify UI of change
+    _controller.add(null); 
   }
 
   Future<void> saveAllRepackList() async {
@@ -255,7 +239,6 @@ class RepackService {
     stmt.dispose();
     db.execute('COMMIT');
     db.dispose();
-    // isDataLoadedInMemory is more about full data sets like new/popular/every
     _controller.add(null);
     print("All repacks names saved to DB. Count: ${allRepacksNames.length}");
   }
@@ -271,7 +254,6 @@ class RepackService {
     stmt.dispose();
     db.execute('COMMIT');
     db.dispose();
-    // Also remove from in-memory allRepacksNames
     for (var failedUrl in failedRepacks.values) {
       allRepacksNames.removeWhere((title, url) => url == failedUrl);
     }
@@ -289,14 +271,12 @@ class RepackService {
     stmt.execute([title, url]);
     stmt.dispose();
     db.dispose();
-    failedRepacks[title] = url; // Ensure in-memory map is updated
+    failedRepacks[title] = url; 
     _controller.add(null);
   }
 
   Future<bool> checkTablesNotEmpty() async {
     final db = sqlite3.open('${await _getAppDataPath()}/repacks.db');
-    // Check if at least one of the core data tables has data,
-    // or if all_repacks_names has data, indicating a previous scrape attempt.
     final tablesToPotentiallyHaveData = [
       'new_repacks',
       'popular_repacks',
@@ -316,14 +296,12 @@ class RepackService {
   }
 
   Future<void> clearAllTables() async {
-    // Renamed from forceClearAllData for clarity if used by settings
     final db = sqlite3.open('${await _getAppDataPath()}/repacks.db');
-    // This is the original clearAllTables, less destructive than forceClearAllData
     final tablesToClear = [
       'new_repacks',
       'popular_repacks',
       'all_repacks_names',
-    ]; // Does not clear 'every_repack' or 'failed_repacks'
+    ]; 
 
     db.execute('BEGIN TRANSACTION');
     for (var table in tablesToClear) {
@@ -334,15 +312,7 @@ class RepackService {
 
     newRepacks.clear();
     popularRepacks.clear();
-    // everyRepack.clear(); // Not cleared by this function
     allRepacksNames.clear();
-    // failedRepacks.clear(); // Not cleared
-
-    // If everyRepack is not cleared, isDataLoadedInMemory might still be true if everyRepack had data.
-    // This function's original intent seemed to be for a partial clear.
-    // For settings "force delete", a more comprehensive clear is needed.
-    // Let's assume this function keeps its original scope.
-    // If new/popular/allnames are empty, but everyRepack has data, isDataLoadedInMemory should reflect that.
     isDataLoadedInMemory = everyRepack.isNotEmpty;
 
     _controller.add(null);
@@ -350,7 +320,6 @@ class RepackService {
   }
 
   Future<void> forceClearAllData() async {
-    // This is the comprehensive clear for the settings "Force Rescrape"
     final dbPath = '${await _getAppDataPath()}/repacks.db';
     final db = sqlite3.open(dbPath);
     final tables = [
@@ -372,7 +341,7 @@ class RepackService {
     everyRepack.clear();
     allRepacksNames.clear();
     failedRepacks.clear();
-    isDataLoadedInMemory = false; // All data is gone
+    isDataLoadedInMemory = false; 
 
     _controller.add(null);
     print("All repack data forcefully cleared from DB and memory.");
@@ -380,8 +349,6 @@ class RepackService {
 
   Future<String> _getAppDataPath() async {
     final appDataDir = await getApplicationSupportDirectory();
-    // Use platform-agnostic path joining if possible, but this is common for Windows.
-    // For cross-platform, consider the 'path' package.
     final directoryPath =
         '${appDataDir.path}${Platform.pathSeparator}FitFlutter${Platform.pathSeparator}cache';
     final directory = Directory(directoryPath);

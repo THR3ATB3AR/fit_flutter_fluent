@@ -5,9 +5,11 @@ import 'package:fit_flutter_fluent/services/scraper_service.dart';
 import 'package:fit_flutter_fluent/widgets/repack_item.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/material.dart' show Badge;
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fit_flutter_fluent/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RepackLibrary extends StatefulWidget {
   const RepackLibrary({super.key});
@@ -34,6 +36,10 @@ class _RepackLibraryState extends State<RepackLibrary> {
   bool _isSyncingLibrary = false;
   String _syncStatusText = "";
 
+  final FlyoutController _genreFlyoutController = FlyoutController();
+  Map<String, int> _genreCounts = {};
+  final Set<String> _selectedGenres = {};
+
   @override
   void initState() {
     super.initState();
@@ -47,9 +53,11 @@ class _RepackLibraryState extends State<RepackLibrary> {
       if (_repackService.isDataLoadedInMemory) {
         if (dataChanged) {
           _fullRepackListFromService = List.from(newServiceData);
+          _calculateAndSortGenreCounts();
           _performFilteringAndPagination();
         } else if (_isLoadingInitial) {
           _fullRepackListFromService = List.from(newServiceData);
+          _calculateAndSortGenreCounts();
           _performFilteringAndPagination();
         }
       } else {
@@ -60,6 +68,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
 
     if (_repackService.isDataLoadedInMemory) {
       _fullRepackListFromService = List.from(_repackService.everyRepack);
+      _calculateAndSortGenreCounts();
       if (_isLoadingInitial) {
         _performFilteringAndPagination();
       }
@@ -79,9 +88,30 @@ class _RepackLibraryState extends State<RepackLibrary> {
           _fullRepackListFromService.isEmpty &&
           _repackService.everyRepack.isNotEmpty) {
         _fullRepackListFromService = List.from(_repackService.everyRepack);
+        _calculateAndSortGenreCounts();
       }
       _performFilteringAndPagination();
     }
+  }
+
+  void _calculateAndSortGenreCounts() {
+    final newGenreCounts = <String, int>{};
+    for (final repack in _fullRepackListFromService) {
+      if (repack.genres.isNotEmpty) {
+        final genres = repack.genres
+            .split(',')
+            .map((g) => g.trim())
+            .where((g) => g.isNotEmpty);
+        for (final genre in genres) {
+          newGenreCounts.update(genre, (count) => count + 1, ifAbsent: () => 1);
+        }
+      }
+    }
+
+    final sortedEntries =
+        newGenreCounts.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+
+    _genreCounts = Map.fromEntries(sortedEntries);
   }
 
   void _performFilteringAndPagination() {
@@ -93,20 +123,36 @@ class _RepackLibraryState extends State<RepackLibrary> {
       setState(() {
         _filteredRepacksForDisplay = [];
         _paginatedRepacks = [];
+        _genreCounts = {};
+        _selectedGenres.clear();
       });
       return;
     }
 
-    if (_activeSearchQuery.isEmpty) {
-      _filteredRepacksForDisplay = List.from(_fullRepackListFromService);
-    } else {
-      _filteredRepacksForDisplay =
-          _fullRepackListFromService.where((repack) {
+    List<Repack> currentlyFilteredRepacks = List.from(
+      _fullRepackListFromService,
+    );
+
+    if (_selectedGenres.isNotEmpty) {
+      currentlyFilteredRepacks =
+          currentlyFilteredRepacks.where((repack) {
+            if (repack.genres.isEmpty) return false;
+            final repackGenres =
+                repack.genres.split(',').map((g) => g.trim()).toSet();
+            return repackGenres.containsAll(_selectedGenres);
+          }).toList();
+    }
+
+    if (_activeSearchQuery.isNotEmpty) {
+      currentlyFilteredRepacks =
+          currentlyFilteredRepacks.where((repack) {
             return repack.title.toLowerCase().contains(
               _activeSearchQuery.toLowerCase(),
             );
           }).toList();
     }
+
+    _filteredRepacksForDisplay = currentlyFilteredRepacks;
 
     _paginatedRepacks = _filteredRepacksForDisplay.take(_itemsPerPage).toList();
 
@@ -169,18 +215,22 @@ class _RepackLibraryState extends State<RepackLibrary> {
     if (!mounted) return;
     setState(() {
       _isSyncingLibrary = true;
-      _syncStatusText = "Starting library sync...";
+      _syncStatusText = AppLocalizations.of(context)!.startingLibrarySync;
       ScraperService.instance.loadingProgress.value = 0.0;
     });
 
     try {
-      _updateSyncStatusText("Fetching all repack names...");
+      _updateSyncStatusText(
+        AppLocalizations.of(context)!.fetchingAllRepackNames,
+      );
       ScraperService.instance.loadingProgress.value = 0.0;
 
       final allNames = await ScraperService.instance.scrapeAllRepacksNames(
         onProgress: (current, total) {
           if (mounted) {
-            _updateSyncStatusText("Fetching names: $current/$total pages");
+            _updateSyncStatusText(
+              AppLocalizations.of(context)!.fetchingNamesPages(current, total),
+            );
             if (total > 0) {
               ScraperService.instance.loadingProgress.value =
                   current.toDouble() / total.toDouble();
@@ -195,7 +245,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
 
       if (mounted) {
         _updateSyncStatusText(
-          "Scraping missing repack details...\nThis may take a while.",
+          "${AppLocalizations.of(context)!.scrapingMissingRepackDetails}\n${AppLocalizations.of(context)!.thisMayTakeAWhile}",
         );
         ScraperService.instance.loadingProgress.value = 0.0;
       }
@@ -203,7 +253,9 @@ class _RepackLibraryState extends State<RepackLibrary> {
         onProgress: (current, total) {
           if (mounted) {
             _updateSyncStatusText(
-              "Scraping details: $current/$total missing repacks",
+              AppLocalizations.of(
+                context,
+              )!.scrapingMissingRepackDetailsProgress(current, total),
             );
           }
         },
@@ -214,8 +266,10 @@ class _RepackLibraryState extends State<RepackLibrary> {
           context,
           builder: (context, close) {
             return InfoBar(
-              title: const Text('Success'),
-              content: const Text('Repack library synchronized.'),
+              title: Text(AppLocalizations.of(context)!.success),
+              content: Text(
+                AppLocalizations.of(context)!.repackLibrarySynchronized,
+              ),
               action: IconButton(
                 icon: const Icon(FluentIcons.clear),
                 onPressed: close,
@@ -232,8 +286,10 @@ class _RepackLibraryState extends State<RepackLibrary> {
           context,
           builder: (context, close) {
             return InfoBar(
-              title: const Text('Error'),
-              content: Text('Failed to sync library: $e'),
+              title: Text(AppLocalizations.of(context)!.error),
+              content: Text(
+                AppLocalizations.of(context)!.failedToSyncLibrary(e.toString()),
+              ),
               action: IconButton(
                 icon: const Icon(FluentIcons.clear),
                 onPressed: close,
@@ -247,19 +303,19 @@ class _RepackLibraryState extends State<RepackLibrary> {
       if (mounted) {
         setState(() {
           _isSyncingLibrary = false;
-          _syncStatusText = ""; 
+          _syncStatusText = "";
         });
-        ScraperService.instance.loadingProgress.value =
-            0.0; 
+        ScraperService.instance.loadingProgress.value = 0.0;
         _fullRepackListFromService = List.from(_repackService.everyRepack);
+        _calculateAndSortGenreCounts();
         _performFilteringAndPagination();
       }
     }
   }
 
-
   @override
   void dispose() {
+    _genreFlyoutController.dispose();
     _repackServiceSubscription?.cancel();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
@@ -269,10 +325,140 @@ class _RepackLibraryState extends State<RepackLibrary> {
   @override
   Widget build(BuildContext context) {
     final pageHeader = PageHeader(
-      title: const Text('Repack Library'),
+      title: Text(AppLocalizations.of(context)!.repackLibrary),
       commandBar: CommandBar(
         mainAxisAlignment: MainAxisAlignment.end,
         primaryItems: [
+          CommandBarBuilderItem(
+            builder:
+                (context, mode, w) =>
+                    FlyoutTarget(controller: _genreFlyoutController, child: w),
+            wrappedItem: CommandBarButton(
+              icon: Badge(
+                isLabelVisible: _selectedGenres.isNotEmpty,
+                child: const Icon(FluentIcons.filter),
+              ),
+              label: Text(AppLocalizations.of(context)!.filter),
+              onPressed:
+                  () => _genreFlyoutController.showFlyout(
+                    barrierDismissible: true,
+                    dismissWithEsc: true,
+                    builder: (context) {
+                      return StatefulBuilder(
+                        builder: (context, flyoutSetState) {
+                          return FlyoutContent(
+                            child: SizedBox(
+                              width: 250,
+                              height: 400,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          AppLocalizations.of(context)!.filterByGenre,
+                                          style:
+                                              FluentTheme.of(
+                                                context,
+                                              ).typography.subtitle,
+                                        ),
+                                        Button(
+                                          onPressed:
+                                              _selectedGenres.isEmpty
+                                                  ? null
+                                                  : () {
+                                                    flyoutSetState(() {
+                                                      setState(() {
+                                                        _selectedGenres.clear();
+                                                        _performFilteringAndPagination();
+                                                      });
+                                                    });
+                                                  },
+                                          child: Text(AppLocalizations.of(context)!.clear),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Divider(),
+                                  if (_genreCounts.isEmpty)
+                                    Expanded(
+                                      child: Center(
+                                        child: Text(
+                                          AppLocalizations.of(context)!.noGenresAvailable,
+                                          style:
+                                              FluentTheme.of(
+                                                context,
+                                              ).typography.bodyLarge,
+                                        ),
+                                      ),
+                                    )
+                                  else
+                                    Expanded(
+                                      child: ListView.builder(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4.0,
+                                        ),
+                                        itemCount: _genreCounts.length,
+                                        itemBuilder: (context, index) {
+                                          final genre = _genreCounts.keys
+                                              .elementAt(index);
+                                          final count = _genreCounts[genre]!;
+                                          return Padding(
+                                            padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 4.0, bottom: 4.0),
+                                            child: Checkbox(
+                                              content: Expanded(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                    Text(
+                                                      '${genre.length > 20 ? '${genre.substring(0, 20)}…' : genre} ',
+                                                    ),
+                                                    Text(
+                                                      '($count)',
+                                                      style: TextStyle(
+                                                      color: FluentTheme.of(context).accentColor.defaultBrushFor(FluentTheme.of(context).brightness),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              checked: _selectedGenres.contains(
+                                                genre,
+                                              ),
+                                              onChanged: (checked) {
+                                                flyoutSetState(() {
+                                                  setState(() {
+                                                    if (checked == true) {
+                                                      _selectedGenres.add(genre);
+                                                    } else {
+                                                      _selectedGenres.remove(
+                                                        genre,
+                                                      );
+                                                    }
+                                                    _performFilteringAndPagination();
+                                                  });
+                                                });
+                                              },
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+            ),
+          ),
           CommandBarButton(
             icon:
                 _isSyncingLibrary
@@ -282,7 +468,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
                       child: ProgressRing(strokeWidth: 2.0),
                     )
                     : const Icon(FluentIcons.sync),
-            label: const Text('Sync Library'),
+            label: Text(AppLocalizations.of(context)!.syncLibrary),
             onPressed: _isSyncingLibrary ? null : _syncRepackLibrary,
           ),
         ],
@@ -300,7 +486,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Syncing Library...',
+                AppLocalizations.of(context)!.syncingLibrary,
                 style: FluentTheme.of(context).typography.subtitle,
               ),
               const SizedBox(height: 8),
@@ -315,7 +501,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
                   if (value > 0 && value <= 1) {
                     return ProgressBar(value: value * 100);
                   }
-                  return const ProgressRing(); 
+                  return const ProgressRing();
                 },
               ),
               ValueListenableBuilder<double>(
@@ -347,10 +533,13 @@ class _RepackLibraryState extends State<RepackLibrary> {
         return Expanded(
           child: Center(
             child: Text(
-              _activeSearchQuery.isEmpty
-                  ? "No repacks found in the library."
-                  : "No repacks found matching '$_activeSearchQuery'.",
+              _activeSearchQuery.isEmpty && _selectedGenres.isEmpty
+                  ? AppLocalizations.of(context)!.noRepacksFoundInTheLibrary
+                  : AppLocalizations.of(
+                    context,
+                  )!.noRepacksFoundMatchingSearch(_activeSearchQuery),
               style: FluentTheme.of(context).typography.bodyLarge,
+              textAlign: TextAlign.center,
             ),
           ),
         );
@@ -388,9 +577,9 @@ class _RepackLibraryState extends State<RepackLibrary> {
 
             if (repackItemHeight <= 0 ||
                 cardWidth <= cardInternalHorizontalMargin) {
-              return const Center(
+              return Center(
                 child: Text(
-                  "The window is too narrow to display items correctly.\nPlease resize the window.",
+                  "${AppLocalizations.of(context)!.theWindowIsTooNarrowToDisplayItemsCorrectly}\n${AppLocalizations.of(context)!.pleaseResizeTheWindow}",
                   textAlign: TextAlign.center,
                 ),
               );
@@ -433,7 +622,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
         children: [
           if (syncProgressWidget != null) syncProgressWidget,
           buildMainContentArea(),
-          if (_isLoadingMore && !_isSyncingLibrary) 
+          if (_isLoadingMore && !_isSyncingLibrary)
             const Padding(padding: EdgeInsets.all(16.0), child: ProgressRing()),
         ],
       ),
