@@ -41,7 +41,6 @@ Contributions and feature suggestions are welcome!
 
 ## 🐛 Known Issues
 
-* **Genre Links in Details:** In some cases, game genres may appear as raw URLs instead of plain text. A fix is planned to correctly parse and display this information.
 * **Limited Testing:** As a project in active development, there may be undiscovered bugs. Community testing and feedback are greatly appreciated.
 
 ## 📦 Installation
