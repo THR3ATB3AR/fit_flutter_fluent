@@ -293,8 +293,8 @@ class _DownloadGroupItem extends StatelessWidget {
                                     : AppLocalizations.of(
                                       context,
                                     )!.overallProgressFilesPercent(
-                                      (progress * 100),
                                       tasks.length,
+                                      (progress * 100).toStringAsFixed(2),
                                     ),
                                 style:
                                     FluentTheme.of(context).typography.caption,

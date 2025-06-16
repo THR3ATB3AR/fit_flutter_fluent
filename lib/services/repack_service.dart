@@ -68,33 +68,33 @@ class RepackService {
 
     db.execute('''
       CREATE TABLE IF NOT EXISTS new_repacks (
-        title TEXT PRIMARY KEY, url TEXT, releaseDate TEXT, cover TEXT, genres TEXT,
+        title TEXT, url TEXT PRIMARY KEY, releaseDate TEXT, cover TEXT, genres TEXT,
         language TEXT, company TEXT, originalSize TEXT, repackSize TEXT,
         downloadLinks TEXT, updates TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
       )
     ''');
     db.execute('''
       CREATE TABLE IF NOT EXISTS popular_repacks (
-        title TEXT PRIMARY KEY, url TEXT, releaseDate TEXT, cover TEXT, genres TEXT,
+        title TEXT, url TEXT PRIMARY KEY, releaseDate TEXT, cover TEXT, genres TEXT,
         language TEXT, company TEXT, originalSize TEXT, repackSize TEXT,
         downloadLinks TEXT, updates TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
       )
     ''');
     db.execute('''
       CREATE TABLE IF NOT EXISTS every_repack (
-        title TEXT PRIMARY KEY, url TEXT, releaseDate TEXT, cover TEXT, genres TEXT,
+        title TEXT, url TEXT PRIMARY KEY, releaseDate TEXT, cover TEXT, genres TEXT,
         language TEXT, company TEXT, originalSize TEXT, repackSize TEXT,
         downloadLinks TEXT, updates TEXT, repackFeatures TEXT, description TEXT, screenshots TEXT
       )
     ''');
     db.execute('''
       CREATE TABLE IF NOT EXISTS all_repacks_names (
-        title TEXT PRIMARY KEY, url TEXT
+        title TEXT, url TEXT PRIMARY KEY
       )
     ''');
     db.execute('''
       CREATE TABLE IF NOT EXISTS failed_repacks (
-        title TEXT PRIMARY KEY, url TEXT
+        title TEXT, url TEXT PRIMARY KEY
       )
     ''');
     db.dispose();
