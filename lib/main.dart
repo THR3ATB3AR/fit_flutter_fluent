@@ -1,5 +1,8 @@
 import 'dart:io';
+import 'package:fit_flutter_fluent/data/gog_game.dart';
 import 'package:fit_flutter_fluent/providers/update_provider.dart';
+import 'package:fit_flutter_fluent/screens/gog_details.dart';
+import 'package:fit_flutter_fluent/screens/gog_library.dart';
 import 'package:fit_flutter_fluent/services/dd_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
@@ -213,6 +216,12 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           key: const ValueKey('/repacklibrary'),
           icon: const Icon(FluentIcons.library),
           title: Text(AppLocalizations.of(context)!.repackLibrary),
+          body: const SizedBox.shrink(),
+        ),
+        PaneItem(
+          key: const ValueKey('/goglibrary'),
+          icon: const Icon(FluentIcons.library),
+          title: Text(AppLocalizations.of(context)!.gogLibrary),
           body: const SizedBox.shrink(),
         ),
       ].map<NavigationPaneItem>((e) {
@@ -666,6 +675,12 @@ final router = GoRouter(
           },
         ),
         GoRoute(
+          path: '/goglibrary',
+          builder: (context, state) {
+            return const GogLibrary();
+          },
+        ),
+        GoRoute(
           path: '/settings',
           builder: (BuildContext context, GoRouterState state) {
             final String? section = state.uri.queryParameters['section'];
@@ -683,6 +698,13 @@ final router = GoRouter(
           builder: (context, state) {
             final repack = state.extra as Repack;
             return RepackDetails(selectedRepack: repack);
+          },
+        ),
+        GoRoute(
+          path: '/gogdetails',
+          builder: (context, state) {
+            final gogGame = state.extra as GogGame;
+            return GogDetails(selectedGogGame: gogGame);
           },
         ),
       ],

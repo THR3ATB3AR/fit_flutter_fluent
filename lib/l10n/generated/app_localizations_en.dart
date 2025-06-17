@@ -788,4 +788,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filter => 'Filter';
+
+  @override
+  String get gogLibrary => 'GOG Library';
+
+  @override
+  String get syncGogLibrary => 'Sync GOG Library';
+
+  @override
+  String get startingGogSync => 'Starting GOG library sync...';
+
+  @override
+  String get fetchingGogGames => 'Fetching GOG games...';
+
+  @override
+  String fetchingGogGameDetails(Object current, Object total) {
+    return 'Fetching details for GOG game $current of $total...';
+  }
+
+  @override
+  String get gogLibrarySynchronized =>
+      'GOG library has been successfully synchronized.';
+
+  @override
+  String failedToSyncGogLibrary(Object error) {
+    return 'Failed to synchronize GOG library: $error';
+  }
+
+  @override
+  String get noGogGamesFoundInLibrary =>
+      'No GOG games found in the library. Try syncing to fetch them.';
+
+  @override
+  String get noGogGamesFoundMatchingSearch =>
+      'No GOG games found matching your search and filter criteria.';
+
+  @override
+  String get gogGameDetails => 'GOG Game Details';
+
+  @override
+  String get userRating => 'User Rating';
+
+  @override
+  String get downloadSize => 'Download Size';
+
+  @override
+  String get lastUpdate => 'Last Update';
+
+  @override
+  String get developer => 'Developer';
 }
