@@ -662,7 +662,7 @@ class AppLocalizationsNo extends AppLocalizations {
   String get downloadStarted => 'Nedlastingen har startet';
 
   @override
-  String get ok => 'Ok';
+  String get ok => 'OK';
 
   @override
   String get noFilesSelected => 'Ingen filer valgt';

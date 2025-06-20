@@ -1093,4 +1093,78 @@ class ScraperService {
       return GogDownloadLinks(); // Return empty on failure
     }
   }
+
+  Future<GogGame> rescrapeSingleGogGame(int gogGameId) async {
+    debugPrint("[Rescrape] Starting rescrape for GOG game ID: $gogGameId");
+
+    // --- Step 1: Fetch the master list to find the specific game's base data ---
+    final allGamesUrl = Uri.parse('https://gog-games.to/api/web/all-games');
+    final http.Response allGamesResponse;
+    try {
+      allGamesResponse = await _fetchWithRetry(allGamesUrl);
+    } catch (e) {
+      throw Exception("Failed to fetch master game list from gog-games.to: $e");
+    }
+
+    final List<dynamic> allGamesData = jsonDecode(allGamesResponse.body);
+    // Find the specific game's data from the master list by its ID.
+    final gameData = allGamesData.cast<Map<String, dynamic>>().firstWhere(
+          (game) => game['id']?.toString() == gogGameId.toString(),
+      orElse: () => throw Exception("Game with ID $gogGameId not found in the master list."),
+    );
+
+    debugPrint("[Rescrape] Found base game data: ${gameData['title']}");
+
+    // --- Step 2: Fetch the detailed data from gogdb.org ---
+    final gogDbUrl = Uri.parse('https://www.gogdb.org/data/products/$gogGameId/product.json');
+    final http.Response gogDbResponse;
+    try {
+      gogDbResponse = await _fetchWithRetry(gogDbUrl);
+    } catch (e) {
+      throw Exception("Failed to fetch detailed data from gogdb.org for ID $gogGameId: $e");
+    }
+
+    final Map<String, dynamic> gogDbData = jsonDecode(gogDbResponse.body);
+    debugPrint("[Rescrape] Fetched detailed data from gogdb.org");
+
+    // --- Step 3: Combine and build the new GogGame object (reusing logic from scrapeGogGames) ---
+    String cleanHtml(String? htmlString) {
+      if (htmlString == null || htmlString.isEmpty) return 'N/A';
+      return htmlString.replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n').replaceAll(RegExp(r'<[^>]*>'), '').trim();
+    }
+
+    final List<String> genres = (gogDbData['tags'] as List<dynamic>?)?.map((tag) => tag['name'].toString()).toList() ?? [];
+    final String coverHash = gogDbData['image_boxart'] ?? gameData['image'] ?? '';
+    final String coverUrl = coverHash.isNotEmpty ? 'https://images.gog-statics.com/$coverHash.jpg' : 'https://github.com/THR3ATB3AR/fit_flutter_assets/blob/main/noposter.png?raw=true';
+    final List<String> screenshots = (gogDbData['screenshots'] as List<dynamic>?)?.map((hash) => 'https://images.gog-statics.com/$hash.jpg').toList() ?? [];
+    final List<String> languages = (gogDbData['localizations'] as List<dynamic>?)?.map((lang) => lang['name'].toString()).toList() ?? ['English'];
+    final int? userRating = gogDbData['user_rating'] as int?;
+
+    final installerList = gogDbData['dl_installer'] as List<dynamic>?;
+    int? windowsDownloadSize;
+    if (installerList != null) {
+      final windowsInstaller = installerList.firstWhere((installer) => installer['os'] == 'windows', orElse: () => null);
+      if (windowsInstaller != null) {
+        windowsDownloadSize = windowsInstaller['total_size'] as int?;
+      }
+    }
+
+    debugPrint("[Rescrape] Successfully built new GogGame object.");
+
+    return GogGame(
+      id: gogGameId,
+      title: gameData['title'] ?? 'N/A Title',
+      slug: gameData['slug'] ?? '',
+      developer: gameData['developer'] ?? 'N/A',
+      publisher: gameData['publisher'] ?? 'N/A',
+      updateDate: DateTime.tryParse(gameData['last_update'] ?? '') ?? DateTime(1970),
+      description: cleanHtml(gogDbData['description']),
+      cover: coverUrl,
+      genres: genres,
+      screenshots: screenshots,
+      languages: languages,
+      userRating: userRating,
+      windowsDownloadSize: windowsDownloadSize,
+    );
+  }
 }

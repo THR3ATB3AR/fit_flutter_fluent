@@ -67,53 +67,52 @@ class _GogDetailsState extends State<GogDetails> {
     }
   }
 
-  // Future<void> _rescrapeDetails() async {
-  //   if (_isRescrapingDetails) return;
+  Future<void> _rescrapeDetails() async {
+    if (_isRescrapingDetails) return;
 
-  //   setState(() {
-  //     _isRescrapingDetails = true;
-  //   });
+    setState(() {
+      _isRescrapingDetails = true;
+    });
 
-  //   try {
-  //     final String urlToScrape = _currentRepack.url;
-  //     if (urlToScrape.isEmpty) {
-  //       throw Exception("Repack URL is empty, cannot rescrape.");
-  //     }
+    try {
+      // Use the new scraper function with the game's ID
+      GogGame newGogGameData = await _scraperService.rescrapeSingleGogGame(
+        _currentGogGame.id,
+      );
 
-  //     Repack newRepackData = await _scraperService.scrapeRepackFromSearch(
-  //       urlToScrape,
-  //     );
+      // Update the main data list in the service
+      _repackService.gogGames.removeWhere((g) => g.id == newGogGameData.id);
+      _repackService.gogGames.add(newGogGameData);
+      
+      // Save the updated list to the database
+      // Using saveGogGamesList will handle sorting and notifying listeners
+      await _repackService.saveGogGamesList();
 
-  //     _repackService.everyRepack.removeWhere((r) => r.url == newRepackData.url);
-  //     _repackService.everyRepack.add(newRepackData);
-  //     _repackService.everyRepack.sort((a, b) => a.title.compareTo(b.title));
-  //     await _repackService.saveSingleEveryRepack(newRepackData);
-
-  //     if (mounted) {
-  //       setState(() {
-  //         _currentRepack = newRepackData;
-  //       });
-  //       _showInfoBar(
-  //         title: AppLocalizations.of(context)!.success,
-  //         content:
-  //             AppLocalizations.of(context)!.detailsHaveBeenRescraped(newRepackData.title),
-  //         severity: InfoBarSeverity.success,
-  //       );
-  //     }
-  //   } catch (e) {
-  //     _showInfoBar(
-  //       title: AppLocalizations.of(context)!.errorRescraping,
-  //       content: AppLocalizations.of(context)!.failedToRescrapeDetails(e.toString()),
-  //       severity: InfoBarSeverity.error,
-  //     );
-  //   } finally {
-  //     if (mounted) {
-  //       setState(() {
-  //         _isRescrapingDetails = false;
-  //       });
-  //     }
-  //   }
-  // }
+      if (mounted) {
+        // Update the local state to refresh the UI immediately
+        setState(() {
+          _currentGogGame = newGogGameData;
+        });
+        _showInfoBar(
+          title: AppLocalizations.of(context)!.success,
+          content: AppLocalizations.of(context)!.detailsHaveBeenRescraped(newGogGameData.title),
+          severity: InfoBarSeverity.success,
+        );
+      }
+    } catch (e) {
+      _showInfoBar(
+        title: AppLocalizations.of(context)!.errorRescraping,
+        content: AppLocalizations.of(context)!.failedToRescrapeDetails(e.toString()),
+        severity: InfoBarSeverity.error,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRescrapingDetails = false;
+        });
+      }
+    }
+  }
 
   void _showInfoBar({
     required String title,
@@ -156,10 +155,10 @@ class _GogDetailsState extends State<GogDetails> {
                     )
                     : const Icon(FluentIcons.refresh),
             label: Text(AppLocalizations.of(context)!.rescrapeDetails),
-            onPressed: (){}
-                // _isRescrapingDetails || _currentRepack.url.isEmpty
-                //     ? null
-                //     : _rescrapeDetails,
+            onPressed: 
+                _isRescrapingDetails || _currentGogGame.url.isEmpty
+                    ? null
+                    : _rescrapeDetails,
           ),
         ],
       ),

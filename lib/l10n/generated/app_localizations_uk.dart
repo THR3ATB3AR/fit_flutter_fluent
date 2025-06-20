@@ -662,7 +662,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get downloadStarted => 'Завантаження розпочато';
 
   @override
-  String get ok => 'Гаразд';
+  String get ok => 'OK';
 
   @override
   String get noFilesSelected => 'Не вибрано жодного файлу';

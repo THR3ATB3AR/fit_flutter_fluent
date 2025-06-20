@@ -663,7 +663,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get downloadStarted => 'Загрузка начата';
 
   @override
-  String get ok => 'ОК';
+  String get ok => 'OK';
 
   @override
   String get noFilesSelected => 'Файлы не выбраны';

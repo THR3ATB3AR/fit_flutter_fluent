@@ -671,7 +671,7 @@ class AppLocalizationsEl extends AppLocalizations {
   String get downloadStarted => 'Η Λήψη Ξεκίνησε';
 
   @override
-  String get ok => 'Εντάξει';
+  String get ok => 'OK';
 
   @override
   String get noFilesSelected => 'Δεν Επιλέχθηκαν Αρχεία';

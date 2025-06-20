@@ -670,7 +670,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get downloadStarted => 'Descărcare începută';
 
   @override
-  String get ok => 'Ok';
+  String get ok => 'OK';
 
   @override
   String get noFilesSelected => 'Niciun fișier selectat';

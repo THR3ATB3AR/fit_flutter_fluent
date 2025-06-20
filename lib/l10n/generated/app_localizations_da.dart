@@ -662,7 +662,7 @@ class AppLocalizationsDa extends AppLocalizations {
   String get downloadStarted => 'Download Startet';
 
   @override
-  String get ok => 'Ok';
+  String get ok => 'OK';
 
   @override
   String get noFilesSelected => 'Ingen Filer Valgt';

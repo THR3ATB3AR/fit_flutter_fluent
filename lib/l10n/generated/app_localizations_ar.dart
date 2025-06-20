@@ -657,7 +657,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get downloadStarted => 'بدأ التحميل';
 
   @override
-  String get ok => 'حسناً';
+  String get ok => 'OK';
 
   @override
   String get noFilesSelected => 'لا توجد ملفات محددة';

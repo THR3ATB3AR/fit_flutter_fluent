@@ -676,7 +676,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get downloadStarted => 'Téléchargement démarré';
 
   @override
-  String get ok => 'Ok';
+  String get ok => 'OK';
 
   @override
   String get noFilesSelected => 'Aucun fichier sélectionné';

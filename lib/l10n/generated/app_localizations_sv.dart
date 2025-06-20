@@ -663,7 +663,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get downloadStarted => 'Nedladdning påbörjad';
 
   @override
-  String get ok => 'Ok';
+  String get ok => 'OK';
 
   @override
   String get noFilesSelected => 'Inga filer valda';

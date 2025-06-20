@@ -667,7 +667,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get downloadStarted => 'Lataus Aloitettu';
 
   @override
-  String get ok => 'Ok';
+  String get ok => 'OK';
 
   @override
   String get noFilesSelected => 'Ei Valittuja Tiedostoja';

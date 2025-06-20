@@ -668,7 +668,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get downloadStarted => 'Download gestartet';
 
   @override
-  String get ok => 'Ok';
+  String get ok => 'OK';
 
   @override
   String get noFilesSelected => 'Keine Dateien ausgewählt';
