@@ -73,7 +73,7 @@
   "couldNotLaunchUrl": "Nie można uruchomić URL: {error}",
   "couldNotLaunch": "Nie można uruchomić: {url}",
   "invalidUrlFormat": "Nieprawidłowy format URL: {url}",
-  "rescrapeDetails": "Szczegóły odkrycia",
+  "rescrapeDetails": "Odśwież Szczegóły",
   "detailsHaveBeenRescraped": "Szczegóły dla {title} zostały pozyskane i zaktualizowane.",
   "failedToRescrapeDetails": "Nie udało się pozyskać szczegółów: {errorMessage}",
   "errorRescraping": "Błąd Pozyskiwania",
