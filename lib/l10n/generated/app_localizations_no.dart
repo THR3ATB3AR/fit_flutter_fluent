@@ -844,5 +844,5 @@ class AppLocalizationsNo extends AppLocalizations {
       'Kun torrenter jobber for øyeblikket.';
 
   @override
-  String get couldNotFindDownloadLinks => 'Could not find download links';
+  String get couldNotFindDownloadLinks => 'Kunne ikke finne nedlastingslenker';
 }

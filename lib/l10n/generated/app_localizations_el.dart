@@ -855,5 +855,5 @@ class AppLocalizationsEl extends AppLocalizations {
       'Μόνο τα torrent λειτουργούν προς το παρόν.';
 
   @override
-  String get couldNotFindDownloadLinks => 'Could not find download links';
+  String get couldNotFindDownloadLinks => 'Αδυναμία εύρεσης συνδέσμων λήψης';
 }

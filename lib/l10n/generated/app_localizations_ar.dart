@@ -837,5 +837,5 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onlyTorrentsAreWorkingForNow => 'فقط التورنت تعمل الآن.';
 
   @override
-  String get couldNotFindDownloadLinks => 'Could not find download links';
+  String get couldNotFindDownloadLinks => 'تعذر العثور على روابط التحميل';
 }

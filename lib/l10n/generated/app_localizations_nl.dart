@@ -849,5 +849,5 @@ class AppLocalizationsNl extends AppLocalizations {
   String get onlyTorrentsAreWorkingForNow => 'Alleen torrents werken voor nu.';
 
   @override
-  String get couldNotFindDownloadLinks => 'Could not find download links';
+  String get couldNotFindDownloadLinks => 'Kan geen downloadlinks vinden';
 }

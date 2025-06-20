@@ -855,5 +855,6 @@ class AppLocalizationsPl extends AppLocalizations {
       'Na razie działają tylko torrenty.';
 
   @override
-  String get couldNotFindDownloadLinks => 'Could not find download links';
+  String get couldNotFindDownloadLinks =>
+      'Nie można znaleźć linków do pobrania';
 }

@@ -844,5 +844,5 @@ class AppLocalizationsDa extends AppLocalizations {
   String get onlyTorrentsAreWorkingForNow => 'Kun torrents arbejder for nu.';
 
   @override
-  String get couldNotFindDownloadLinks => 'Could not find download links';
+  String get couldNotFindDownloadLinks => 'Kunne ikke finde download-links';
 }

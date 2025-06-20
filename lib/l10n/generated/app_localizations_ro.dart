@@ -854,5 +854,6 @@ class AppLocalizationsRo extends AppLocalizations {
       'Numai torentele lucrează deocamdată.';
 
   @override
-  String get couldNotFindDownloadLinks => 'Could not find download links';
+  String get couldNotFindDownloadLinks =>
+      'Linkurile de descărcare nu au putut fi găsite';
 }

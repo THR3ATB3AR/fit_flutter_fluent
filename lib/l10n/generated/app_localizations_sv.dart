@@ -846,5 +846,5 @@ class AppLocalizationsSv extends AppLocalizations {
       'Endast torrenter arbetar för tillfället.';
 
   @override
-  String get couldNotFindDownloadLinks => 'Could not find download links';
+  String get couldNotFindDownloadLinks => 'Kunde inte hitta nedladdningslänkar';
 }

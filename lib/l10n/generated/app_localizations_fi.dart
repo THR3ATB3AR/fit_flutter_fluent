@@ -849,5 +849,5 @@ class AppLocalizationsFi extends AppLocalizations {
       'Vain torrentit toimivat toistaiseksi.';
 
   @override
-  String get couldNotFindDownloadLinks => 'Could not find download links';
+  String get couldNotFindDownloadLinks => 'Latauslinkkejä ei löytynyt';
 }

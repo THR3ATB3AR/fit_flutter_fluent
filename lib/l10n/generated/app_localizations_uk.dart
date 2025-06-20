@@ -843,5 +843,6 @@ class AppLocalizationsUk extends AppLocalizations {
   String get onlyTorrentsAreWorkingForNow => 'Заплановано лише торренти.';
 
   @override
-  String get couldNotFindDownloadLinks => 'Could not find download links';
+  String get couldNotFindDownloadLinks =>
+      'Не вдалося знайти посилання на завантаження';
 }

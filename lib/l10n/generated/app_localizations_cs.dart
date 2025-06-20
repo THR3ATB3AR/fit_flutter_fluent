@@ -848,5 +848,5 @@ class AppLocalizationsCs extends AppLocalizations {
       'Pro tuto chvíli pracují pouze torrenty.';
 
   @override
-  String get couldNotFindDownloadLinks => 'Could not find download links';
+  String get couldNotFindDownloadLinks => 'Nelze najít odkazy ke stažení';
 }

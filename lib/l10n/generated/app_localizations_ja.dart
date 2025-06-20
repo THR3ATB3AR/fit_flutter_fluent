@@ -823,5 +823,5 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onlyTorrentsAreWorkingForNow => '現時点では、Torrent だけが動作します。';
 
   @override
-  String get couldNotFindDownloadLinks => 'Could not find download links';
+  String get couldNotFindDownloadLinks => 'ダウンロードリンクが見つかりませんでした';
 }
