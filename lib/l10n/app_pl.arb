@@ -200,5 +200,20 @@
   "noGenresAvailable": "Brak dostępnych gatunków",
   "clear": "Wyczyść",
   "filterByGenre": "Filtruj według gatunku",
-  "filter": "Filtruj"
+  "filter": "Filtruj",
+  "gogLibrary": "Biblioteka GOG",
+  "syncGogLibrary": "Synchronizuj bibliotekę GOG",
+  "startingGogSync": "Uruchamianie synchronizacji biblioteki GOG...",
+  "fetchingGogGames": "Pobieranie gier GOG...",
+  "fetchingGogGameDetails": "Pobieranie szczegółów gry GOG {current} dla {total}...",
+  "gogLibrarySynchronized": "Biblioteka GOG została pomyślnie zsynchronizowana.",
+  "failedToSyncGogLibrary": "Nie udało się zsynchronizować biblioteki GOG: {error}",
+  "noGogGamesFoundInLibrary": "Nie znaleziono gier GOG w bibliotece. Spróbuj zsynchronizować, aby je pobrać.",
+  "noGogGamesFoundMatchingSearch": "Nie znaleziono gier GOG spełniających kryteria wyszukiwania i filtrowania.",
+  "gogGameDetails": "Szczegóły gry GOG",
+  "userRating": "Ocena użytkownika",
+  "downloadSize": "Rozmiar pobierania",
+  "lastUpdate": "Ostatnia aktualizacja",
+  "developer": "Programista",
+  "onlyTorrentsAreWorkingForNow": "Na razie działają tylko torrenty."
 }
