@@ -215,5 +215,6 @@
   "downloadSize": "Lataa Koko",
   "lastUpdate": "Viimeisin Päivitys",
   "developer": "Kehittäjä",
-  "onlyTorrentsAreWorkingForNow": "Vain torrentit toimivat toistaiseksi."
+  "onlyTorrentsAreWorkingForNow": "Vain torrentit toimivat toistaiseksi.",
+  "couldNotFindDownloadLinks": "Could not find download links"
 }

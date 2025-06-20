@@ -662,7 +662,7 @@ class AppLocalizationsDa extends AppLocalizations {
   String get downloadStarted => 'Download Startet';
 
   @override
-  String get ok => 'OK';
+  String get ok => 'Ok';
 
   @override
   String get noFilesSelected => 'Ingen Filer Valgt';
@@ -770,7 +770,7 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Skærmbilleder ($count)';
   }
 
   @override
@@ -792,55 +792,57 @@ class AppLocalizationsDa extends AppLocalizations {
   String get filter => 'Filtrer';
 
   @override
-  String get gogLibrary => 'GOG Library';
+  String get gogLibrary => 'GOG Bibliotek';
 
   @override
-  String get syncGogLibrary => 'Sync GOG Library';
+  String get syncGogLibrary => 'Synkroniser GOG Bibliotek';
 
   @override
-  String get startingGogSync => 'Starting GOG library sync...';
+  String get startingGogSync => 'Starter GOG bibliotek synkronisering...';
 
   @override
-  String get fetchingGogGames => 'Fetching GOG games...';
+  String get fetchingGogGames => 'Henter GOG spil...';
 
   @override
   String fetchingGogGameDetails(Object current, Object total) {
-    return 'Fetching details for GOG game $current of $total...';
+    return 'Henter detaljer for GOG spil $current af $total...';
   }
 
   @override
   String get gogLibrarySynchronized =>
-      'GOG library has been successfully synchronized.';
+      'GOG bibliotek er synkroniseret med succes.';
 
   @override
   String failedToSyncGogLibrary(Object error) {
-    return 'Failed to synchronize GOG library: $error';
+    return 'Synkronisering af GOG bibliotek mislykkedes: $error';
   }
 
   @override
   String get noGogGamesFoundInLibrary =>
-      'No GOG games found in the library. Try syncing to fetch them.';
+      'Ingen GOG spil fundet i biblioteket. Prøv at synkronisere for at hente dem.';
 
   @override
   String get noGogGamesFoundMatchingSearch =>
-      'No GOG games found matching your search and filter criteria.';
+      'Ingen GOG spil fundet matcher dine søgnings- og filterkriterier.';
 
   @override
-  String get gogGameDetails => 'GOG Game Details';
+  String get gogGameDetails => 'GOG Spil Detaljer';
 
   @override
-  String get userRating => 'User Rating';
+  String get userRating => 'Bruger Bedømmelse';
 
   @override
-  String get downloadSize => 'Download Size';
+  String get downloadSize => 'Download Størrelse';
 
   @override
-  String get lastUpdate => 'Last Update';
+  String get lastUpdate => 'Seneste Opdatering';
 
   @override
-  String get developer => 'Developer';
+  String get developer => 'Udvikler';
 
   @override
-  String get onlyTorrentsAreWorkingForNow =>
-      'Only torrents are working for now.';
+  String get onlyTorrentsAreWorkingForNow => 'Kun torrents arbejder for nu.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Could not find download links';
 }

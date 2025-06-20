@@ -319,7 +319,7 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get rescrapeDetails => 'Szczegóły odkrycia';
+  String get rescrapeDetails => 'Odśwież Szczegóły';
 
   @override
   String detailsHaveBeenRescraped(Object title) {
@@ -802,55 +802,58 @@ class AppLocalizationsPl extends AppLocalizations {
   String get filter => 'Filtruj';
 
   @override
-  String get gogLibrary => 'GOG Library';
+  String get gogLibrary => 'Biblioteka GOG';
 
   @override
-  String get syncGogLibrary => 'Sync GOG Library';
+  String get syncGogLibrary => 'Synchronizuj bibliotekę GOG';
 
   @override
-  String get startingGogSync => 'Starting GOG library sync...';
+  String get startingGogSync => 'Uruchamianie synchronizacji biblioteki GOG...';
 
   @override
-  String get fetchingGogGames => 'Fetching GOG games...';
+  String get fetchingGogGames => 'Pozyskiwanie gier GOG...';
 
   @override
   String fetchingGogGameDetails(Object current, Object total) {
-    return 'Fetching details for GOG game $current of $total...';
+    return 'Pozyskiwanie szczegółów gry GOG $current dla $total...';
   }
 
   @override
   String get gogLibrarySynchronized =>
-      'GOG library has been successfully synchronized.';
+      'Biblioteka GOG została pomyślnie zsynchronizowana.';
 
   @override
   String failedToSyncGogLibrary(Object error) {
-    return 'Failed to synchronize GOG library: $error';
+    return 'Nie udało się zsynchronizować biblioteki GOG: $error';
   }
 
   @override
   String get noGogGamesFoundInLibrary =>
-      'No GOG games found in the library. Try syncing to fetch them.';
+      'Nie znaleziono gier GOG w bibliotece. Spróbuj zsynchronizować, aby je pobrać.';
 
   @override
   String get noGogGamesFoundMatchingSearch =>
-      'No GOG games found matching your search and filter criteria.';
+      'Nie znaleziono gier GOG spełniających kryteria wyszukiwania i filtrowania.';
 
   @override
-  String get gogGameDetails => 'GOG Game Details';
+  String get gogGameDetails => 'Szczegóły gry GOG';
 
   @override
-  String get userRating => 'User Rating';
+  String get userRating => 'Oceny użytkowników';
 
   @override
-  String get downloadSize => 'Download Size';
+  String get downloadSize => 'Rozmiar pobierania';
 
   @override
-  String get lastUpdate => 'Last Update';
+  String get lastUpdate => 'Ostatnia aktualizacja';
 
   @override
-  String get developer => 'Developer';
+  String get developer => 'Deweloper';
 
   @override
   String get onlyTorrentsAreWorkingForNow =>
-      'Only torrents are working for now.';
+      'Na razie działają tylko torrenty.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Could not find download links';
 }

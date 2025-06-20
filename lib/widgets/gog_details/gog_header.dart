@@ -103,7 +103,7 @@ class _GogHeaderState extends State<GogHeader> {
           return InfoBar(
             title: Text(AppLocalizations.of(context)!.error),
             content: Text(
-              'AppLocalizations.of(context)!.couldNotFindDownloadLinks',
+              AppLocalizations.of(context)!.couldNotFindDownloadLinks,
             ),
             action: IconButton(
               icon: const Icon(FluentIcons.clear),

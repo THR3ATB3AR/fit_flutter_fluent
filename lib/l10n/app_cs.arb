@@ -215,5 +215,6 @@
   "downloadSize": "Velikost stahování",
   "lastUpdate": "Poslední aktualizace",
   "developer": "Vývojář",
-  "onlyTorrentsAreWorkingForNow": "Pro tuto chvíli pracují pouze torrenty."
+  "onlyTorrentsAreWorkingForNow": "Pro tuto chvíli pracují pouze torrenty.",
+  "couldNotFindDownloadLinks": "Could not find download links"
 }

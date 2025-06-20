@@ -215,5 +215,6 @@
   "downloadSize": "Розмір завантаження",
   "lastUpdate": "Останнє оновлення",
   "developer": "Розробник",
-  "onlyTorrentsAreWorkingForNow": "Заплановано лише торренти."
+  "onlyTorrentsAreWorkingForNow": "Заплановано лише торренти.",
+  "couldNotFindDownloadLinks": "Could not find download links"
 }

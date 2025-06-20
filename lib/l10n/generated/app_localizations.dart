@@ -1453,6 +1453,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only torrents are working for now.'**
   String get onlyTorrentsAreWorkingForNow;
+
+  /// No description provided for @couldNotFindDownloadLinks.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not find download links'**
+  String get couldNotFindDownloadLinks;
 }
 
 class _AppLocalizationsDelegate

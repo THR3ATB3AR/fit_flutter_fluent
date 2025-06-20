@@ -751,7 +751,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'スクリーンショット ($count)';
   }
 
   @override
@@ -773,55 +773,55 @@ class AppLocalizationsJa extends AppLocalizations {
   String get filter => 'フィルター';
 
   @override
-  String get gogLibrary => 'GOG Library';
+  String get gogLibrary => 'GOGライブラリ';
 
   @override
-  String get syncGogLibrary => 'Sync GOG Library';
+  String get syncGogLibrary => 'GOGライブラリを同期';
 
   @override
-  String get startingGogSync => 'Starting GOG library sync...';
+  String get startingGogSync => 'GOGライブラリの同期を開始しています...';
 
   @override
-  String get fetchingGogGames => 'Fetching GOG games...';
+  String get fetchingGogGames => 'GOGゲームを取得しています...';
 
   @override
   String fetchingGogGameDetails(Object current, Object total) {
-    return 'Fetching details for GOG game $current of $total...';
+    return 'GOGゲーム $current の $totalの詳細を取得中...';
   }
 
   @override
-  String get gogLibrarySynchronized =>
-      'GOG library has been successfully synchronized.';
+  String get gogLibrarySynchronized => 'GOGライブラリが正常に同期されました。';
 
   @override
   String failedToSyncGogLibrary(Object error) {
-    return 'Failed to synchronize GOG library: $error';
+    return 'GOGライブラリの同期に失敗しました: $error';
   }
 
   @override
-  String get noGogGamesFoundInLibrary =>
-      'No GOG games found in the library. Try syncing to fetch them.';
+  String get noGogGamesFoundInLibrary => 'ライブラリにGOGゲームが見つかりません。同期して取得してみてください。';
 
   @override
   String get noGogGamesFoundMatchingSearch =>
-      'No GOG games found matching your search and filter criteria.';
+      '検索条件とフィルター条件に一致するGOGゲームが見つかりませんでした。';
 
   @override
-  String get gogGameDetails => 'GOG Game Details';
+  String get gogGameDetails => 'GOGゲームの詳細';
 
   @override
-  String get userRating => 'User Rating';
+  String get userRating => 'ユーザー評価';
 
   @override
-  String get downloadSize => 'Download Size';
+  String get downloadSize => 'ダウンロードサイズ';
 
   @override
-  String get lastUpdate => 'Last Update';
+  String get lastUpdate => '最終更新';
 
   @override
-  String get developer => 'Developer';
+  String get developer => '開発者';
 
   @override
-  String get onlyTorrentsAreWorkingForNow =>
-      'Only torrents are working for now.';
+  String get onlyTorrentsAreWorkingForNow => '現時点では、Torrent だけが動作します。';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Could not find download links';
 }

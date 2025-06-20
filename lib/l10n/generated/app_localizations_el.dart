@@ -671,7 +671,7 @@ class AppLocalizationsEl extends AppLocalizations {
   String get downloadStarted => 'Η Λήψη Ξεκίνησε';
 
   @override
-  String get ok => 'OK';
+  String get ok => 'Εντάξει';
 
   @override
   String get noFilesSelected => 'Δεν Επιλέχθηκαν Αρχεία';
@@ -779,7 +779,7 @@ class AppLocalizationsEl extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Στιγμιότυπα Οθόνης ($count)';
   }
 
   @override
@@ -802,25 +802,25 @@ class AppLocalizationsEl extends AppLocalizations {
   String get filter => 'Φίλτρο';
 
   @override
-  String get gogLibrary => 'GOG Library';
+  String get gogLibrary => 'Βιβλιοθήκη GOG';
 
   @override
-  String get syncGogLibrary => 'Sync GOG Library';
+  String get syncGogLibrary => 'Συγχρονισμός Gaw Βιβλιοθήκης';
 
   @override
-  String get startingGogSync => 'Starting GOG library sync...';
+  String get startingGogSync => 'Έναρξη συγχρονισμού βιβλιοθήκης GOG...';
 
   @override
-  String get fetchingGogGames => 'Fetching GOG games...';
+  String get fetchingGogGames => 'Λήψη παιχνιδιών GOG...';
 
   @override
   String fetchingGogGameDetails(Object current, Object total) {
-    return 'Fetching details for GOG game $current of $total...';
+    return 'Λήψη λεπτομερειών για GOG παιχνίδι $current του $total...';
   }
 
   @override
   String get gogLibrarySynchronized =>
-      'GOG library has been successfully synchronized.';
+      'Η βιβλιοθήκη GOG συγχρονίστηκε επιτυχώς.';
 
   @override
   String failedToSyncGogLibrary(Object error) {
@@ -829,28 +829,31 @@ class AppLocalizationsEl extends AppLocalizations {
 
   @override
   String get noGogGamesFoundInLibrary =>
-      'No GOG games found in the library. Try syncing to fetch them.';
+      'Δεν βρέθηκαν παιχνίδια GOG στη βιβλιοθήκη. Δοκιμάστε να συγχρονίσετε για την ανάκτησή τους.';
 
   @override
   String get noGogGamesFoundMatchingSearch =>
-      'No GOG games found matching your search and filter criteria.';
+      'Δεν βρέθηκαν παιχνίδια GOG που να ταιριάζουν με τα κριτήρια αναζήτησης και φίλτρου.';
 
   @override
-  String get gogGameDetails => 'GOG Game Details';
+  String get gogGameDetails => 'Λεπτομέρειες Παιχνιδιού GOG';
 
   @override
-  String get userRating => 'User Rating';
+  String get userRating => 'Βαθμολογία Χρήστη';
 
   @override
-  String get downloadSize => 'Download Size';
+  String get downloadSize => 'Μέγεθος Λήψης';
 
   @override
-  String get lastUpdate => 'Last Update';
+  String get lastUpdate => 'Τελευταία Ενημέρωση';
 
   @override
-  String get developer => 'Developer';
+  String get developer => 'Προγραμματιστής';
 
   @override
   String get onlyTorrentsAreWorkingForNow =>
-      'Only torrents are working for now.';
+      'Μόνο τα torrent λειτουργούν προς το παρόν.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Could not find download links';
 }

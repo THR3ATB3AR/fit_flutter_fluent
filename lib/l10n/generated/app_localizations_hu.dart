@@ -841,4 +841,7 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get onlyTorrentsAreWorkingForNow =>
       'Only torrents are working for now.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Could not find download links';
 }

@@ -215,5 +215,6 @@
   "downloadSize": "ダウンロードサイズ",
   "lastUpdate": "最終更新",
   "developer": "開発者",
-  "onlyTorrentsAreWorkingForNow": "現時点では、Torrent だけが動作します。"
+  "onlyTorrentsAreWorkingForNow": "現時点では、Torrent だけが動作します。",
+  "couldNotFindDownloadLinks": "Could not find download links"
 }

@@ -664,7 +664,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get downloadStarted => 'Download Iniciado';
 
   @override
-  String get ok => 'OK';
+  String get ok => 'Certo';
 
   @override
   String get noFilesSelected => 'Nenhum Arquivo Selecionado';
@@ -772,7 +772,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Capturas de tela ($count)';
   }
 
   @override
@@ -794,55 +794,58 @@ class AppLocalizationsPt extends AppLocalizations {
   String get filter => 'filtro';
 
   @override
-  String get gogLibrary => 'GOG Library';
+  String get gogLibrary => 'Biblioteca de GOG';
 
   @override
-  String get syncGogLibrary => 'Sync GOG Library';
+  String get syncGogLibrary => 'Sincronizar Biblioteca GOG';
 
   @override
-  String get startingGogSync => 'Starting GOG library sync...';
+  String get startingGogSync => 'Iniciando sincronização de biblioteca GOG...';
 
   @override
-  String get fetchingGogGames => 'Fetching GOG games...';
+  String get fetchingGogGames => 'Buscando jogos GOG...';
 
   @override
   String fetchingGogGameDetails(Object current, Object total) {
-    return 'Fetching details for GOG game $current of $total...';
+    return 'Buscando detalhes para o jogo de GOG $current de $total...';
   }
 
   @override
   String get gogLibrarySynchronized =>
-      'GOG library has been successfully synchronized.';
+      'Biblioteca GOG foi sincronizada com sucesso.';
 
   @override
   String failedToSyncGogLibrary(Object error) {
-    return 'Failed to synchronize GOG library: $error';
+    return 'Falha ao sincronizar a biblioteca GOG: $error';
   }
 
   @override
   String get noGogGamesFoundInLibrary =>
-      'No GOG games found in the library. Try syncing to fetch them.';
+      'Nenhum jogo GOG encontrado na biblioteca. Tente sincronizar para obtê-los.';
 
   @override
   String get noGogGamesFoundMatchingSearch =>
-      'No GOG games found matching your search and filter criteria.';
+      'Nenhum jogo GOG encontrado correspondente à sua pesquisa e critérios de filtro.';
 
   @override
-  String get gogGameDetails => 'GOG Game Details';
+  String get gogGameDetails => 'Detalhes do Jogo GOG';
 
   @override
-  String get userRating => 'User Rating';
+  String get userRating => 'Avaliação do usuário';
 
   @override
-  String get downloadSize => 'Download Size';
+  String get downloadSize => 'Tamanho do download';
 
   @override
-  String get lastUpdate => 'Last Update';
+  String get lastUpdate => 'Última atualização';
 
   @override
-  String get developer => 'Developer';
+  String get developer => 'Desenvolvedores';
 
   @override
   String get onlyTorrentsAreWorkingForNow =>
-      'Only torrents are working for now.';
+      'Apenas torrents estão trabalhando por enquanto.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Could not find download links';
 }

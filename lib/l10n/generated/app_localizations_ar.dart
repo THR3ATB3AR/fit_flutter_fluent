@@ -657,7 +657,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get downloadStarted => 'بدأ التحميل';
 
   @override
-  String get ok => 'OK';
+  String get ok => 'حسناً';
 
   @override
   String get noFilesSelected => 'لا توجد ملفات محددة';
@@ -764,7 +764,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'لقطات الشاشة ($count)';
   }
 
   @override
@@ -786,55 +786,56 @@ class AppLocalizationsAr extends AppLocalizations {
   String get filter => 'تصفية';
 
   @override
-  String get gogLibrary => 'GOG Library';
+  String get gogLibrary => 'مكتبة GG';
 
   @override
-  String get syncGogLibrary => 'Sync GOG Library';
+  String get syncGogLibrary => 'مزامنة مكتبة GOG';
 
   @override
-  String get startingGogSync => 'Starting GOG library sync...';
+  String get startingGogSync => 'بدء مزامنة مكتبة GOG...';
 
   @override
-  String get fetchingGogGames => 'Fetching GOG games...';
+  String get fetchingGogGames => 'جلب ألعاب GOG...';
 
   @override
   String fetchingGogGameDetails(Object current, Object total) {
-    return 'Fetching details for GOG game $current of $total...';
+    return 'جلب تفاصيل لعبة GOG $current من $total...';
   }
 
   @override
-  String get gogLibrarySynchronized =>
-      'GOG library has been successfully synchronized.';
+  String get gogLibrarySynchronized => 'تم مزامنة مكتبة GOG بنجاح.';
 
   @override
   String failedToSyncGogLibrary(Object error) {
-    return 'Failed to synchronize GOG library: $error';
+    return 'فشل مزامنة مكتبة GOG: $error';
   }
 
   @override
   String get noGogGamesFoundInLibrary =>
-      'No GOG games found in the library. Try syncing to fetch them.';
+      'لم يتم العثور على ألعاب GOG في المكتبة. حاول المزامنة لجلبها.';
 
   @override
   String get noGogGamesFoundMatchingSearch =>
-      'No GOG games found matching your search and filter criteria.';
+      'لم يتم العثور على ألعاب GOG تطابق معايير البحث والتصفية الخاصة بك.';
 
   @override
-  String get gogGameDetails => 'GOG Game Details';
+  String get gogGameDetails => 'تفاصيل لعبة GG';
 
   @override
-  String get userRating => 'User Rating';
+  String get userRating => 'تقييم المستخدم';
 
   @override
-  String get downloadSize => 'Download Size';
+  String get downloadSize => 'حجم التحميل';
 
   @override
-  String get lastUpdate => 'Last Update';
+  String get lastUpdate => 'آخر تحديث';
 
   @override
-  String get developer => 'Developer';
+  String get developer => 'المطور';
 
   @override
-  String get onlyTorrentsAreWorkingForNow =>
-      'Only torrents are working for now.';
+  String get onlyTorrentsAreWorkingForNow => 'فقط التورنت تعمل الآن.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Could not find download links';
 }

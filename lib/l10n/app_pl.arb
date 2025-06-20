@@ -215,5 +215,6 @@
   "downloadSize": "Rozmiar pobierania",
   "lastUpdate": "Ostatnia aktualizacja",
   "developer": "Deweloper",
-  "onlyTorrentsAreWorkingForNow": "Na razie działają tylko torrenty."
+  "onlyTorrentsAreWorkingForNow": "Na razie działają tylko torrenty.",
+  "couldNotFindDownloadLinks": "Could not find download links"
 }

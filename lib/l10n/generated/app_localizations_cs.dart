@@ -772,7 +772,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Snímky obrazovky ($count)';
   }
 
   @override
@@ -795,55 +795,58 @@ class AppLocalizationsCs extends AppLocalizations {
   String get filter => 'Filtr';
 
   @override
-  String get gogLibrary => 'GOG Library';
+  String get gogLibrary => 'Knihovna GOG';
 
   @override
-  String get syncGogLibrary => 'Sync GOG Library';
+  String get syncGogLibrary => 'Synchronizovat knihovnu GOG';
 
   @override
-  String get startingGogSync => 'Starting GOG library sync...';
+  String get startingGogSync => 'Spouštění synchronizace knihovny GOG...';
 
   @override
-  String get fetchingGogGames => 'Fetching GOG games...';
+  String get fetchingGogGames => 'Načítání her v GOG...';
 
   @override
   String fetchingGogGameDetails(Object current, Object total) {
-    return 'Fetching details for GOG game $current of $total...';
+    return 'Načítání podrobností pro hru GŘ $current z $total...';
   }
 
   @override
   String get gogLibrarySynchronized =>
-      'GOG library has been successfully synchronized.';
+      'Knihovna GOG byla úspěšně synchronizována.';
 
   @override
   String failedToSyncGogLibrary(Object error) {
-    return 'Failed to synchronize GOG library: $error';
+    return 'Synchronizace GOG knihovny se nezdařila: $error';
   }
 
   @override
   String get noGogGamesFoundInLibrary =>
-      'No GOG games found in the library. Try syncing to fetch them.';
+      'V knihovně nebyly nalezeny žádné hry GOG. Zkuste je synchronizovat.';
 
   @override
   String get noGogGamesFoundMatchingSearch =>
-      'No GOG games found matching your search and filter criteria.';
+      'Nebyly nalezeny žádné hry vyhovující vašemu hledání a filtraci.';
 
   @override
-  String get gogGameDetails => 'GOG Game Details';
+  String get gogGameDetails => 'Podrobnosti hry v GOG';
 
   @override
-  String get userRating => 'User Rating';
+  String get userRating => 'Hodnocení uživatele';
 
   @override
-  String get downloadSize => 'Download Size';
+  String get downloadSize => 'Velikost stahování';
 
   @override
-  String get lastUpdate => 'Last Update';
+  String get lastUpdate => 'Poslední aktualizace';
 
   @override
-  String get developer => 'Developer';
+  String get developer => 'Vývojář';
 
   @override
   String get onlyTorrentsAreWorkingForNow =>
-      'Only torrents are working for now.';
+      'Pro tuto chvíli pracují pouze torrenty.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Could not find download links';
 }

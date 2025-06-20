@@ -215,5 +215,6 @@
   "downloadSize": "Download Size",
   "lastUpdate": "Last Update",
   "developer": "Developer",
-  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now.",
+  "couldNotFindDownloadLinks": "Could not find download links"
 }

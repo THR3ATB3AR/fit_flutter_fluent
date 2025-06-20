@@ -215,5 +215,6 @@
   "downloadSize": "Ladda ner storlek",
   "lastUpdate": "Senaste uppdatering",
   "developer": "Utvecklare",
-  "onlyTorrentsAreWorkingForNow": "Endast torrenter arbetar för tillfället."
+  "onlyTorrentsAreWorkingForNow": "Endast torrenter arbetar för tillfället.",
+  "couldNotFindDownloadLinks": "Could not find download links"
 }

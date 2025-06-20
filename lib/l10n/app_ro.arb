@@ -215,5 +215,6 @@
   "downloadSize": "Dimensiune descărcare",
   "lastUpdate": "Ultima actualizare",
   "developer": "Dezvoltator",
-  "onlyTorrentsAreWorkingForNow": "Numai torentele lucrează deocamdată."
+  "onlyTorrentsAreWorkingForNow": "Numai torentele lucrează deocamdată.",
+  "couldNotFindDownloadLinks": "Could not find download links"
 }

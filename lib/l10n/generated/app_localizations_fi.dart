@@ -667,7 +667,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get downloadStarted => 'Lataus Aloitettu';
 
   @override
-  String get ok => 'OK';
+  String get ok => 'Ok';
 
   @override
   String get noFilesSelected => 'Ei Valittuja Tiedostoja';
@@ -774,7 +774,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Kuvakaappaukset ($count)';
   }
 
   @override
@@ -796,16 +796,16 @@ class AppLocalizationsFi extends AppLocalizations {
   String get filter => 'Suodatin';
 
   @override
-  String get gogLibrary => 'GOG Library';
+  String get gogLibrary => 'Ggg Kirjasto';
 
   @override
-  String get syncGogLibrary => 'Sync GOG Library';
+  String get syncGogLibrary => 'Synkronoi Gig-kirjasto';
 
   @override
-  String get startingGogSync => 'Starting GOG library sync...';
+  String get startingGogSync => 'Käynnistetään GOG-kirjaston synkronointi...';
 
   @override
-  String get fetchingGogGames => 'Fetching GOG games...';
+  String get fetchingGogGames => 'Haetaan GOG-pelejä...';
 
   @override
   String fetchingGogGameDetails(Object current, Object total) {
@@ -814,37 +814,40 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get gogLibrarySynchronized =>
-      'GOG library has been successfully synchronized.';
+      'GOG-kirjasto on onnistuneesti synkronoitu.';
 
   @override
   String failedToSyncGogLibrary(Object error) {
-    return 'Failed to synchronize GOG library: $error';
+    return 'GOG-kirjaston synkronointi epäonnistui: $error';
   }
 
   @override
   String get noGogGamesFoundInLibrary =>
-      'No GOG games found in the library. Try syncing to fetch them.';
+      'Kirjastosta ei löytynyt GOG-pelejä. Yritä synkronoida noutaaksesi ne.';
 
   @override
   String get noGogGamesFoundMatchingSearch =>
-      'No GOG games found matching your search and filter criteria.';
+      'Hakusi ja suodatuskriteerejäsi vastaavia GOG-pelejä ei löytynyt.';
 
   @override
-  String get gogGameDetails => 'GOG Game Details';
+  String get gogGameDetails => 'Ggg- Pelin Tiedot';
 
   @override
-  String get userRating => 'User Rating';
+  String get userRating => 'Käyttäjän Arvostelu';
 
   @override
-  String get downloadSize => 'Download Size';
+  String get downloadSize => 'Lataa Koko';
 
   @override
-  String get lastUpdate => 'Last Update';
+  String get lastUpdate => 'Viimeisin Päivitys';
 
   @override
-  String get developer => 'Developer';
+  String get developer => 'Kehittäjä';
 
   @override
   String get onlyTorrentsAreWorkingForNow =>
-      'Only torrents are working for now.';
+      'Vain torrentit toimivat toistaiseksi.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Could not find download links';
 }

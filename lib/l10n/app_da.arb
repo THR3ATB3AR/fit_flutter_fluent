@@ -215,5 +215,6 @@
   "downloadSize": "Download Størrelse",
   "lastUpdate": "Seneste Opdatering",
   "developer": "Udvikler",
-  "onlyTorrentsAreWorkingForNow": "Kun torrents arbejder for nu."
+  "onlyTorrentsAreWorkingForNow": "Kun torrents arbejder for nu.",
+  "couldNotFindDownloadLinks": "Could not find download links"
 }

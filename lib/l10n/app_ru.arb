@@ -215,5 +215,6 @@
   "downloadSize": "Размер загрузки",
   "lastUpdate": "Последнее обновление",
   "developer": "Разработчик",
-  "onlyTorrentsAreWorkingForNow": "Сейчас работают только торренты."
+  "onlyTorrentsAreWorkingForNow": "Сейчас работают только торренты.",
+  "couldNotFindDownloadLinks": "Could not find download links"
 }
