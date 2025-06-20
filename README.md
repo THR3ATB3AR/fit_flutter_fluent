@@ -27,7 +27,7 @@ This project was created for educational purposes to enhance my skills in Flutte
 
 ## 📸 Screenshots
 
-![Home Page](assets/readme/1.png?raw=true)![Repack Details](assets/readme/2.png?raw=true)![Repack Library](assets/readme/3.png?raw=true)![Download Manager](assets/readme/4.png?raw=true)
+![Home Page](assets/readme/1.png?raw=true)![Repack Details](assets/readme/2.png?raw=true)![Repack Library](assets/readme/3.png?raw=true)![GOG Library](assets/readme/4.png?raw=true)![Download Manager](assets/readme/5.png?raw=true)
 
 ## 🚀 Roadmap
 
