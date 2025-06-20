@@ -216,5 +216,5 @@
   "lastUpdate": "Τελευταία Ενημέρωση",
   "developer": "Προγραμματιστής",
   "onlyTorrentsAreWorkingForNow": "Μόνο τα torrent λειτουργούν προς το παρόν.",
-  "couldNotFindDownloadLinks": "Could not find download links"
+  "couldNotFindDownloadLinks": "Αδυναμία εύρεσης συνδέσμων λήψης"
 }
