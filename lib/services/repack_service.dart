@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:fit_flutter_fluent/data/gog_game.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
@@ -18,6 +19,7 @@ class RepackService {
   List<Repack> everyRepack = [];
   Map<String, String> allRepacksNames = {};
   Map<String, String> failedRepacks = {};
+  List<GogGame> gogGames = []; 
 
   bool isDataLoadedInMemory = false;
 
@@ -97,7 +99,25 @@ class RepackService {
         title TEXT, url TEXT PRIMARY KEY
       )
     ''');
-    db.dispose();
+    db.execute('''
+    CREATE TABLE IF NOT EXISTS gog_games (
+      id INTEGER PRIMARY KEY,
+      title TEXT,
+      slug TEXT,
+      url TEXT,
+      description TEXT,
+      developer TEXT,
+      publisher TEXT,
+      updateDate TEXT,
+      cover TEXT,
+      genres TEXT,
+      screenshots TEXT,
+      languages TEXT,
+      userRating INTEGER,
+      windowsDownloadSize INTEGER
+    )
+  ''');
+  db.dispose();
   }
 
   Future<void> loadRepacks() async {
@@ -142,6 +162,10 @@ class RepackService {
           row['title'] as String: row['url'] as String,
       };
 
+      final gogGamesResult = db.select('SELECT * FROM gog_games');
+      gogGames = gogGamesResult.map((row) => GogGame.fromSqlite(row)).toList();
+      gogGames.sort((a, b) => a.title.compareTo(b.title));
+
       isDataLoadedInMemory = true;
       print("Repacks loaded from database into memory.");
     } catch (e) {
@@ -152,6 +176,7 @@ class RepackService {
       everyRepack.clear();
       allRepacksNames.clear();
       failedRepacks.clear();
+      gogGames.clear();
     } finally {
       db.dispose();
     }
@@ -275,6 +300,35 @@ class RepackService {
     _controller.add(null);
   }
 
+  Future<void> saveGogGamesList() async { // <-- Pass the list as an argument
+  final db = sqlite3.open('${await _getAppDataPath()}/repacks.db');
+  db.execute('BEGIN TRANSACTION');
+  db.execute('DELETE FROM gog_games');
+  
+  final stmt = db.prepare(
+    '''
+    INSERT INTO gog_games (
+      id, title, slug, url, description, developer, publisher, updateDate, 
+      cover, genres, screenshots, languages, userRating, windowsDownloadSize
+    ) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    '''
+  );
+  
+  for (var game in gogGames) {
+    stmt.execute(game.toSqliteParams());
+  }
+  
+  stmt.dispose();
+  db.execute('COMMIT');
+  db.dispose();
+  
+  gogGames.sort((a, b) => a.title.compareTo(b.title));
+  isDataLoadedInMemory = true;
+  notifyListeners();
+  print("GOG games list saved to DB. Count: ${gogGames.length}");
+}
+
   Future<bool> checkTablesNotEmpty() async {
     final db = sqlite3.open('${await _getAppDataPath()}/repacks.db');
     final tablesToPotentiallyHaveData = [
@@ -282,6 +336,7 @@ class RepackService {
       'popular_repacks',
       'every_repack',
       'all_repacks_names',
+      'gog_games',
     ];
     bool hasAnyData = false;
     for (var table in tablesToPotentiallyHaveData) {
@@ -301,6 +356,7 @@ class RepackService {
       'new_repacks',
       'popular_repacks',
       'all_repacks_names',
+      'gog_games',
     ]; 
 
     db.execute('BEGIN TRANSACTION');
@@ -328,6 +384,7 @@ class RepackService {
       'every_repack',
       'all_repacks_names',
       'failed_repacks',
+      'gog_games',
     ];
     db.execute('BEGIN TRANSACTION');
     for (var table in tables) {
@@ -341,6 +398,7 @@ class RepackService {
     everyRepack.clear();
     allRepacksNames.clear();
     failedRepacks.clear();
+    gogGames.clear();
     isDataLoadedInMemory = false; 
 
     _controller.add(null);

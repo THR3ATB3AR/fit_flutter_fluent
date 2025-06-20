@@ -770,7 +770,7 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Skærmbilleder ($count)';
   }
 
   @override
@@ -790,4 +790,59 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get filter => 'Filtrer';
+
+  @override
+  String get gogLibrary => 'GOG Bibliotek';
+
+  @override
+  String get syncGogLibrary => 'Synkroniser GOG Bibliotek';
+
+  @override
+  String get startingGogSync => 'Starter GOG bibliotek synkronisering...';
+
+  @override
+  String get fetchingGogGames => 'Henter GOG spil...';
+
+  @override
+  String fetchingGogGameDetails(Object current, Object total) {
+    return 'Henter detaljer for GOG spil $current af $total...';
+  }
+
+  @override
+  String get gogLibrarySynchronized =>
+      'GOG bibliotek er synkroniseret med succes.';
+
+  @override
+  String failedToSyncGogLibrary(Object error) {
+    return 'Synkronisering af GOG bibliotek mislykkedes: $error';
+  }
+
+  @override
+  String get noGogGamesFoundInLibrary =>
+      'Ingen GOG spil fundet i biblioteket. Prøv at synkronisere for at hente dem.';
+
+  @override
+  String get noGogGamesFoundMatchingSearch =>
+      'Ingen GOG spil fundet matcher dine søgnings- og filterkriterier.';
+
+  @override
+  String get gogGameDetails => 'GOG Spil Detaljer';
+
+  @override
+  String get userRating => 'Bruger Bedømmelse';
+
+  @override
+  String get downloadSize => 'Download Størrelse';
+
+  @override
+  String get lastUpdate => 'Seneste Opdatering';
+
+  @override
+  String get developer => 'Udvikler';
+
+  @override
+  String get onlyTorrentsAreWorkingForNow => 'Kun torrents arbejder for nu.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Kunne ikke finde download-links';
 }

@@ -1363,6 +1363,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Filter'**
   String get filter;
+
+  /// No description provided for @gogLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'GOG Library'**
+  String get gogLibrary;
+
+  /// No description provided for @syncGogLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync GOG Library'**
+  String get syncGogLibrary;
+
+  /// No description provided for @startingGogSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting GOG library sync...'**
+  String get startingGogSync;
+
+  /// No description provided for @fetchingGogGames.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching GOG games...'**
+  String get fetchingGogGames;
+
+  /// No description provided for @fetchingGogGameDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching details for GOG game {current} of {total}...'**
+  String fetchingGogGameDetails(Object current, Object total);
+
+  /// No description provided for @gogLibrarySynchronized.
+  ///
+  /// In en, this message translates to:
+  /// **'GOG library has been successfully synchronized.'**
+  String get gogLibrarySynchronized;
+
+  /// No description provided for @failedToSyncGogLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to synchronize GOG library: {error}'**
+  String failedToSyncGogLibrary(Object error);
+
+  /// No description provided for @noGogGamesFoundInLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'No GOG games found in the library. Try syncing to fetch them.'**
+  String get noGogGamesFoundInLibrary;
+
+  /// No description provided for @noGogGamesFoundMatchingSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No GOG games found matching your search and filter criteria.'**
+  String get noGogGamesFoundMatchingSearch;
+
+  /// No description provided for @gogGameDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'GOG Game Details'**
+  String get gogGameDetails;
+
+  /// No description provided for @userRating.
+  ///
+  /// In en, this message translates to:
+  /// **'User Rating'**
+  String get userRating;
+
+  /// No description provided for @downloadSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Size'**
+  String get downloadSize;
+
+  /// No description provided for @lastUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Update'**
+  String get lastUpdate;
+
+  /// No description provided for @developer.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer'**
+  String get developer;
+
+  /// No description provided for @onlyTorrentsAreWorkingForNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Only torrents are working for now.'**
+  String get onlyTorrentsAreWorkingForNow;
+
+  /// No description provided for @couldNotFindDownloadLinks.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not find download links'**
+  String get couldNotFindDownloadLinks;
 }
 
 class _AppLocalizationsDelegate

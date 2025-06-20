@@ -775,7 +775,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Screenshot ($count)';
   }
 
   @override
@@ -795,4 +795,61 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get filter => 'Filtro';
+
+  @override
+  String get gogLibrary => 'Libreria GOG';
+
+  @override
+  String get syncGogLibrary => 'Sincronizza Libreria GOG';
+
+  @override
+  String get startingGogSync => 'Avvio sincronizzazione libreria GOG...';
+
+  @override
+  String get fetchingGogGames => 'Recupero giochi GOG...';
+
+  @override
+  String fetchingGogGameDetails(Object current, Object total) {
+    return 'Recupero dettagli per il gioco GOG $current di $total...';
+  }
+
+  @override
+  String get gogLibrarySynchronized =>
+      'La libreria GOG è stata sincronizzata con successo.';
+
+  @override
+  String failedToSyncGogLibrary(Object error) {
+    return 'Sincronizzazione della libreria GOG non riuscita: $error';
+  }
+
+  @override
+  String get noGogGamesFoundInLibrary =>
+      'Nessun gioco GOG trovato nella libreria. Prova a sincronizzare per recuperarli.';
+
+  @override
+  String get noGogGamesFoundMatchingSearch =>
+      'Nessun gioco GOG trovato corrispondente ai criteri di ricerca e di filtro.';
+
+  @override
+  String get gogGameDetails => 'GOG Dettagli Di Gioco';
+
+  @override
+  String get userRating => 'Valutazione Utente';
+
+  @override
+  String get downloadSize => 'Dimensione Download';
+
+  @override
+  String get lastUpdate => 'Ultimo Aggiornamento';
+
+  @override
+  String get developer => 'Sviluppatore';
+
+  @override
+  String get onlyTorrentsAreWorkingForNow =>
+      'Solo i torrent stanno funzionando per ora.';
+
+  @override
+  String get couldNotFindDownloadLinks =>
+      'Impossibile trovare i link per il download';
 }

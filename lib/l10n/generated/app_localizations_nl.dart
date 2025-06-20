@@ -774,7 +774,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Schermafbeeldingen ($count)';
   }
 
   @override
@@ -794,4 +794,60 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get filter => 'Filteren';
+
+  @override
+  String get gogLibrary => 'GOG Bibliotheek';
+
+  @override
+  String get syncGogLibrary => 'Synchroniseer GOG bibliotheek';
+
+  @override
+  String get startingGogSync =>
+      'GOG bibliotheek synchronisatie wordt gestart...';
+
+  @override
+  String get fetchingGogGames => 'Ophalen GOG spellen...';
+
+  @override
+  String fetchingGogGameDetails(Object current, Object total) {
+    return 'Ophalen details voor het GOG spel $current van $total...';
+  }
+
+  @override
+  String get gogLibrarySynchronized =>
+      'GOG bibliotheek is succesvol gesynchroniseerd.';
+
+  @override
+  String failedToSyncGogLibrary(Object error) {
+    return 'Synchroniseren GOG bibliotheek is mislukt: $error';
+  }
+
+  @override
+  String get noGogGamesFoundInLibrary =>
+      'Geen GOG spellen gevonden in de bibliotheek. Probeer te synchroniseren om ze op te halen.';
+
+  @override
+  String get noGogGamesFoundMatchingSearch =>
+      'Geen GOG spellen gevonden die aan je zoekcriteria voldoen.';
+
+  @override
+  String get gogGameDetails => 'GOG Spel Details';
+
+  @override
+  String get userRating => 'Gebruiker beoordeling';
+
+  @override
+  String get downloadSize => 'Download grootte';
+
+  @override
+  String get lastUpdate => 'Laatste update';
+
+  @override
+  String get developer => 'Ontwikkelaar';
+
+  @override
+  String get onlyTorrentsAreWorkingForNow => 'Alleen torrents werken voor nu.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Kan geen downloadlinks vinden';
 }

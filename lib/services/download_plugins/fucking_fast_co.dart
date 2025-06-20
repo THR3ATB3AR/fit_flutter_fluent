@@ -43,10 +43,14 @@ class FuckingFastCo {
         throw Exception('Failed to start download on server side');
       }
     } catch (e) {
-      // print(e);
-      // print('chuj');
+      throw Exception('Error starting download on server side: $e');
     }
 
-    return DownloadInfo(repackTitle: gameName, downloadLink: dllink, fileName: fileName, downloadType: downloadType);
+    return DownloadInfo(
+      repackTitle: gameName,
+      downloadLink: dllink,
+      fileName: fileName,
+      downloadType: downloadType,
+    );
   }
 }

@@ -774,7 +774,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Kuvakaappaukset ($count)';
   }
 
   @override
@@ -794,4 +794,60 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get filter => 'Suodatin';
+
+  @override
+  String get gogLibrary => 'Ggg Kirjasto';
+
+  @override
+  String get syncGogLibrary => 'Synkronoi Gig-kirjasto';
+
+  @override
+  String get startingGogSync => 'Käynnistetään GOG-kirjaston synkronointi...';
+
+  @override
+  String get fetchingGogGames => 'Haetaan GOG-pelejä...';
+
+  @override
+  String fetchingGogGameDetails(Object current, Object total) {
+    return 'Fetching details for GOG game $current of $total...';
+  }
+
+  @override
+  String get gogLibrarySynchronized =>
+      'GOG-kirjasto on onnistuneesti synkronoitu.';
+
+  @override
+  String failedToSyncGogLibrary(Object error) {
+    return 'GOG-kirjaston synkronointi epäonnistui: $error';
+  }
+
+  @override
+  String get noGogGamesFoundInLibrary =>
+      'Kirjastosta ei löytynyt GOG-pelejä. Yritä synkronoida noutaaksesi ne.';
+
+  @override
+  String get noGogGamesFoundMatchingSearch =>
+      'Hakusi ja suodatuskriteerejäsi vastaavia GOG-pelejä ei löytynyt.';
+
+  @override
+  String get gogGameDetails => 'Ggg- Pelin Tiedot';
+
+  @override
+  String get userRating => 'Käyttäjän Arvostelu';
+
+  @override
+  String get downloadSize => 'Lataa Koko';
+
+  @override
+  String get lastUpdate => 'Viimeisin Päivitys';
+
+  @override
+  String get developer => 'Kehittäjä';
+
+  @override
+  String get onlyTorrentsAreWorkingForNow =>
+      'Vain torrentit toimivat toistaiseksi.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Latauslinkkejä ei löytynyt';
 }

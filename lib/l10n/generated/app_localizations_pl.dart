@@ -319,7 +319,7 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get rescrapeDetails => 'Szczegóły odkrycia';
+  String get rescrapeDetails => 'Odśwież Szczegóły';
 
   @override
   String detailsHaveBeenRescraped(Object title) {
@@ -800,4 +800,61 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get filter => 'Filtruj';
+
+  @override
+  String get gogLibrary => 'Biblioteka GOG';
+
+  @override
+  String get syncGogLibrary => 'Synchronizuj bibliotekę GOG';
+
+  @override
+  String get startingGogSync => 'Uruchamianie synchronizacji biblioteki GOG...';
+
+  @override
+  String get fetchingGogGames => 'Pozyskiwanie gier GOG...';
+
+  @override
+  String fetchingGogGameDetails(Object current, Object total) {
+    return 'Pozyskiwanie szczegółów gry GOG $current dla $total...';
+  }
+
+  @override
+  String get gogLibrarySynchronized =>
+      'Biblioteka GOG została pomyślnie zsynchronizowana.';
+
+  @override
+  String failedToSyncGogLibrary(Object error) {
+    return 'Nie udało się zsynchronizować biblioteki GOG: $error';
+  }
+
+  @override
+  String get noGogGamesFoundInLibrary =>
+      'Nie znaleziono gier GOG w bibliotece. Spróbuj zsynchronizować, aby je pobrać.';
+
+  @override
+  String get noGogGamesFoundMatchingSearch =>
+      'Nie znaleziono gier GOG spełniających kryteria wyszukiwania i filtrowania.';
+
+  @override
+  String get gogGameDetails => 'Szczegóły gry GOG';
+
+  @override
+  String get userRating => 'Oceny użytkowników';
+
+  @override
+  String get downloadSize => 'Rozmiar pobierania';
+
+  @override
+  String get lastUpdate => 'Ostatnia aktualizacja';
+
+  @override
+  String get developer => 'Deweloper';
+
+  @override
+  String get onlyTorrentsAreWorkingForNow =>
+      'Na razie działają tylko torrenty.';
+
+  @override
+  String get couldNotFindDownloadLinks =>
+      'Nie można znaleźć linków do pobrania';
 }

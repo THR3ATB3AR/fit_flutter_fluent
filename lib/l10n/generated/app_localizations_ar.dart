@@ -764,7 +764,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'لقطات الشاشة ($count)';
   }
 
   @override
@@ -784,4 +784,58 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get filter => 'تصفية';
+
+  @override
+  String get gogLibrary => 'مكتبة GG';
+
+  @override
+  String get syncGogLibrary => 'مزامنة مكتبة GOG';
+
+  @override
+  String get startingGogSync => 'بدء مزامنة مكتبة GOG...';
+
+  @override
+  String get fetchingGogGames => 'جلب ألعاب GOG...';
+
+  @override
+  String fetchingGogGameDetails(Object current, Object total) {
+    return 'جلب تفاصيل لعبة GOG $current من $total...';
+  }
+
+  @override
+  String get gogLibrarySynchronized => 'تم مزامنة مكتبة GOG بنجاح.';
+
+  @override
+  String failedToSyncGogLibrary(Object error) {
+    return 'فشل مزامنة مكتبة GOG: $error';
+  }
+
+  @override
+  String get noGogGamesFoundInLibrary =>
+      'لم يتم العثور على ألعاب GOG في المكتبة. حاول المزامنة لجلبها.';
+
+  @override
+  String get noGogGamesFoundMatchingSearch =>
+      'لم يتم العثور على ألعاب GOG تطابق معايير البحث والتصفية الخاصة بك.';
+
+  @override
+  String get gogGameDetails => 'تفاصيل لعبة GG';
+
+  @override
+  String get userRating => 'تقييم المستخدم';
+
+  @override
+  String get downloadSize => 'حجم التحميل';
+
+  @override
+  String get lastUpdate => 'آخر تحديث';
+
+  @override
+  String get developer => 'المطور';
+
+  @override
+  String get onlyTorrentsAreWorkingForNow => 'فقط التورنت تعمل الآن.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'تعذر العثور على روابط التحميل';
 }

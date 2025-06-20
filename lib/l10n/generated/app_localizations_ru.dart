@@ -771,7 +771,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Скриншоты ($count)';
   }
 
   @override
@@ -791,4 +791,60 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get filter => 'Фильтр';
+
+  @override
+  String get gogLibrary => 'Библиотека GOG';
+
+  @override
+  String get syncGogLibrary => 'Синхронизировать GOG библиотеку';
+
+  @override
+  String get startingGogSync => 'Запуск синхронизации с GOG...';
+
+  @override
+  String get fetchingGogGames => 'Получение GOG игр...';
+
+  @override
+  String fetchingGogGameDetails(Object current, Object total) {
+    return 'Получение деталей для GOG игры $current из $total...';
+  }
+
+  @override
+  String get gogLibrarySynchronized =>
+      'Библиотека GOG успешно синхронизирована.';
+
+  @override
+  String failedToSyncGogLibrary(Object error) {
+    return 'Не удалось синхронизировать GOG библиотеку: $error';
+  }
+
+  @override
+  String get noGogGamesFoundInLibrary =>
+      'В библиотеке не найдено GOG игр. Попробуйте синхронизировать, чтобы получить их.';
+
+  @override
+  String get noGogGamesFoundMatchingSearch =>
+      'Не найдено GOG игр, соответствующих критериям поиска.';
+
+  @override
+  String get gogGameDetails => 'Подробности игры GOG';
+
+  @override
+  String get userRating => 'Рейтинг пользователя';
+
+  @override
+  String get downloadSize => 'Размер загрузки';
+
+  @override
+  String get lastUpdate => 'Последнее обновление';
+
+  @override
+  String get developer => 'Разработчик';
+
+  @override
+  String get onlyTorrentsAreWorkingForNow => 'Сейчас работают только торренты.';
+
+  @override
+  String get couldNotFindDownloadLinks =>
+      'Не удалось найти ссылки для загрузки';
 }

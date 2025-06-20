@@ -779,7 +779,7 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Capturi ecran ($count)';
   }
 
   @override
@@ -799,4 +799,61 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get filter => 'Filtrare';
+
+  @override
+  String get gogLibrary => 'Biblioteca GOG';
+
+  @override
+  String get syncGogLibrary => 'Sincronizează biblioteca GOG';
+
+  @override
+  String get startingGogSync => 'Pornire sincronizare librărie GOG...';
+
+  @override
+  String get fetchingGogGames => 'Preluare jocuri GOG...';
+
+  @override
+  String fetchingGogGameDetails(Object current, Object total) {
+    return 'Preluarea detaliilor pentru jocul GOG $current de $total...';
+  }
+
+  @override
+  String get gogLibrarySynchronized =>
+      'Biblioteca GOG a fost sincronizată cu succes.';
+
+  @override
+  String failedToSyncGogLibrary(Object error) {
+    return 'Biblioteca GOG nu a putut fi sincronizată: $error';
+  }
+
+  @override
+  String get noGogGamesFoundInLibrary =>
+      'Nu s-au găsit jocuri GOG în bibliotecă. Încercați să vă sincronizați pentru a le prelua.';
+
+  @override
+  String get noGogGamesFoundMatchingSearch =>
+      'Nu s-au găsit jocuri GOG care să corespundă criteriilor de căutare și filtrare.';
+
+  @override
+  String get gogGameDetails => 'Detalii joc GOG';
+
+  @override
+  String get userRating => 'Evaluare utilizator';
+
+  @override
+  String get downloadSize => 'Dimensiune descărcare';
+
+  @override
+  String get lastUpdate => 'Ultima actualizare';
+
+  @override
+  String get developer => 'Dezvoltator';
+
+  @override
+  String get onlyTorrentsAreWorkingForNow =>
+      'Numai torentele lucrează deocamdată.';
+
+  @override
+  String get couldNotFindDownloadLinks =>
+      'Linkurile de descărcare nu au putut fi găsite';
 }

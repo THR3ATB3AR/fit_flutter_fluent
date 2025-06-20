@@ -200,5 +200,21 @@
   "noGenresAvailable": "No genres available",
   "clear": "Clear",
   "filterByGenre": "Filter by Genre",
-  "filter": "Filter"
+  "filter": "Filter",
+  "gogLibrary": "GOG Library",
+  "syncGogLibrary": "Sync GOG Library",
+  "startingGogSync": "Starting GOG library sync...",
+  "fetchingGogGames": "Fetching GOG games...",
+  "fetchingGogGameDetails": "Fetching details for GOG game {current} of {total}...",
+  "gogLibrarySynchronized": "GOG library has been successfully synchronized.",
+  "failedToSyncGogLibrary": "Failed to synchronize GOG library: {error}",
+  "noGogGamesFoundInLibrary": "No GOG games found in the library. Try syncing to fetch them.",
+  "noGogGamesFoundMatchingSearch": "No GOG games found matching your search and filter criteria.",
+  "gogGameDetails": "GOG Game Details",
+  "userRating": "User Rating",
+  "downloadSize": "Download Size",
+  "lastUpdate": "Last Update",
+  "developer": "Developer",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now.",
+  "couldNotFindDownloadLinks": "Could not find download links"
 }

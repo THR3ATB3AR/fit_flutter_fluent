@@ -772,7 +772,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Snímky obrazovky ($count)';
   }
 
   @override
@@ -793,4 +793,60 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get filter => 'Filtr';
+
+  @override
+  String get gogLibrary => 'Knihovna GOG';
+
+  @override
+  String get syncGogLibrary => 'Synchronizovat knihovnu GOG';
+
+  @override
+  String get startingGogSync => 'Spouštění synchronizace knihovny GOG...';
+
+  @override
+  String get fetchingGogGames => 'Načítání her v GOG...';
+
+  @override
+  String fetchingGogGameDetails(Object current, Object total) {
+    return 'Načítání podrobností pro hru GŘ $current z $total...';
+  }
+
+  @override
+  String get gogLibrarySynchronized =>
+      'Knihovna GOG byla úspěšně synchronizována.';
+
+  @override
+  String failedToSyncGogLibrary(Object error) {
+    return 'Synchronizace GOG knihovny se nezdařila: $error';
+  }
+
+  @override
+  String get noGogGamesFoundInLibrary =>
+      'V knihovně nebyly nalezeny žádné hry GOG. Zkuste je synchronizovat.';
+
+  @override
+  String get noGogGamesFoundMatchingSearch =>
+      'Nebyly nalezeny žádné hry vyhovující vašemu hledání a filtraci.';
+
+  @override
+  String get gogGameDetails => 'Podrobnosti hry v GOG';
+
+  @override
+  String get userRating => 'Hodnocení uživatele';
+
+  @override
+  String get downloadSize => 'Velikost stahování';
+
+  @override
+  String get lastUpdate => 'Poslední aktualizace';
+
+  @override
+  String get developer => 'Vývojář';
+
+  @override
+  String get onlyTorrentsAreWorkingForNow =>
+      'Pro tuto chvíli pracují pouze torrenty.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Nelze najít odkazy ke stažení';
 }

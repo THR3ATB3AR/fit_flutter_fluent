@@ -779,7 +779,7 @@ class AppLocalizationsEl extends AppLocalizations {
 
   @override
   String screenshotsTitle(Object count) {
-    return 'Screenshots ($count)';
+    return 'Στιγμιότυπα Οθόνης ($count)';
   }
 
   @override
@@ -800,4 +800,60 @@ class AppLocalizationsEl extends AppLocalizations {
 
   @override
   String get filter => 'Φίλτρο';
+
+  @override
+  String get gogLibrary => 'Βιβλιοθήκη GOG';
+
+  @override
+  String get syncGogLibrary => 'Συγχρονισμός Gaw Βιβλιοθήκης';
+
+  @override
+  String get startingGogSync => 'Έναρξη συγχρονισμού βιβλιοθήκης GOG...';
+
+  @override
+  String get fetchingGogGames => 'Λήψη παιχνιδιών GOG...';
+
+  @override
+  String fetchingGogGameDetails(Object current, Object total) {
+    return 'Λήψη λεπτομερειών για GOG παιχνίδι $current του $total...';
+  }
+
+  @override
+  String get gogLibrarySynchronized =>
+      'Η βιβλιοθήκη GOG συγχρονίστηκε επιτυχώς.';
+
+  @override
+  String failedToSyncGogLibrary(Object error) {
+    return 'Failed to synchronize GOG library: $error';
+  }
+
+  @override
+  String get noGogGamesFoundInLibrary =>
+      'Δεν βρέθηκαν παιχνίδια GOG στη βιβλιοθήκη. Δοκιμάστε να συγχρονίσετε για την ανάκτησή τους.';
+
+  @override
+  String get noGogGamesFoundMatchingSearch =>
+      'Δεν βρέθηκαν παιχνίδια GOG που να ταιριάζουν με τα κριτήρια αναζήτησης και φίλτρου.';
+
+  @override
+  String get gogGameDetails => 'Λεπτομέρειες Παιχνιδιού GOG';
+
+  @override
+  String get userRating => 'Βαθμολογία Χρήστη';
+
+  @override
+  String get downloadSize => 'Μέγεθος Λήψης';
+
+  @override
+  String get lastUpdate => 'Τελευταία Ενημέρωση';
+
+  @override
+  String get developer => 'Προγραμματιστής';
+
+  @override
+  String get onlyTorrentsAreWorkingForNow =>
+      'Μόνο τα torrent λειτουργούν προς το παρόν.';
+
+  @override
+  String get couldNotFindDownloadLinks => 'Αδυναμία εύρεσης συνδέσμων λήψης';
 }
