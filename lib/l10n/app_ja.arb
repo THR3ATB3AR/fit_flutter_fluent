@@ -200,5 +200,6 @@
   "noGenresAvailable": "利用可能なジャンルがありません",
   "clear": "クリア",
   "filterByGenre": "ジャンルでフィルター",
-  "filter": "フィルター"
+  "filter": "フィルター",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

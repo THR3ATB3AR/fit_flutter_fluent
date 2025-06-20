@@ -200,5 +200,6 @@
   "noGenresAvailable": "Brak dostępnych gatunków",
   "clear": "Wyczyść",
   "filterByGenre": "Filtruj według gatunku",
-  "filter": "Filtruj"
+  "filter": "Filtruj",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

@@ -200,5 +200,6 @@
   "noGenresAvailable": "Žádné žánry nejsou k dispozici",
   "clear": "Vyčistit",
   "filterByGenre": "Filtrovat podle žánru",
-  "filter": "Filtr"
+  "filter": "Filtr",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

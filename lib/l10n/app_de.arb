@@ -162,7 +162,7 @@
   "errorProcessingOneOrMoreLinks": "Fehler beim Verarbeiten eines oder mehrerer Links. ",
   "filesAddedToDownloadManager": "{count} {count, plural, zero{Dateien} one{Datei} other{Dateien}} zum Download-Manager hinzugefügt.",
   "downloadStarted": "Download gestartet",
-  "ok": "Ok",
+  "ok": "OK",
   "noFilesSelected": "Keine Dateien ausgewählt",
   "pleaseSelectOneOrMoreFilesFromTheTreeToDownload": "Bitte wählen Sie eine oder mehrere Dateien aus dem Baum zum Download.",
   "noFilesCouldBeRetrieved": "Es konnten keine Dateien abgerufen werden.",
@@ -200,5 +200,6 @@
   "noGenresAvailable": "Keine Genres verfügbar",
   "clear": "Leeren",
   "filterByGenre": "Nach Genre filtern",
-  "filter": "Filtern"
+  "filter": "Filtern",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

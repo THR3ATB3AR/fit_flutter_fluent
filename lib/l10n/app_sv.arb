@@ -162,7 +162,7 @@
   "errorProcessingOneOrMoreLinks": "Fel vid behandling av en eller flera länkar. ",
   "filesAddedToDownloadManager": "{count} {count, plural, zero{files} one{file} other{files}} added to download manager.",
   "downloadStarted": "Nedladdning påbörjad",
-  "ok": "Ok",
+  "ok": "OK",
   "noFilesSelected": "Inga filer valda",
   "pleaseSelectOneOrMoreFilesFromTheTreeToDownload": "Välj en eller flera filer från trädet att ladda ner.",
   "noFilesCouldBeRetrieved": "Inga filer kunde hämtas.",
@@ -200,5 +200,6 @@
   "noGenresAvailable": "Inga genrer tillgängliga",
   "clear": "Rensa",
   "filterByGenre": "Filtrera efter genre",
-  "filter": "Filtrera"
+  "filter": "Filtrera",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

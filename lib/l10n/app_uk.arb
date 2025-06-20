@@ -162,7 +162,7 @@
   "errorProcessingOneOrMoreLinks": "Помилка обробки одного або декількох посилань. ",
   "filesAddedToDownloadManager": "{count} {count, plural, zero{файли} one{файл} other{Файли}} додано до системи завантаження менеджера.",
   "downloadStarted": "Завантаження розпочато",
-  "ok": "Гаразд",
+  "ok": "OK",
   "noFilesSelected": "Не вибрано жодного файлу",
   "pleaseSelectOneOrMoreFilesFromTheTreeToDownload": "Будь ласка, виберіть один або кілька файлів з дерева для завантаження.",
   "noFilesCouldBeRetrieved": "Жоден файл не може бути отриманий.",
@@ -200,5 +200,6 @@
   "noGenresAvailable": "Немає доступних жанрів",
   "clear": "Очистити",
   "filterByGenre": "Фільтр за жанром",
-  "filter": "Фільтр"
+  "filter": "Фільтр",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

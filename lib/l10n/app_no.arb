@@ -162,7 +162,7 @@
   "errorProcessingOneOrMoreLinks": "Feil under behandling av én eller flere lenker. ",
   "filesAddedToDownloadManager": "{count} {count, plural, zero{filer} one{Fil} other{filer}} lagt til i nedlastingshåndterer.",
   "downloadStarted": "Nedlastingen har startet",
-  "ok": "Ok",
+  "ok": "OK",
   "noFilesSelected": "Ingen filer valgt",
   "pleaseSelectOneOrMoreFilesFromTheTreeToDownload": "Velg en eller flere filer fra treet for å laste ned.",
   "noFilesCouldBeRetrieved": "Ingen filer kunne hentes.",
@@ -200,5 +200,6 @@
   "noGenresAvailable": "Ingen sjangre tilgjengelig",
   "clear": "Tøm",
   "filterByGenre": "Filtrer etter Sjanger",
-  "filter": "Filtrer"
+  "filter": "Filtrer",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

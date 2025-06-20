@@ -844,4 +844,8 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get developer => 'Developer';
+
+  @override
+  String get onlyTorrentsAreWorkingForNow =>
+      'Only torrents are working for now.';
 }

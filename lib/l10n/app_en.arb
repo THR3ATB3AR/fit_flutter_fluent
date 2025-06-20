@@ -214,5 +214,6 @@
   "userRating": "User Rating",
   "downloadSize": "Download Size",
   "lastUpdate": "Last Update",
-  "developer": "Developer"
+  "developer": "Developer",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

@@ -162,7 +162,7 @@
   "errorProcessingOneOrMoreLinks": "Virhe yhden tai useamman linkin käsittelyssä. ",
   "filesAddedToDownloadManager": "{count} {count, plural, zero{tiedostoja} one{tiedosto} other{tiedostoja}} lisätty lataushallintaan.",
   "downloadStarted": "Lataus Aloitettu",
-  "ok": "Ok",
+  "ok": "OK",
   "noFilesSelected": "Ei Valittuja Tiedostoja",
   "pleaseSelectOneOrMoreFilesFromTheTreeToDownload": "Valitse yksi tai useampi tiedosto puusta ladattavaksi.",
   "noFilesCouldBeRetrieved": "Yhtään tiedostoa ei voitu hakea.",
@@ -200,5 +200,6 @@
   "noGenresAvailable": "Lajityyppejä ei saatavilla",
   "clear": "Tyhjennä",
   "filterByGenre": "Suodata lajin mukaan",
-  "filter": "Suodatin"
+  "filter": "Suodatin",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

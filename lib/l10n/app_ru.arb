@@ -162,7 +162,7 @@
   "errorProcessingOneOrMoreLinks": "Ошибка при обработке одной или нескольких ссылок. ",
   "filesAddedToDownloadManager": "{count} {count, plural, zero{файлы} one{файл} other{файлы}} добавлены в менеджер загрузок.",
   "downloadStarted": "Загрузка начата",
-  "ok": "ОК",
+  "ok": "OK",
   "noFilesSelected": "Файлы не выбраны",
   "pleaseSelectOneOrMoreFilesFromTheTreeToDownload": "Пожалуйста, выберите один или несколько файлов из дерева для загрузки.",
   "noFilesCouldBeRetrieved": "Файлы не могут быть получены.",
@@ -200,5 +200,6 @@
   "noGenresAvailable": "Нет доступных жанров",
   "clear": "Очистить",
   "filterByGenre": "Фильтр по жанру",
-  "filter": "Фильтр"
+  "filter": "Фильтр",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

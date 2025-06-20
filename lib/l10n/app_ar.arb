@@ -162,7 +162,7 @@
   "errorProcessingOneOrMoreLinks": "خطأ في معالجة رابط واحد أو أكثر. ",
   "filesAddedToDownloadManager": "{count} {count, plural, zero{ملفات} one{ملف} other{ملفات}} تمت إضافتها إلى مدير التحميل.",
   "downloadStarted": "بدأ التحميل",
-  "ok": "حسناً",
+  "ok": "OK",
   "noFilesSelected": "لا توجد ملفات محددة",
   "pleaseSelectOneOrMoreFilesFromTheTreeToDownload": "الرجاء تحديد ملف واحد أو أكثر من الشجرة للتنزيل.",
   "noFilesCouldBeRetrieved": "لا يمكن استرجاع أي ملفات.",
@@ -200,5 +200,6 @@
   "noGenresAvailable": "لا توجد أنواع متاحة",
   "clear": "مسح",
   "filterByGenre": "تصفية حسب النوع",
-  "filter": "تصفية"
+  "filter": "تصفية",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

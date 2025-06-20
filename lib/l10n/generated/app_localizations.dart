@@ -1447,6 +1447,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Developer'**
   String get developer;
+
+  /// No description provided for @onlyTorrentsAreWorkingForNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Only torrents are working for now.'**
+  String get onlyTorrentsAreWorkingForNow;
 }
 
 class _AppLocalizationsDelegate

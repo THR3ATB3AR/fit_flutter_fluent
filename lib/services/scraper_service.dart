@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:fit_flutter_fluent/data/download_mirror.dart';
+import 'package:fit_flutter_fluent/data/gog_download_links.dart';
 import 'package:fit_flutter_fluent/data/gog_game.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fit_flutter_fluent/services/repack_service.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
 import 'package:html/dom.dart' as dom;
 import 'package:intl/intl.dart';
@@ -963,5 +967,130 @@ class ScraperService {
     );
 
     return gogGames;
+  }
+
+  Map<String, List<DownloadMirror>> _parseDownloadSection(dom.Document document, String sectionTitle) {
+    // ... (This helper function from the previous answer remains unchanged)
+    final Map<String, List<DownloadMirror>> categorizedMirrors = {};
+    final sectionHeader = document.querySelectorAll('div[class^="game-section-with-accordion"] p.font-semibold').firstWhere(
+          (p) => p.text.trim().toUpperCase() == sectionTitle,
+      orElse: () => dom.Element.html('<div></div>'),
+    );
+
+    final sectionContainer = sectionHeader.parent?.parent;
+    if (sectionContainer == null) return {};
+
+    final mirrorElements = sectionContainer.querySelectorAll('details[class*="item-accordion"]');
+
+    for (final mirrorElement in mirrorElements) {
+      final mirrorName = mirrorElement.querySelector('summary p')?.text.trim();
+      if (mirrorName == null || mirrorName.isEmpty) continue;
+      
+      final links = mirrorElement.querySelectorAll('div > a[href]')
+                                .map((a) => a.attributes['href'])
+                                .whereType<String>()
+                                .toList();
+      
+      if (links.isNotEmpty) {
+        final category = sectionTitle.replaceAll(' DOWNLOAD LINKS', '').trim();
+        categorizedMirrors.putIfAbsent(category, () => []).add(
+          DownloadMirror(mirrorName: mirrorName, urls: links),
+        );
+      }
+    }
+    return categorizedMirrors;
+  }
+
+  /// Scrapes all download links from a gog-games.to page using a headless browser.
+  Future<GogDownloadLinks> scrapeGogGameDownloadLinks(String gamePageUrl) async {
+    // We use a Completer to wait for the page to finish loading in the background.
+    final Completer<String> contentCompleter = Completer<String>();
+
+    debugPrint("[WebView] Starting headless scrape for: $gamePageUrl");
+    
+    // Create and run the headless webview.
+    final headlessWebView = HeadlessInAppWebView(
+      initialUrlRequest: URLRequest(url: WebUri(gamePageUrl)),
+      initialSettings: InAppWebViewSettings(
+        // Set a realistic User-Agent
+        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+        // Crucially, enable JavaScript
+        javaScriptEnabled: true,
+        // Try to disable some detection mechanisms
+        javaScriptCanOpenWindowsAutomatically: false,
+        mediaPlaybackRequiresUserGesture: false,
+      ),
+      onLoadStop: (controller, url) async {
+        debugPrint("[WebView] Page finished loading: $url");
+        
+        // Give Cloudflare/JS time to run its checks and render the content.
+        // This delay is crucial for SPAs and anti-bot systems.
+        await Future.delayed(const Duration(seconds: 10));
+        
+        debugPrint("[WebView] Extracting HTML content...");
+        try {
+          // Get the entire HTML of the rendered page.
+          final html = await controller.getHtml();
+          if (html != null && !contentCompleter.isCompleted) {
+            contentCompleter.complete(html);
+          } else if (!contentCompleter.isCompleted) {
+            contentCompleter.completeError("Failed to get HTML content.");
+          }
+        } catch (e) {
+          if (!contentCompleter.isCompleted) {
+            contentCompleter.completeError(e);
+          }
+        }
+      },
+      onLoadError: (controller, url, code, message) {
+        debugPrint("[WebView] Error loading page: $message");
+        if (!contentCompleter.isCompleted) {
+          contentCompleter.completeError("Error code $code: $message");
+        }
+      },
+    );
+
+    try {
+      debugPrint("[WebView] Running headless webview instance...");
+      await headlessWebView.run();
+
+      // Wait for the onLoadStop callback to complete and provide the HTML, with a timeout.
+      final String content = await contentCompleter.future.timeout(const Duration(seconds: 45));
+      debugPrint("[WebView] Got page content. Length: ${content.length} characters.");
+      
+      // Stop and dispose the webview now that we have the content.
+      await headlessWebView.dispose();
+      debugPrint("[WebView] Headless webview disposed.");
+
+      if (content.length < 5000) {
+        debugPrint("[WebView] WARNING: Content is very short. Scrape might have been blocked.");
+      }
+
+      final document = parser.parse(content);
+
+      // --- The rest of your parsing logic remains IDENTICAL ---
+      debugPrint("[WebView] Parsing content...");
+      final torrentElement = document.querySelector('a.btn-torrent[href^="magnet:"]');
+      final String? torrentLink = torrentElement?.attributes['href'];
+      
+      final gameLinks = _parseDownloadSection(document, 'GAME DOWNLOAD LINKS');
+      final patchLinks = _parseDownloadSection(document, 'PATCH DOWNLOAD LINKS');
+      final extraLinks = _parseDownloadSection(document, 'EXTRA DOWNLOAD LINKS');
+      debugPrint("[WebView] Parsing complete.");
+
+      return GogDownloadLinks(
+        torrentLink: torrentLink,
+        gameDownloadLinks: gameLinks,
+        patchDownloadLinks: patchLinks,
+        extraDownloadLinks: extraLinks,
+      );
+    } catch (e) {
+      debugPrint("FATAL ERROR during headless WebView scrape for $gamePageUrl: $e");
+      // Ensure the webview is disposed even on error.
+      if (headlessWebView.isRunning()) {
+        await headlessWebView.dispose();
+      }
+      return GogDownloadLinks(); // Return empty on failure
+    }
   }
 }

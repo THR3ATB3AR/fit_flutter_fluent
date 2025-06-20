@@ -200,5 +200,6 @@
   "noGenresAvailable": "Nessun genere disponibile",
   "clear": "Pulisci",
   "filterByGenre": "Filtra per genere",
-  "filter": "Filtro"
+  "filter": "Filtro",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

@@ -162,7 +162,7 @@
   "errorProcessingOneOrMoreLinks": "Eroare la procesarea uneia sau mai multor linkuri. ",
   "filesAddedToDownloadManager": "{count} {count, plural, zero{fişiere} one{fişier} other{fişiere}} adăugat la managerul de descărcare.",
   "downloadStarted": "Descărcare începută",
-  "ok": "Ok",
+  "ok": "OK",
   "noFilesSelected": "Niciun fișier selectat",
   "pleaseSelectOneOrMoreFilesFromTheTreeToDownload": "Te rugăm să selectezi unul sau mai multe fișiere din copac pentru a fi descărcate.",
   "noFilesCouldBeRetrieved": "Nici un fişier nu a putut fi recuperat.",
@@ -200,5 +200,6 @@
   "noGenresAvailable": "Niciun gen disponibil",
   "clear": "Curăță",
   "filterByGenre": "Filtrare după gen",
-  "filter": "Filtrare"
+  "filter": "Filtrare",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

@@ -162,7 +162,7 @@
   "errorProcessingOneOrMoreLinks": "Σφάλμα κατά την επεξεργασία ενός ή περισσότερων συνδέσμων. ",
   "filesAddedToDownloadManager": "{count} {count, plural, zero{αρχεία} one{αρχείο} other{αρχεία}} προστέθηκαν στο διαχειριστή λήψης.",
   "downloadStarted": "Η Λήψη Ξεκίνησε",
-  "ok": "Εντάξει",
+  "ok": "OK",
   "noFilesSelected": "Δεν Επιλέχθηκαν Αρχεία",
   "pleaseSelectOneOrMoreFilesFromTheTreeToDownload": "Παρακαλώ επιλέξτε ένα ή περισσότερα αρχεία από το δέντρο για λήψη.",
   "noFilesCouldBeRetrieved": "Δεν ήταν δυνατή η ανάκτηση αρχείων.",
@@ -200,5 +200,6 @@
   "noGenresAvailable": "Δεν υπάρχουν διαθέσιμα είδη",
   "clear": "Εκκαθάριση",
   "filterByGenre": "Φιλτράρισμα ανά είδος",
-  "filter": "Φίλτρο"
+  "filter": "Φίλτρο",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }

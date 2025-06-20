@@ -162,7 +162,7 @@
   "errorProcessingOneOrMoreLinks": "Fout bij het verwerken van een of meer links. ",
   "filesAddedToDownloadManager": "{count} {count, plural, zero{files} one{file} other{files}} added to download manager.",
   "downloadStarted": "Download gestart",
-  "ok": "Ok",
+  "ok": "OK",
   "noFilesSelected": "Geen bestanden geselecteerd",
   "pleaseSelectOneOrMoreFilesFromTheTreeToDownload": "Selecteer een of meer bestanden uit de te downloaden structuur.",
   "noFilesCouldBeRetrieved": "Er konden geen bestanden worden opgehaald.",
@@ -200,5 +200,6 @@
   "noGenresAvailable": "Geen genres beschikbaar",
   "clear": "Verwijderen",
   "filterByGenre": "Filteren op genre",
-  "filter": "Filteren"
+  "filter": "Filteren",
+  "onlyTorrentsAreWorkingForNow": "Only torrents are working for now."
 }
