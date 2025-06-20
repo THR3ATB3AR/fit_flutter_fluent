@@ -216,5 +216,5 @@
   "lastUpdate": "Последнее обновление",
   "developer": "Разработчик",
   "onlyTorrentsAreWorkingForNow": "Сейчас работают только торренты.",
-  "couldNotFindDownloadLinks": "Could not find download links"
+  "couldNotFindDownloadLinks": "Не удалось найти ссылки для загрузки"
 }
