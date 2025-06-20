@@ -596,7 +596,9 @@ class ScraperService {
                   }
                   return src;
                 } catch (e) {
-                  print(e);
+                  debugPrint(
+                    "Error processing screenshot URL: ${element.attributes['src']}, error: $e",
+                  );
                   return '';
                 }
               });
@@ -838,18 +840,15 @@ class ScraperService {
   Future<List<GogGame>> scrapeGogGames({
     required Function(int, int) onProgress,
   }) async {
-    // 1. Fetch the initial list of all games from gog-games.to
     final allGamesUrl = Uri.parse('https://gog-games.to/api/web/all-games');
     http.Response response;
     try {
       response = await _fetchWithRetry(allGamesUrl);
     } catch (e) {
       debugPrint("Failed to fetch all games list from gog-games.to: $e");
-      // If the initial list fails, we cannot proceed.
       return [];
     }
 
-    // Parse the JSON response into a list of dynamic objects
     final List<dynamic> allGamesData;
     try {
       allGamesData = jsonDecode(response.body) as List<dynamic>;
@@ -858,16 +857,13 @@ class ScraperService {
       return [];
     }
 
-    // Cast the list to a more specific type for processing
     final List<Map<String, dynamic>> gamesToProcess =
         allGamesData.cast<Map<String, dynamic>>();
 
-    // 2. Use _processInBatches to fetch details for each game concurrently
     final List<GogGame>
     gogGames = await _processInBatches<Map<String, dynamic>, GogGame>(
       items: gamesToProcess,
-      batchSize:
-          _maxConcurrentFetches, // Reuse existing constant for concurrency
+      batchSize: _maxConcurrentFetches,
       onProgress: onProgress,
       processItem: (gameData) async {
         final String? gogId = gameData['id']?.toString();
@@ -877,16 +873,12 @@ class ScraperService {
         }
 
         try {
-          // Fetch detailed data for a single game from gogdb.org
           final gogDbUrl = Uri.parse(
             'https://www.gogdb.org/data/products/$gogId/product.json',
           );
           final gogDbResponse = await _fetchWithRetry(gogDbUrl);
           final Map<String, dynamic> gogDbData = jsonDecode(gogDbResponse.body);
 
-          // 3. Combine data from both sources to create a GogGame instance
-
-          // Helper function to clean HTML content into plain text
           String cleanHtml(String? htmlString) {
             if (htmlString == null || htmlString.isEmpty) return 'N/A';
             return htmlString
@@ -895,22 +887,19 @@ class ScraperService {
                 .trim();
           }
 
-          // Extract genres from the 'tags' list
           final List<String> genres =
               (gogDbData['tags'] as List<dynamic>?)
                   ?.map((tag) => tag['name'].toString())
                   .toList() ??
               [];
 
-          // Construct the full URL for the cover image
           final String coverHash =
               gogDbData['image_boxart'] ?? gameData['image'] ?? '';
           final String coverUrl =
               coverHash.isNotEmpty
                   ? 'https://images.gog-statics.com/$coverHash.jpg'
-                  : 'https://github.com/THR3ATB3AR/fit_flutter_assets/blob/main/noposter.png?raw=true'; // Default image
+                  : 'https://github.com/THR3ATB3AR/fit_flutter_assets/blob/main/noposter.png?raw=true';
 
-          // Construct full URLs for screenshots
           final List<String> screenshots =
               (gogDbData['screenshots'] as List<dynamic>?)
                   ?.map((hash) => 'https://images.gog-statics.com/$hash.jpg')
@@ -921,12 +910,10 @@ class ScraperService {
               (gogDbData['localizations'] as List<dynamic>?)
                   ?.map((lang) => lang['name'].toString())
                   .toList() ??
-              ['English']; // Default to English if not found
+              ['English'];
 
-          // Extract user rating (out of 50)
           final int? userRating = gogDbData['user_rating'] as int?;
 
-          // Extract Windows download size in bytes
           final installerList = gogDbData['dl_installer'] as List<dynamic>?;
           int? windowsDownloadSize;
           if (installerList != null) {
@@ -952,7 +939,6 @@ class ScraperService {
             cover: coverUrl,
             genres: genres,
             screenshots: screenshots,
-            // --- PASS NEW DATA TO CONSTRUCTOR ---
             languages: languages,
             userRating: userRating,
             windowsDownloadSize: windowsDownloadSize,
@@ -969,67 +955,71 @@ class ScraperService {
     return gogGames;
   }
 
-  Map<String, List<DownloadMirror>> _parseDownloadSection(dom.Document document, String sectionTitle) {
-    // ... (This helper function from the previous answer remains unchanged)
+  Map<String, List<DownloadMirror>> _parseDownloadSection(
+    dom.Document document,
+    String sectionTitle,
+  ) {
     final Map<String, List<DownloadMirror>> categorizedMirrors = {};
-    final sectionHeader = document.querySelectorAll('div[class^="game-section-with-accordion"] p.font-semibold').firstWhere(
+    final sectionHeader = document
+        .querySelectorAll(
+          'div[class^="game-section-with-accordion"] p.font-semibold',
+        )
+        .firstWhere(
           (p) => p.text.trim().toUpperCase() == sectionTitle,
-      orElse: () => dom.Element.html('<div></div>'),
-    );
+          orElse: () => dom.Element.html('<div></div>'),
+        );
 
     final sectionContainer = sectionHeader.parent?.parent;
     if (sectionContainer == null) return {};
 
-    final mirrorElements = sectionContainer.querySelectorAll('details[class*="item-accordion"]');
+    final mirrorElements = sectionContainer.querySelectorAll(
+      'details[class*="item-accordion"]',
+    );
 
     for (final mirrorElement in mirrorElements) {
       final mirrorName = mirrorElement.querySelector('summary p')?.text.trim();
       if (mirrorName == null || mirrorName.isEmpty) continue;
-      
-      final links = mirrorElement.querySelectorAll('div > a[href]')
-                                .map((a) => a.attributes['href'])
-                                .whereType<String>()
-                                .toList();
-      
+
+      final links =
+          mirrorElement
+              .querySelectorAll('div > a[href]')
+              .map((a) => a.attributes['href'])
+              .whereType<String>()
+              .toList();
+
       if (links.isNotEmpty) {
         final category = sectionTitle.replaceAll(' DOWNLOAD LINKS', '').trim();
-        categorizedMirrors.putIfAbsent(category, () => []).add(
-          DownloadMirror(mirrorName: mirrorName, urls: links),
-        );
+        categorizedMirrors
+            .putIfAbsent(category, () => [])
+            .add(DownloadMirror(mirrorName: mirrorName, urls: links));
       }
     }
     return categorizedMirrors;
   }
 
-  /// Scrapes all download links from a gog-games.to page using a headless browser.
-  Future<GogDownloadLinks> scrapeGogGameDownloadLinks(String gamePageUrl) async {
-    // We use a Completer to wait for the page to finish loading in the background.
+  Future<GogDownloadLinks> scrapeGogGameDownloadLinks(
+    String gamePageUrl,
+  ) async {
     final Completer<String> contentCompleter = Completer<String>();
 
     debugPrint("[WebView] Starting headless scrape for: $gamePageUrl");
-    
-    // Create and run the headless webview.
+
     final headlessWebView = HeadlessInAppWebView(
       initialUrlRequest: URLRequest(url: WebUri(gamePageUrl)),
       initialSettings: InAppWebViewSettings(
-        // Set a realistic User-Agent
-        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
-        // Crucially, enable JavaScript
+        userAgent:
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
         javaScriptEnabled: true,
-        // Try to disable some detection mechanisms
         javaScriptCanOpenWindowsAutomatically: false,
         mediaPlaybackRequiresUserGesture: false,
       ),
       onLoadStop: (controller, url) async {
         debugPrint("[WebView] Page finished loading: $url");
-        
-        // Give Cloudflare/JS time to run its checks and render the content.
-        // This delay is crucial for SPAs and anti-bot systems.
+
         await Future.delayed(const Duration(seconds: 10));
-        
+
         debugPrint("[WebView] Extracting HTML content...");
         try {
-          // Get the entire HTML of the rendered page.
           final html = await controller.getHtml();
           if (html != null && !contentCompleter.isCompleted) {
             contentCompleter.complete(html);
@@ -1054,28 +1044,39 @@ class ScraperService {
       debugPrint("[WebView] Running headless webview instance...");
       await headlessWebView.run();
 
-      // Wait for the onLoadStop callback to complete and provide the HTML, with a timeout.
-      final String content = await contentCompleter.future.timeout(const Duration(seconds: 45));
-      debugPrint("[WebView] Got page content. Length: ${content.length} characters.");
-      
-      // Stop and dispose the webview now that we have the content.
+      final String content = await contentCompleter.future.timeout(
+        const Duration(seconds: 45),
+      );
+      debugPrint(
+        "[WebView] Got page content. Length: ${content.length} characters.",
+      );
+
       await headlessWebView.dispose();
       debugPrint("[WebView] Headless webview disposed.");
 
       if (content.length < 5000) {
-        debugPrint("[WebView] WARNING: Content is very short. Scrape might have been blocked.");
+        debugPrint(
+          "[WebView] WARNING: Content is very short. Scrape might have been blocked.",
+        );
       }
 
       final document = parser.parse(content);
 
-      // --- The rest of your parsing logic remains IDENTICAL ---
       debugPrint("[WebView] Parsing content...");
-      final torrentElement = document.querySelector('a.btn-torrent[href^="magnet:"]');
+      final torrentElement = document.querySelector(
+        'a.btn-torrent[href^="magnet:"]',
+      );
       final String? torrentLink = torrentElement?.attributes['href'];
-      
+
       final gameLinks = _parseDownloadSection(document, 'GAME DOWNLOAD LINKS');
-      final patchLinks = _parseDownloadSection(document, 'PATCH DOWNLOAD LINKS');
-      final extraLinks = _parseDownloadSection(document, 'EXTRA DOWNLOAD LINKS');
+      final patchLinks = _parseDownloadSection(
+        document,
+        'PATCH DOWNLOAD LINKS',
+      );
+      final extraLinks = _parseDownloadSection(
+        document,
+        'EXTRA DOWNLOAD LINKS',
+      );
       debugPrint("[WebView] Parsing complete.");
 
       return GogDownloadLinks(
@@ -1085,19 +1086,19 @@ class ScraperService {
         extraDownloadLinks: extraLinks,
       );
     } catch (e) {
-      debugPrint("FATAL ERROR during headless WebView scrape for $gamePageUrl: $e");
-      // Ensure the webview is disposed even on error.
+      debugPrint(
+        "FATAL ERROR during headless WebView scrape for $gamePageUrl: $e",
+      );
       if (headlessWebView.isRunning()) {
         await headlessWebView.dispose();
       }
-      return GogDownloadLinks(); // Return empty on failure
+      return GogDownloadLinks();
     }
   }
 
   Future<GogGame> rescrapeSingleGogGame(int gogGameId) async {
     debugPrint("[Rescrape] Starting rescrape for GOG game ID: $gogGameId");
 
-    // --- Step 1: Fetch the master list to find the specific game's base data ---
     final allGamesUrl = Uri.parse('https://gog-games.to/api/web/all-games');
     final http.Response allGamesResponse;
     try {
@@ -1107,43 +1108,70 @@ class ScraperService {
     }
 
     final List<dynamic> allGamesData = jsonDecode(allGamesResponse.body);
-    // Find the specific game's data from the master list by its ID.
     final gameData = allGamesData.cast<Map<String, dynamic>>().firstWhere(
-          (game) => game['id']?.toString() == gogGameId.toString(),
-      orElse: () => throw Exception("Game with ID $gogGameId not found in the master list."),
+      (game) => game['id']?.toString() == gogGameId.toString(),
+      orElse:
+          () =>
+              throw Exception(
+                "Game with ID $gogGameId not found in the master list.",
+              ),
     );
 
     debugPrint("[Rescrape] Found base game data: ${gameData['title']}");
 
-    // --- Step 2: Fetch the detailed data from gogdb.org ---
-    final gogDbUrl = Uri.parse('https://www.gogdb.org/data/products/$gogGameId/product.json');
+    final gogDbUrl = Uri.parse(
+      'https://www.gogdb.org/data/products/$gogGameId/product.json',
+    );
     final http.Response gogDbResponse;
     try {
       gogDbResponse = await _fetchWithRetry(gogDbUrl);
     } catch (e) {
-      throw Exception("Failed to fetch detailed data from gogdb.org for ID $gogGameId: $e");
+      throw Exception(
+        "Failed to fetch detailed data from gogdb.org for ID $gogGameId: $e",
+      );
     }
 
     final Map<String, dynamic> gogDbData = jsonDecode(gogDbResponse.body);
     debugPrint("[Rescrape] Fetched detailed data from gogdb.org");
 
-    // --- Step 3: Combine and build the new GogGame object (reusing logic from scrapeGogGames) ---
     String cleanHtml(String? htmlString) {
       if (htmlString == null || htmlString.isEmpty) return 'N/A';
-      return htmlString.replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n').replaceAll(RegExp(r'<[^>]*>'), '').trim();
+      return htmlString
+          .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
+          .replaceAll(RegExp(r'<[^>]*>'), '')
+          .trim();
     }
 
-    final List<String> genres = (gogDbData['tags'] as List<dynamic>?)?.map((tag) => tag['name'].toString()).toList() ?? [];
-    final String coverHash = gogDbData['image_boxart'] ?? gameData['image'] ?? '';
-    final String coverUrl = coverHash.isNotEmpty ? 'https://images.gog-statics.com/$coverHash.jpg' : 'https://github.com/THR3ATB3AR/fit_flutter_assets/blob/main/noposter.png?raw=true';
-    final List<String> screenshots = (gogDbData['screenshots'] as List<dynamic>?)?.map((hash) => 'https://images.gog-statics.com/$hash.jpg').toList() ?? [];
-    final List<String> languages = (gogDbData['localizations'] as List<dynamic>?)?.map((lang) => lang['name'].toString()).toList() ?? ['English'];
+    final List<String> genres =
+        (gogDbData['tags'] as List<dynamic>?)
+            ?.map((tag) => tag['name'].toString())
+            .toList() ??
+        [];
+    final String coverHash =
+        gogDbData['image_boxart'] ?? gameData['image'] ?? '';
+    final String coverUrl =
+        coverHash.isNotEmpty
+            ? 'https://images.gog-statics.com/$coverHash.jpg'
+            : 'https://github.com/THR3ATB3AR/fit_flutter_assets/blob/main/noposter.png?raw=true';
+    final List<String> screenshots =
+        (gogDbData['screenshots'] as List<dynamic>?)
+            ?.map((hash) => 'https://images.gog-statics.com/$hash.jpg')
+            .toList() ??
+        [];
+    final List<String> languages =
+        (gogDbData['localizations'] as List<dynamic>?)
+            ?.map((lang) => lang['name'].toString())
+            .toList() ??
+        ['English'];
     final int? userRating = gogDbData['user_rating'] as int?;
 
     final installerList = gogDbData['dl_installer'] as List<dynamic>?;
     int? windowsDownloadSize;
     if (installerList != null) {
-      final windowsInstaller = installerList.firstWhere((installer) => installer['os'] == 'windows', orElse: () => null);
+      final windowsInstaller = installerList.firstWhere(
+        (installer) => installer['os'] == 'windows',
+        orElse: () => null,
+      );
       if (windowsInstaller != null) {
         windowsDownloadSize = windowsInstaller['total_size'] as int?;
       }
@@ -1157,7 +1185,8 @@ class ScraperService {
       slug: gameData['slug'] ?? '',
       developer: gameData['developer'] ?? 'N/A',
       publisher: gameData['publisher'] ?? 'N/A',
-      updateDate: DateTime.tryParse(gameData['last_update'] ?? '') ?? DateTime(1970),
+      updateDate:
+          DateTime.tryParse(gameData['last_update'] ?? '') ?? DateTime(1970),
       description: cleanHtml(gogDbData['description']),
       cover: coverUrl,
       genres: genres,

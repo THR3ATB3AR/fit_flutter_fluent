@@ -46,49 +46,66 @@ class BuzzheavierCom {
       // This request is expected to give us a redirect, not the file itself.
       // We prevent automatic redirects to capture the header.
       final downloadEndpointUrl = Uri.parse('$initialUrl/download');
-    final intermediateRequest = http.Request('GET', downloadEndpointUrl)..followRedirects = false;
-    print('[Buzzheavier] Requesting download endpoint: $downloadEndpointUrl');
-    final intermediateResponse = await client.send(intermediateRequest);
-    
-    if (intermediateResponse.statusCode < 300 || intermediateResponse.statusCode >= 400) {
-      throw Exception('Expected a redirect from download endpoint, but got status ${intermediateResponse.statusCode}');
-    }
+      final intermediateRequest = http.Request('GET', downloadEndpointUrl)
+        ..followRedirects = false;
+      print('[Buzzheavier] Requesting download endpoint: $downloadEndpointUrl');
+      final intermediateResponse = await client.send(intermediateRequest);
 
-    final intermediateRedirectUrl = intermediateResponse.headers['hx-redirect'] ?? intermediateResponse.headers['location'];
-    if (intermediateRedirectUrl == null || intermediateRedirectUrl.isEmpty) {
-      throw Exception('Redirect found, but "Hx-Redirect" or "location" header was missing.');
-    }
-    print('[Buzzheavier] Found intermediate redirect URL: $intermediateRedirectUrl');
+      if (intermediateResponse.statusCode < 300 ||
+          intermediateResponse.statusCode >= 400) {
+        throw Exception(
+          'Expected a redirect from download endpoint, but got status ${intermediateResponse.statusCode}',
+        );
+      }
 
-    // --- Step 3 (NEW): Make a HEAD request to the intermediate URL to get the FINAL URL ---
-    // We use a HEAD request because we only care about the headers (specifically the final 'location' after redirects)
-    // and don't need to download the body. This is much faster.
-    print('[Buzzheavier] Sending HEAD request to intermediate URL to find final location...');
-    final finalRequest = http.Request('HEAD', Uri.parse(intermediateRedirectUrl))
-      ..followRedirects = true; // IMPORTANT: Allow redirects here
-      
-    final finalResponse = await client.send(finalRequest);
-
-    // The final URL is the URL of the last request in the redirect chain.
-    final finalUrl = finalResponse.request?.url.toString();
-
-    if (finalUrl != null && finalUrl.isNotEmpty && finalUrl != intermediateRedirectUrl) {
-      print('[Buzzheavier] Found FINAL download URL: $finalUrl');
-      return DownloadInfo(
-        repackTitle: repackTitle,
-        downloadLink: finalUrl,
-        fileName: fileName,
-        downloadType: downloadType,
+      final intermediateRedirectUrl =
+          intermediateResponse.headers['hx-redirect'] ??
+          intermediateResponse.headers['location'];
+      if (intermediateRedirectUrl == null || intermediateRedirectUrl.isEmpty) {
+        throw Exception(
+          'Redirect found, but "Hx-Redirect" or "location" header was missing.',
+        );
+      }
+      print(
+        '[Buzzheavier] Found intermediate redirect URL: $intermediateRedirectUrl',
       );
-    } else {
-      throw Exception('Failed to resolve the final download URL from the intermediate redirect.');
-    }
 
-  } catch (e) {
-    print('[Buzzheavier] An error occurred: $e');
-    rethrow;
-  } finally {
-    client.close();
+      // --- Step 3 (NEW): Make a HEAD request to the intermediate URL to get the FINAL URL ---
+      // We use a HEAD request because we only care about the headers (specifically the final 'location' after redirects)
+      // and don't need to download the body. This is much faster.
+      print(
+        '[Buzzheavier] Sending HEAD request to intermediate URL to find final location...',
+      );
+      final finalRequest = http.Request(
+        'HEAD',
+        Uri.parse(intermediateRedirectUrl),
+      )..followRedirects = true; // IMPORTANT: Allow redirects here
+
+      final finalResponse = await client.send(finalRequest);
+
+      // The final URL is the URL of the last request in the redirect chain.
+      final finalUrl = finalResponse.request?.url.toString();
+
+      if (finalUrl != null &&
+          finalUrl.isNotEmpty &&
+          finalUrl != intermediateRedirectUrl) {
+        print('[Buzzheavier] Found FINAL download URL: $finalUrl');
+        return DownloadInfo(
+          repackTitle: repackTitle,
+          downloadLink: finalUrl,
+          fileName: fileName,
+          downloadType: downloadType,
+        );
+      } else {
+        throw Exception(
+          'Failed to resolve the final download URL from the intermediate redirect.',
+        );
+      }
+    } catch (e) {
+      print('[Buzzheavier] An error occurred: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
   }
-}
 }

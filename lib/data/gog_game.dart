@@ -13,8 +13,8 @@ class GogGame {
   final List<String> genres;
   final List<String> screenshots;
   final List<String> languages;
-  final int? userRating; 
-  final int? windowsDownloadSize; 
+  final int? userRating;
+  final int? windowsDownloadSize;
 
   GogGame({
     required this.id,
@@ -42,11 +42,17 @@ class GogGame {
       description: row['description'] as String,
       developer: row['developer'] as String,
       publisher: row['publisher'] as String,
-      updateDate: DateTime.tryParse(row['updateDate'] as String) ?? DateTime(1970),
+      updateDate:
+          DateTime.tryParse(row['updateDate'] as String) ?? DateTime(1970),
       cover: row['cover'] as String,
-      genres: (jsonDecode(row['genres'] as String) as List<dynamic>).cast<String>(),
-      screenshots: (jsonDecode(row['screenshots'] as String) as List<dynamic>).cast<String>(),
-      languages: (jsonDecode(row['languages'] as String) as List<dynamic>).cast<String>(),
+      genres:
+          (jsonDecode(row['genres'] as String) as List<dynamic>).cast<String>(),
+      screenshots:
+          (jsonDecode(row['screenshots'] as String) as List<dynamic>)
+              .cast<String>(),
+      languages:
+          (jsonDecode(row['languages'] as String) as List<dynamic>)
+              .cast<String>(),
       userRating: row['userRating'] as int?,
       windowsDownloadSize: row['windowsDownloadSize'] as int?,
     );

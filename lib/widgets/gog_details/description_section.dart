@@ -26,26 +26,18 @@ class DescriptionSection extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              GogGameInfoCard(gogGame: gogGame),
-              // const SizedBox(height: 16),
-              // gogGame.updates == null 
-              //     ? Container()
-              //     :
-              // _buildHtmlSectionCard(
-              //   context,
-              //   title: "Updates & Patches",
-              //   htmlContent: gogGame.updates!,
-              // ),
-            ],
+            children: [GogGameInfoCard(gogGame: gogGame)],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSectionCard(BuildContext context,
-      {required String title, required String content}) {
+  Widget _buildSectionCard(
+    BuildContext context, {
+    required String title,
+    required String content,
+  }) {
     final theme = FluentTheme.of(context);
     return Card(
       borderRadius: BorderRadius.circular(8.0),
@@ -56,11 +48,16 @@ class DescriptionSection extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(
-                left: 16.0, top: 16.0, right: 16.0, bottom: 8.0),
+              left: 16.0,
+              top: 16.0,
+              right: 16.0,
+              bottom: 8.0,
+            ),
             child: Text(
               title,
-              style: theme.typography.subtitle
-                  ?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.typography.subtitle?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           const Divider(
@@ -72,14 +69,10 @@ class DescriptionSection extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text(
-              content,
-              style: theme.typography.body,
-            ),
+            child: Text(content, style: theme.typography.body),
           ),
         ],
       ),
     );
   }
-
 }

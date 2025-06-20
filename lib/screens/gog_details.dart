@@ -3,11 +3,10 @@ import 'package:fit_flutter_fluent/widgets/gog_details/description_section.dart'
 import 'package:fit_flutter_fluent/widgets/gog_details/gog_header.dart';
 import 'package:fit_flutter_fluent/widgets/gog_details/gog_screenshot_section.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:url_launcher/url_launcher.dart'; 
-import 'package:fit_flutter_fluent/services/scraper_service.dart'; 
-import 'package:fit_flutter_fluent/services/repack_service.dart'; 
+import 'package:url_launcher/url_launcher.dart';
+import 'package:fit_flutter_fluent/services/scraper_service.dart';
+import 'package:fit_flutter_fluent/services/repack_service.dart';
 import 'package:fit_flutter_fluent/l10n/generated/app_localizations.dart';
-
 
 class GogDetails extends StatefulWidget {
   final GogGame selectedGogGame;
@@ -47,21 +46,27 @@ class _GogDetailsState extends State<GogDetails> {
         } catch (e) {
           _showInfoBar(
             title: AppLocalizations.of(context)!.error,
-            content: AppLocalizations.of(context)!.couldNotLaunchUrl(e.toString()),
+            content: AppLocalizations.of(
+              context,
+            )!.couldNotLaunchUrl(e.toString()),
             severity: InfoBarSeverity.error,
           );
         }
       } else {
         _showInfoBar(
           title: AppLocalizations.of(context)!.error,
-          content: AppLocalizations.of(context)!.couldNotLaunch(_currentGogGame.url),
+          content: AppLocalizations.of(
+            context,
+          )!.couldNotLaunch(_currentGogGame.url),
           severity: InfoBarSeverity.error,
         );
       }
     } else {
       _showInfoBar(
         title: AppLocalizations.of(context)!.error,
-        content: AppLocalizations.of(context)!.invalidUrlFormat(_currentGogGame.url),
+        content: AppLocalizations.of(
+          context,
+        )!.invalidUrlFormat(_currentGogGame.url),
         severity: InfoBarSeverity.error,
       );
     }
@@ -75,34 +80,33 @@ class _GogDetailsState extends State<GogDetails> {
     });
 
     try {
-      // Use the new scraper function with the game's ID
       GogGame newGogGameData = await _scraperService.rescrapeSingleGogGame(
         _currentGogGame.id,
       );
 
-      // Update the main data list in the service
       _repackService.gogGames.removeWhere((g) => g.id == newGogGameData.id);
       _repackService.gogGames.add(newGogGameData);
-      
-      // Save the updated list to the database
-      // Using saveGogGamesList will handle sorting and notifying listeners
+
       await _repackService.saveGogGamesList();
 
       if (mounted) {
-        // Update the local state to refresh the UI immediately
         setState(() {
           _currentGogGame = newGogGameData;
         });
         _showInfoBar(
           title: AppLocalizations.of(context)!.success,
-          content: AppLocalizations.of(context)!.detailsHaveBeenRescraped(newGogGameData.title),
+          content: AppLocalizations.of(
+            context,
+          )!.detailsHaveBeenRescraped(newGogGameData.title),
           severity: InfoBarSeverity.success,
         );
       }
     } catch (e) {
       _showInfoBar(
         title: AppLocalizations.of(context)!.errorRescraping,
-        content: AppLocalizations.of(context)!.failedToRescrapeDetails(e.toString()),
+        content: AppLocalizations.of(
+          context,
+        )!.failedToRescrapeDetails(e.toString()),
         severity: InfoBarSeverity.error,
       );
     } finally {
@@ -138,7 +142,7 @@ class _GogDetailsState extends State<GogDetails> {
 
     return ScaffoldPage.scrollable(
       header: CommandBar(
-        mainAxisAlignment: MainAxisAlignment.end, 
+        mainAxisAlignment: MainAxisAlignment.end,
         primaryItems: [
           CommandBarButton(
             icon: const Icon(FluentIcons.globe),
@@ -155,7 +159,7 @@ class _GogDetailsState extends State<GogDetails> {
                     )
                     : const Icon(FluentIcons.refresh),
             label: Text(AppLocalizations.of(context)!.rescrapeDetails),
-            onPressed: 
+            onPressed:
                 _isRescrapingDetails || _currentGogGame.url.isEmpty
                     ? null
                     : _rescrapeDetails,
@@ -168,7 +172,7 @@ class _GogDetailsState extends State<GogDetails> {
             constraints: const BoxConstraints(
               maxWidth: screenshotSectionMaxWidth,
             ),
-            child: GogHeader(gogGame: _currentGogGame), 
+            child: GogHeader(gogGame: _currentGogGame),
           ),
         ),
         const SizedBox(height: 60),
@@ -179,9 +183,7 @@ class _GogDetailsState extends State<GogDetails> {
             ),
             child: SizedBox(
               height: 600,
-              child: GogScreenshotSection(
-                gogGames: _currentGogGame,
-              ), 
+              child: GogScreenshotSection(gogGames: _currentGogGame),
             ),
           ),
         ),
@@ -191,9 +193,7 @@ class _GogDetailsState extends State<GogDetails> {
             constraints: const BoxConstraints(
               maxWidth: screenshotSectionMaxWidth,
             ),
-            child: DescriptionSection(
-              gogGame: _currentGogGame,
-            ), 
+            child: DescriptionSection(gogGame: _currentGogGame),
           ),
         ),
       ],

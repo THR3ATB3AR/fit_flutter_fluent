@@ -67,19 +67,21 @@ class _GogDownloadDialogState extends State<GogDownloadDialog> {
       launchUrl(Uri.parse(widget.links.torrentLink!));
       Navigator.pop(context);
     } else if (_selectedMirror != null) {
-      
       showDialog(
         context: context,
-        builder: (context) => ContentDialog(
-          title: Text(AppLocalizations.of(context)!.error),
-            content: Text(AppLocalizations.of(context)!.onlyTorrentsAreWorkingForNow),
-          actions: [
-        Button(
-          child: Text(AppLocalizations.of(context)!.ok),
-          onPressed: () => Navigator.pop(context),
-        ),
-          ],
-        ),
+        builder:
+            (context) => ContentDialog(
+              title: Text(AppLocalizations.of(context)!.error),
+              content: Text(
+                AppLocalizations.of(context)!.onlyTorrentsAreWorkingForNow,
+              ),
+              actions: [
+                Button(
+                  child: Text(AppLocalizations.of(context)!.ok),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
       );
 
       // final ddManager = DdManager.instance;
@@ -125,12 +127,21 @@ class _GogDownloadDialogState extends State<GogDownloadDialog> {
                   child: ComboBox<String>(
                     value: _selectedCategory,
                     isExpanded: true,
-                    items: categories.keys.map((key) => ComboBoxItem<String>(value: key, child: Text(key))).toList(),
+                    items:
+                        categories.keys
+                            .map(
+                              (key) => ComboBoxItem<String>(
+                                value: key,
+                                child: Text(key),
+                              ),
+                            )
+                            .toList(),
                     onChanged: (value) {
                       if (value != null) {
                         setState(() {
                           _selectedCategory = value;
-                          if (value != 'TORRENT' && categories[value]!.isNotEmpty) {
+                          if (value != 'TORRENT' &&
+                              categories[value]!.isNotEmpty) {
                             _selectedMirror = categories[value]!.first;
                           } else {
                             _selectedMirror = null;
@@ -149,10 +160,15 @@ class _GogDownloadDialogState extends State<GogDownloadDialog> {
                     child: ComboBox<DownloadMirror>(
                       value: _selectedMirror,
                       isExpanded: true,
-                      items: currentMirrors.map((mirror) => ComboBoxItem<DownloadMirror>(
-                        value: mirror,
-                        child: Text(mirror.mirrorName),
-                      )).toList(),
+                      items:
+                          currentMirrors
+                              .map(
+                                (mirror) => ComboBoxItem<DownloadMirror>(
+                                  value: mirror,
+                                  child: Text(mirror.mirrorName),
+                                ),
+                              )
+                              .toList(),
                       onChanged: (value) {
                         setState(() => _selectedMirror = value);
                       },

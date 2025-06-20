@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fit_flutter_fluent/data/gog_game.dart';
-import 'package:fit_flutter_fluent/data/gog_download_links.dart'; 
-import 'package:fit_flutter_fluent/services/scraper_service.dart'; 
+import 'package:fit_flutter_fluent/data/gog_download_links.dart';
+import 'package:fit_flutter_fluent/services/scraper_service.dart';
 import 'package:fit_flutter_fluent/widgets/fluent_chip.dart';
-import 'package:fit_flutter_fluent/widgets/gog_details/gog_download_dialog.dart'; 
+import 'package:fit_flutter_fluent/widgets/gog_details/gog_download_dialog.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'dart:async';
 import 'package:fit_flutter_fluent/services/dd_manager.dart';
@@ -32,8 +32,12 @@ class _GogHeaderState extends State<GogHeader> {
   void initState() {
     super.initState();
     _setupProgressListener();
-    _taskGroupUpdateSubscription = _ddManager.onTaskGroupUpdated.listen((updatedSanitizedTitle) {
-      if (mounted && updatedSanitizedTitle == _ddManager.sanitizeFileName(widget.gogGame.title)) {
+    _taskGroupUpdateSubscription = _ddManager.onTaskGroupUpdated.listen((
+      updatedSanitizedTitle,
+    ) {
+      if (mounted &&
+          updatedSanitizedTitle ==
+              _ddManager.sanitizeFileName(widget.gogGame.title)) {
         _setupProgressListener();
       }
     });
@@ -41,7 +45,9 @@ class _GogHeaderState extends State<GogHeader> {
 
   void _setupProgressListener() {
     _batchProgressNotifier?.removeListener(_onProgressChanged);
-    _batchProgressNotifier = _ddManager.getBatchProgressForTitle(widget.gogGame.title);
+    _batchProgressNotifier = _ddManager.getBatchProgressForTitle(
+      widget.gogGame.title,
+    );
     if (mounted) {
       setState(() {
         if (_batchProgressNotifier != null) {
@@ -71,7 +77,9 @@ class _GogHeaderState extends State<GogHeader> {
     if (!mounted) return;
     setState(() => _isLoadingLinks = true);
 
-    final links = await _scraperService.scrapeGogGameDownloadLinks(widget.gogGame.url);
+    final links = await _scraperService.scrapeGogGameDownloadLinks(
+      widget.gogGame.url,
+    );
 
     if (!mounted) return;
     setState(() {
@@ -82,10 +90,11 @@ class _GogHeaderState extends State<GogHeader> {
     if (_downloadLinks != null && !_downloadLinks!.isEmpty) {
       showDialog(
         context: context,
-        builder: (context) => GogDownloadDialog(
-          gameTitle: widget.gogGame.title,
-          links: _downloadLinks!,
-        ),
+        builder:
+            (context) => GogDownloadDialog(
+              gameTitle: widget.gogGame.title,
+              links: _downloadLinks!,
+            ),
       );
     } else {
       displayInfoBar(
@@ -93,8 +102,13 @@ class _GogHeaderState extends State<GogHeader> {
         builder: (context, close) {
           return InfoBar(
             title: Text(AppLocalizations.of(context)!.error),
-            content: Text('AppLocalizations.of(context)!.couldNotFindDownloadLinks'),
-            action: IconButton(icon: const Icon(FluentIcons.clear), onPressed: close),
+            content: Text(
+              'AppLocalizations.of(context)!.couldNotFindDownloadLinks',
+            ),
+            action: IconButton(
+              icon: const Icon(FluentIcons.clear),
+              onPressed: close,
+            ),
             severity: InfoBarSeverity.error,
           );
         },
@@ -116,7 +130,6 @@ class _GogHeaderState extends State<GogHeader> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Cover Image
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8.0),
@@ -135,23 +148,30 @@ class _GogHeaderState extends State<GogHeader> {
                     fit: BoxFit.cover,
                     width: 120,
                     height: 120,
-                    errorWidget: (context, url, error) => Container(
-                      width: 120,
-                      height: 120,
-                      color: theme.resources.subtleFillColorSecondary,
-                      child: Center(child: Icon(FluentIcons.photo_error, size: 32, color: theme.inactiveColor)),
-                    ),
-                    placeholder: (context, url) => Container(
-                      width: 120,
-                      height: 120,
-                      color: theme.resources.subtleFillColorTertiary,
-                      child: const Center(child: ProgressRing()),
-                    ),
+                    errorWidget:
+                        (context, url, error) => Container(
+                          width: 120,
+                          height: 120,
+                          color: theme.resources.subtleFillColorSecondary,
+                          child: Center(
+                            child: Icon(
+                              FluentIcons.photo_error,
+                              size: 32,
+                              color: theme.inactiveColor,
+                            ),
+                          ),
+                        ),
+                    placeholder:
+                        (context, url) => Container(
+                          width: 120,
+                          height: 120,
+                          color: theme.resources.subtleFillColorTertiary,
+                          child: const Center(child: ProgressRing()),
+                        ),
                   ),
                 ),
               ),
               const SizedBox(width: 24),
-              // Title and Publisher
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,14 +179,19 @@ class _GogHeaderState extends State<GogHeader> {
                   children: [
                     Text(
                       widget.gogGame.title,
-                      style: typography.titleLarge?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                      style: typography.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       widget.gogGame.publisher,
-                      style: typography.bodyLarge?.copyWith(color: theme.inactiveColor),
+                      style: typography.bodyLarge?.copyWith(
+                        color: theme.inactiveColor,
+                      ),
                     ),
                   ],
                 ),
@@ -174,44 +199,57 @@ class _GogHeaderState extends State<GogHeader> {
             ],
           ),
           const SizedBox(height: 24),
-          // Genres
           if (widget.gogGame.genres.isNotEmpty)
             Wrap(
               spacing: 8.0,
               runSpacing: 8.0,
-              children: widget.gogGame.genres.map((g) => FluentChip(label: g.trim())).toList(),
+              children:
+                  widget.gogGame.genres
+                      .map((g) => FluentChip(label: g.trim()))
+                      .toList(),
             ),
           const SizedBox(height: 24),
-          // Download Button
           SizedBox(
             width: 180,
             child: FilledButton(
               style: ButtonStyle(
-                padding: WidgetStateProperty.all(const EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
+                padding: WidgetStateProperty.all(
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
               ),
-              onPressed: _isLoadingLinks ? null : _fetchAndShowDownloadDialog, // <-- ASSIGN NEW METHOD
-              child: _isLoadingLinks
-                  ? const SizedBox(width: 16, height: 16, child: ProgressRing())
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          FluentIcons.download,
-                          size: 16,
-                          color: theme.brightness == Brightness.dark ? Colors.black : Colors.white,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          localizations.download,
-                          style: typography.bodyStrong?.copyWith(
-                            color: theme.brightness == Brightness.dark ? Colors.black : Colors.white,
+              onPressed: _isLoadingLinks ? null : _fetchAndShowDownloadDialog,
+              child:
+                  _isLoadingLinks
+                      ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: ProgressRing(),
+                      )
+                      : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            FluentIcons.download,
+                            size: 16,
+                            color:
+                                theme.brightness == Brightness.dark
+                                    ? Colors.black
+                                    : Colors.white,
                           ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: 8),
+                          Text(
+                            localizations.download,
+                            style: typography.bodyStrong?.copyWith(
+                              color:
+                                  theme.brightness == Brightness.dark
+                                      ? Colors.black
+                                      : Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
             ),
           ),
-          // Download Progress
           if (_batchProgressNotifier != null)
             Padding(
               padding: const EdgeInsets.only(top: 20.0),
@@ -230,8 +268,8 @@ class _GogHeaderState extends State<GogHeader> {
                     _batchProgress == 1.0
                         ? localizations.downloadComplete
                         : _batchProgress == 0.0
-                            ? localizations.downloadPending
-                            : '${localizations.downloading} ${(_batchProgress * 100).toStringAsFixed(0)}%',
+                        ? localizations.downloadPending
+                        : '${localizations.downloading} ${(_batchProgress * 100).toStringAsFixed(0)}%',
                     style: typography.body,
                   ),
                 ],
