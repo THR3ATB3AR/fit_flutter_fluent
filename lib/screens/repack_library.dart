@@ -28,7 +28,7 @@ class _RepackLibraryState extends State<RepackLibrary> {
   bool _isLoadingInitial = true;
   bool _isLoadingMore = false;
   final ScrollController _scrollController = ScrollController();
-  final int _itemsPerPage = 24;
+  final int _itemsPerPage = 30;
 
   StreamSubscription? _repackServiceSubscription;
   String _activeSearchQuery = '';
