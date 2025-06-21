@@ -4,6 +4,7 @@ import 'package:fit_flutter_fluent/providers/update_provider.dart';
 import 'package:fit_flutter_fluent/screens/gog_details.dart';
 import 'package:fit_flutter_fluent/screens/gog_library.dart';
 import 'package:fit_flutter_fluent/services/dd_manager.dart';
+import 'package:fit_flutter_fluent/warez_icons_icons.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fit_flutter_fluent/data/repack.dart';
 import 'package:fit_flutter_fluent/screens/download_manager_screen.dart';
@@ -214,13 +215,13 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
         ),
         PaneItem(
           key: const ValueKey('/repacklibrary'),
-          icon: const Icon(FluentIcons.library),
+          icon: const Icon(WarezIcons.fitgirl),
           title: Text(AppLocalizations.of(context)!.repackLibrary),
           body: const SizedBox.shrink(),
         ),
         PaneItem(
           key: const ValueKey('/goglibrary'),
-          icon: const Icon(FluentIcons.library),
+          icon: const Icon(WarezIcons.goggames),
           title: Text(AppLocalizations.of(context)!.gogLibrary),
           body: const SizedBox.shrink(),
         ),
