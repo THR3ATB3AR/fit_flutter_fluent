@@ -262,3 +262,23 @@ begin
   end;
   Log('InitializeWizard finished.');
 end;
+
+procedure DeinitializeSetup();
+var
+  StopResult: Boolean;
+begin
+  Log('DeinitializeSetup called.');
+  if MusicPlaying then
+  begin
+    Log('Attempting to stop music playback...');
+    StopResult := DSStopMediaPlay;
+    if StopResult then
+      Log('DSStopMediaPlay successful.')
+    else
+      Log('DSStopMediaPlay FAILED.');
+  end
+  else
+  begin
+    Log('Music is not playing, no need to stop.');
+  end;
+end;
