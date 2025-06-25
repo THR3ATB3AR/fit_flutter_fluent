@@ -1,19 +1,35 @@
 import 'package:fit_flutter_fluent/data/download_info.dart';
+import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
-import 'package:html/dom.dart' as dom;
 
 class FuckingFastCo {
   Future<DownloadInfo> getDownloadInfo(String gameName, String url) async {
     final response = await http.get(Uri.parse(url));
+
     if (response.statusCode == 404) {
-      throw Exception('File not found');
+      throw Exception('File not found (404)');
+    } else if (response.statusCode != 200) {
+      throw Exception(
+        'Failed to load page, status code: ${response.statusCode}',
+      );
     }
 
-    dom.Document document = parser.parse(response.body);
+    final htmlBody = response.body;
 
-    String? fileName =
-        document.querySelector('meta[name="title"]')?.attributes['content'];
+    final linkRegex = RegExp(r'window\.open\("(https?://[^"]+)"\)');
+    final match = linkRegex.firstMatch(htmlBody);
+
+    if (match == null) {
+      throw Exception(
+        'Could not parse the direct download link from the page.',
+      );
+    }
+
+    final String dllink = match.group(1)!;
+
+    dom.Document document = parser.parse(response.body);
+    String? fileName = document.querySelector('span.text-xl')?.text;
     if (fileName != null) {
       fileName = fileName.trim();
     } else {
@@ -25,25 +41,6 @@ class FuckingFastCo {
       downloadType = fileName.split('.').first;
     } else {
       downloadType = fileName;
-    }
-
-    final regex = RegExp(r'window\.open\("https?://[^\"]+');
-    final match = regex.firstMatch(response.body);
-    if (match == null) {
-      throw Exception('Download link not found');
-    }
-
-    String dllink = match.group(0)!.replaceFirst('window.open("', '');
-
-    try {
-      final fid = url.split('/').last;
-      final serversideDlStartedLink = '/f/$fid/dl';
-      final brcResponse = await http.post(Uri.parse(serversideDlStartedLink));
-      if (brcResponse.statusCode != 200) {
-        throw Exception('Failed to start download on server side');
-      }
-    } catch (e) {
-      throw Exception('Error starting download on server side: $e');
     }
 
     return DownloadInfo(
