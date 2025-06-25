@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'package:fit_flutter_fluent/providers/update_provider.dart';
 import 'package:fit_flutter_fluent/services/scraper_service.dart';
 import 'package:flutter/foundation.dart';
@@ -439,9 +440,10 @@ class _SettingsState extends State<Settings> with PageMixin {
             ),
           ),
         ], addBiggerSpacerAfter: false),
-        _buildSectionWrapper(_autoInstallSettingsKey, [
-          Text(
-            AppLocalizations.of(context)!.automaticInstallation,
+        if (Platform.isWindows)
+          _buildSectionWrapper(_autoInstallSettingsKey, [
+            Text(
+              AppLocalizations.of(context)!.automaticInstallation,
             style: FluentTheme.of(context).typography.subtitle,
           ),
           spacer,
