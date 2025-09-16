@@ -97,7 +97,6 @@ class _GogLibraryState extends State<GogLibrary> {
   void _calculateAndSortGenreCounts() {
     final newGenreCounts = <String, int>{};
     for (final game in _fullGogGameListFromService) {
-      // GogGame.genres is already a List<String>, which is simpler
       for (final genre in game.genres) {
         newGenreCounts.update(genre, (count) => count + 1, ifAbsent: () => 1);
       }
@@ -222,7 +221,6 @@ class _GogLibraryState extends State<GogLibrary> {
           _syncStatusText = "";
         });
         _scraperService.loadingProgress.value = 0.0;
-        // The service stream listener will handle updating the lists
       }
     }
   }
@@ -467,7 +465,6 @@ class _GogLibraryState extends State<GogLibrary> {
                 final gogGame = _paginatedGogGames[index];
                 return GestureDetector(
                   onTap: () {
-                    // You can create a GogDetails page later
                     context.push("/gogdetails", extra: gogGame);
                   },
                   child: GogItem(gogGame: gogGame, itemHeight: gogItemHeight),
@@ -493,6 +490,3 @@ class _GogLibraryState extends State<GogLibrary> {
     );
   }
 }
-
-// Small tweak to GogItem to remove itemHeight dependency
-// and let the GridView handle sizing.

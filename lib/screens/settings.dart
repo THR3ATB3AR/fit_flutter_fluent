@@ -524,7 +524,6 @@ class _SettingsState extends State<Settings> with PageMixin {
                 if (mode != null) {
                   appTheme.mode = mode;
                   if (kIsWindowEffectsSupported) {
-                    // Ensure context is available and mounted for setEffect
                     if (mounted)
                       appTheme.setEffect(appTheme.windowEffect, context);
                   }

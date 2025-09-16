@@ -283,14 +283,13 @@ class UpdateProvider extends ChangeNotifier {
         Navigator.of(
           context,
           rootNavigator: true,
-        ).pop(); // Zamknij dialog "Downloading"
+        ).pop(); 
 
       if (e is AppImageUpdateRequiresRestartException) {
-        // Pokaż dialog o konieczności restartu
         if (context.mounted) {
           await showDialog(
             context: context,
-            barrierDismissible: false, // Użytkownik musi kliknąć OK
+            barrierDismissible: false, 
             builder:
                 (ctx) => ContentDialog(
                   title: const Text('Update Complete'),
@@ -308,7 +307,6 @@ class UpdateProvider extends ChangeNotifier {
           );
         }
       } else {
-        // Obsługa innych błędów
         if (context.mounted) {
           showDialog(
             context: context,

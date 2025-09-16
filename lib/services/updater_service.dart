@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:fluent_ui/fluent_ui.dart'; // Assuming this is for debugPrint or other UI elements if used directly
+import 'package:fluent_ui/fluent_ui.dart'; 
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
-import 'package:device_info_plus/device_info_plus.dart'; // Added for Android ABI detection
+import 'package:device_info_plus/device_info_plus.dart';
 
 class UpdaterService {
   static const String githubRepo = 'THR3ATB3AR/fit_flutter_fluent';
@@ -76,7 +76,7 @@ class UpdaterService {
   }
 
   Future<String> _getLinuxArchSuffixForAsset() async {
-    if (!Platform.isLinux) return ''; // Should not be called if not Linux
+    if (!Platform.isLinux) return ''; 
 
     try {
       final result = await Process.run('uname', ['-m']);
@@ -85,8 +85,7 @@ class UpdaterService {
         if (arch == 'x86_64' || arch == 'amd64') {
           return 'x86_64';
         } else if (arch == 'aarch64' || arch == 'arm64') {
-          // Added arm64 for uname -m
-          return 'aarch64'; // GitHub Actions uses aarch64 for AppImageTool
+          return 'aarch64'; 
         } else {
           debugPrint(
             'Unsupported Linux architecture: $arch. Cannot determine asset.',
@@ -123,7 +122,6 @@ class UpdaterService {
 
     try {
       if (Platform.isWindows) {
-        // Workflow name: fit-flutter-setup-win64-${APP_VERSION}.exe
         final expectedAssetName =
             'fit-flutter-setup-win64-$releaseVersion.exe'.toLowerCase();
         debugPrint('Checking for Windows asset: $expectedAssetName');
@@ -144,15 +142,13 @@ class UpdaterService {
         final androidInfo = await deviceInfo.androidInfo;
         final supportedAbis =
             androidInfo
-                .supportedAbis; // List<String>, e.g., [arm64-v8a, armeabi-v7a]
+                .supportedAbis; 
         debugPrint('Device supported ABIs: $supportedAbis');
 
-        // Preferred ABI order for searching
         final preferredAbiOrder = ['arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'];
 
         for (final abi in preferredAbiOrder) {
           if (supportedAbis.contains(abi)) {
-            // Workflow name: fitflutterfluent-android-${APP_VERSION}-${abi}.apk
             final expectedAssetName =
                 'fitflutterfluent-android-$releaseVersion-$abi.apk'
                     .toLowerCase();
@@ -167,7 +163,7 @@ class UpdaterService {
               debugPrint(
                 'Found matching Android asset for ABI $abi: ${assetData['name']}',
               );
-              break; // Found the best available ABI
+              break; 
             }
           }
         }
@@ -182,9 +178,7 @@ class UpdaterService {
         }
       } else if (Platform.isLinux) {
         final archSuffix =
-            await _getLinuxArchSuffixForAsset(); // Can throw if unsupported
-        // Workflow name: fit-flutter-fluent-${APP_VERSION}-${APPIMAGE_ARCH_LABEL_FOR_TOOL}.AppImage
-        // APPIMAGE_ARCH_LABEL_FOR_TOOL is x86_64 or aarch64
+            await _getLinuxArchSuffixForAsset(); 
         final expectedAssetName =
             'fit-flutter-fluent-$releaseVersion-$archSuffix.appimage'
                 .toLowerCase();
@@ -202,17 +196,13 @@ class UpdaterService {
           );
         }
       } else if (Platform.isMacOS) {
-        // macOS is not built by the current workflow. This is a placeholder.
-        // Example: final expectedAssetName = 'fitflutterfluent-macos-$releaseVersion.dmg'.toLowerCase();
         throw UnsupportedError('Update for macOS is not yet implemented.');
       } else {
         throw UnsupportedError('Unsupported platform for update.');
       }
     } catch (e) {
       debugPrint("Error identifying asset: $e");
-      // Rethrow the original exception if it's already informative, otherwise wrap it.
       if (e is Exception || e is UnsupportedError || e is ArgumentError) {
-        // ArgumentError from firstWhere
         rethrow;
       }
       throw Exception(
@@ -220,7 +210,6 @@ class UpdaterService {
       );
     }
 
-    // At this point, assetData should be non-null, or an exception would have been thrown.
     final downloadUrl = assetData['browser_download_url'] as String?;
     final fileName = assetData['name'] as String?;
 
@@ -380,14 +369,14 @@ class UpdaterService {
           }
         }
         if (e is AppImageUpdateRequiresRestartException)
-          rethrow; // Don't wrap this specific exception
+          rethrow; 
         rethrow;
       }
     } else if (Platform.isMacOS) {
       debugPrint(
         'Automatic update installation is not implemented for ${Platform.operatingSystem}. Please install manually: $filePath',
       );
-      await OpenFilex.open(File(filePath).parent.path); // Open downloads folder
+      await OpenFilex.open(File(filePath).parent.path); 
       throw Exception(
         'Please install the update manually from: ${File(filePath).parent.path}',
       );

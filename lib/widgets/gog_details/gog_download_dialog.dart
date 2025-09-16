@@ -59,7 +59,6 @@ class _GogDownloadDialogState extends State<GogDownloadDialog> {
   Future<void> _startDownload() async {
     final downloadPath = _pathController.text.trim();
     if (downloadPath.isEmpty) {
-      // Show error if path is empty
       return;
     }
 

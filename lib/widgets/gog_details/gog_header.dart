@@ -77,33 +77,52 @@ class _GogHeaderState extends State<GogHeader> {
     if (!mounted) return;
     setState(() => _isLoadingLinks = true);
 
-    final links = await _scraperService.scrapeGogGameDownloadLinks(
-      widget.gogGame.url,
-    );
-
-    if (!mounted) return;
-    setState(() {
-      _downloadLinks = links;
-      _isLoadingLinks = false;
-    });
-
-    if (_downloadLinks != null && !_downloadLinks!.isEmpty) {
-      showDialog(
-        context: context,
-        builder:
-            (context) => GogDownloadDialog(
-              gameTitle: widget.gogGame.title,
-              links: _downloadLinks!,
-            ),
+    try {
+      final links = await _scraperService.scrapeGogGameDownloadLinks(
+        widget.gogGame.url,
       );
-    } else {
+
+      if (!mounted) return;
+      setState(() {
+        _downloadLinks = links;
+        _isLoadingLinks = false;
+      });
+
+      if (_downloadLinks != null && !_downloadLinks!.isEmpty) {
+        showDialog(
+          context: context,
+          builder: (context) => GogDownloadDialog(
+            gameTitle: widget.gogGame.title,
+            links: _downloadLinks!,
+          ),
+        );
+      } else {
+        displayInfoBar(
+          context,
+          builder: (context, close) {
+            return InfoBar(
+              title: Text(AppLocalizations.of(context)!.error),
+              content: Text(
+                AppLocalizations.of(context)!.couldNotFindDownloadLinks,
+              ),
+              action: IconButton(
+                icon: const Icon(FluentIcons.clear),
+                onPressed: close,
+              ),
+              severity: InfoBarSeverity.error,
+            );
+          },
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoadingLinks = false);
       displayInfoBar(
         context,
         builder: (context, close) {
           return InfoBar(
             title: Text(AppLocalizations.of(context)!.error),
             content: Text(
-              AppLocalizations.of(context)!.couldNotFindDownloadLinks,
+              '${AppLocalizations.of(context)!.couldNotFindDownloadLinks}\n$e',
             ),
             action: IconButton(
               icon: const Icon(FluentIcons.clear),
