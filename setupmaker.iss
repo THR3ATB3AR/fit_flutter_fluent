@@ -55,7 +55,6 @@ Source: "build\windows\x64\runner\Release\flutter_inappwebview_windows_plugin.dl
 Source: "build\windows\x64\runner\Release\WebView2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 Source: "build\windows\x64\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "build\windows\x64\runner\Release\fit_flutter_fluent.exe.WebView2\*"; DestDir: "{app}\fit_flutter_fluent.exe.WebView2"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 
 [Icons]
