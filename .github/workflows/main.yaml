@@ -313,7 +313,7 @@ jobs:
 
       - name: Download AppImageTool (${{ matrix.arch_name }})
         run: |
-          wget -q "https://github.com/AppImage/appimagetool/releases/download/13/appimagetool-${{ matrix.appimage_tool_arch }}.AppImage" -O appimagetool.AppImage
+          wget -q "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${{ matrix.appimage_tool_arch }}.AppImage" -O appimagetool.AppImage
           chmod +x appimagetool.AppImage
 
       - name: Build AppImage (${{ matrix.arch_name }})
